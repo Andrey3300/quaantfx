@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quant FX — Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b82f6'/%3E%3Ccircle cx='14.5' cy='14.5' r='8' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M20 20l6.5 6.5' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5' fill='none' stroke='%234ade80' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0b1322;--bg2:#111b2e;--bg3:#182540;--bg4:#1e2d4d;
+  --border:#22314f;--border2:#2b3d61;
+  --text:#e8eef8;--dim:#8593ad;--dim2:#5c6a86;
+  --green:#22c55e;--red:#ef4444;--red2:#dc2626;
+  --accent:#3b82f6;--accent2:#2563eb;--gold:#f5b921;
+  --hover:rgba(59,130,246,.08);--r:8px;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:13px;display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+input,select{outline:none}
+.mono{font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+.hidden{display:none!important}
+.ic{display:inline-flex;width:18px;height:18px;flex-shrink:0}
+.ic svg{width:100%;height:100%}
+.up{color:var(--green)}.dn{color:var(--red)}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 14px;border-radius:var(--r);font-weight:600;font-size:12px;transition:.15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-green{background:var(--green);color:#052e16}.btn-green:hover{background:#2fd36d}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red2)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--border2)}
+.btn-block{width:100%}
+
+/* ── HEADER ── */
+#header{height:56px;flex-shrink:0;display:flex;align-items:center;padding:0 16px 0 12px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;position:relative}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:.5px}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;flex-shrink:0}
+.logo b{color:var(--accent)}
+#hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.promo-pill{display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:var(--r);background:linear-gradient(90deg,rgba(59,130,246,.18),rgba(139,92,246,.18));border:1px solid rgba(59,130,246,.35);cursor:pointer}
+.promo-pill b{font-size:11px;display:block}.promo-pill small{font-size:10px;color:var(--dim)}
+#acc-switcher{display:flex;align-items:center;gap:10px;padding:5px 10px 5px 12px;border:1px solid var(--border);background:var(--bg3);border-radius:var(--r);cursor:pointer;min-width:160px}
+#acc-switcher:hover{border-color:var(--border2)}
+.acc-lbl{font-size:9px;letter-spacing:1px;color:var(--dim);font-weight:600}
+.acc-lbl.real{color:var(--green)}
+.acc-bal{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;line-height:1.1}
+.acc-arrow{margin-left:auto;font-size:9px;color:var(--dim)}
+#deposit-btn{display:flex;align-items:center;gap:8px;padding:0 16px;height:38px;border-radius:var(--r);background:var(--green);color:#052e16;font-weight:700;font-size:12px;letter-spacing:.3px;transition:.15s}
+#deposit-btn:hover{background:#2fd36d}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#334155,#1e293b);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;overflow:hidden;position:relative;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar:hover{border-color:var(--accent)}
+
+/* ── DROPDOWNS (fixed, positioned by JS) ── */
+.dd{position:fixed;z-index:800;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden;min-width:250px}
+#lang-dd{z-index:2500}
+.dd.open{display:flex}
+.dd-acc{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border)}
+.dd-acc:hover{background:var(--hover)}
+.dd-acc .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.ico.demo{background:rgba(59,130,246,.15)}.ico.real{background:rgba(34,197,94,.15)}
+.dd-acc .nm{font-weight:600;font-size:13px}.dd-acc .bl{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.dd-acc .chk{margin-left:auto;color:var(--green);display:none}.dd-acc.active .chk{display:block}
+.dd-foot{padding:10px 14px;display:flex;gap:8px}
+.um-head{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.um-head .avatar{width:44px;height:44px;cursor:default}
+.um-name{font-weight:700;font-size:14px}.um-id{font-size:11px;color:var(--dim)}
+.um-item{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:13px;color:var(--dim);cursor:pointer}
+.um-item:hover{background:var(--hover);color:var(--text)}
+.um-item .ic{width:16px;height:16px}
+
+/* ── LAYOUT ── */
+#body-row{flex:1;display:flex;min-height:0}
+#sidebar{width:76px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px}
+.sb-item{width:64px;padding:9px 0 7px;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--dim);font-size:10px;font-weight:500;cursor:pointer;position:relative;transition:.15s}
+.sb-item .ic{width:20px;height:20px}
+.sb-item:hover{background:var(--hover);color:var(--text)}
+.sb-item.active{background:rgba(59,130,246,.14);color:var(--accent)}
+.sb-item .badge{position:absolute;top:6px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--red);display:none}
+.sb-item .badge.show{display:block}
+.sb-spacer{flex:1}
+#content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;position:relative}
+.view{display:none;flex:1;min-height:0}
+.view.active{display:flex}
+
+/* ── TRADE VIEW ── */
+#view-trade{flex-direction:column}
+#chart-toolbar{height:48px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.ct-asset{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r);cursor:pointer;font-weight:600;font-size:14px;border:1px solid transparent}
+.ct-asset:hover{background:var(--bg3);border-color:var(--border)}
+.ct-asset .pay{font-size:11px;color:var(--green);font-weight:700}
+.ct-asset .arr{font-size:9px;color:var(--dim)}
+.ct-sep{width:1px;height:22px;background:var(--border);margin:0 4px}
+.ct-btn{height:32px;min-width:32px;padding:0 10px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:6px;color:var(--dim);font-weight:600;font-size:12px;border:1px solid transparent}
+.ct-btn:hover{background:var(--bg3);color:var(--text)}
+.ct-btn.on{background:rgba(59,130,246,.15);color:var(--accent);border-color:rgba(59,130,246,.3)}
+#trade-row{flex:1;display:flex;min-height:0}
+#chart-col{flex:1;display:flex;flex-direction:column;min-width:0}
+#chart-wrap{flex:1;position:relative;overflow:hidden;background:#0a101c}
+#chart-canvas{display:block;cursor:crosshair}
+#ohlc-overlay{position:absolute;top:10px;left:12px;background:rgba(11,19,34,.92);border:1px solid var(--border);padding:6px 10px;font-size:11px;color:var(--dim);line-height:1.8;border-radius:6px;pointer-events:none;display:none;font-family:'JetBrains Mono',monospace}
+#ohlc-overlay b{color:var(--text);font-weight:500;margin-left:3px}
+#chart-clock{position:absolute;left:12px;bottom:34px;font-size:11px;color:var(--dim2);font-family:'JetBrains Mono',monospace;pointer-events:none}
+#sub-panels{display:flex;flex-direction:column;flex-shrink:0}
+.sub-panel{border-top:1px solid var(--border);position:relative;height:90px}
+.sub-panel canvas{display:block}
+.sub-panel-label{position:absolute;top:5px;left:8px;font-size:10px;color:var(--dim);pointer-events:none;z-index:2}
+.sub-panel-close{position:absolute;top:3px;right:8px;font-size:12px;color:var(--dim);cursor:pointer;z-index:2}
+.sub-panel-close:hover{color:var(--red)}
+
+/* ── TRADE PANEL ── */
+#trade-panel{width:300px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.tp-body{padding:14px 14px 4px;display:flex;flex-direction:column;gap:10px}
+.tp-row2{display:flex;flex-direction:column;gap:10px}
+.field{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 8px 8px 12px;display:flex;align-items:center;gap:8px}
+.field .fmain{flex:1;min-width:0}
+.field .fl{font-size:10px;color:var(--dim);font-weight:500;margin-bottom:2px}
+.field .fv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.field .fv:hover{color:var(--accent)}
+.stp{width:30px;height:30px;border-radius:8px;background:var(--bg4);color:var(--text);font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:.1s;flex-shrink:0}
+.stp:hover{background:var(--accent);color:#fff}
+.payout-box{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 0}
+.payout-box .pl{font-size:11px;color:var(--dim)}
+.payout-box .pv{text-align:right}
+.payout-box .pv b{color:var(--green);font-size:18px;font-weight:700;display:block;line-height:1.1}
+.payout-box .pv small{color:var(--green);font-size:11px;opacity:.85;font-family:'JetBrains Mono',monospace}
+.tp-btns{display:grid;grid-template-columns:1fr;gap:8px}
+.trade-btn{height:52px;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;transition:.12s}
+.trade-btn .ic{width:20px;height:20px}
+#btn-up{background:var(--green);color:#052e16}#btn-up:hover{background:#2fd36d}
+#btn-down{background:var(--red)}#btn-down:hover{background:#f05a5a}
+.trade-btn:active{transform:scale(.98)}
+#trades-area{flex:1;display:flex;flex-direction:column;min-height:0}
+.trades-tabs{display:flex;border-bottom:1px solid var(--border);margin-top:8px;flex-shrink:0}
+.trades-tab{flex:1;padding:11px 0;text-align:center;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent}
+.trades-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.trades-tab .cnt{display:inline-block;min-width:16px;padding:0 4px;height:16px;line-height:16px;border-radius:8px;background:var(--accent);color:#fff;font-size:10px;margin-left:5px}
+.trades-tab .cnt:empty{display:none}
+.trades-pane{flex:1;overflow-y:auto;display:none;min-height:0}
+.trades-pane.active{display:block}
+.no-trades{color:var(--dim);font-size:12px;padding:30px 12px;text-align:center;line-height:1.6}
+.ti{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px}
+.ti:hover{background:var(--hover)}
+.ti-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.ti-head .nm{font-weight:600;flex:1;display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti-head .tm{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:12px}
+.ti-mid{display:flex;justify-content:space-between;color:var(--dim);font-size:11px;font-family:'JetBrains Mono',monospace}
+.ti-mid .pf{font-weight:600}
+.ti-date-sep{padding:5px 14px;font-size:10px;color:var(--dim);background:var(--bg3);letter-spacing:.5px}
+.ti-detail{margin:0 10px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.9;font-family:'JetBrains Mono',monospace}
+.di-row{display:flex;justify-content:space-between;gap:8px}
+.di-label{font-size:9px;color:var(--dim);letter-spacing:.5px;display:block;font-family:'Inter',sans-serif}
+.di-box{margin:8px 0;padding:8px 10px;border-radius:6px;text-align:center;border:1px solid var(--border)}
+.pbar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:6px 0}
+.pbar i{display:block;height:100%;border-radius:2px;transition:width .5s linear}
+
+/* ── SIGNALS PANEL ── */
+#signals-panel{width:300px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:none;flex-direction:column;min-height:0}
+#signals-panel.open{display:flex}
+.sp-header{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.sp-x{color:var(--dim);cursor:pointer;font-size:14px}.sp-x:hover{color:var(--text)}
+.sp-list{flex:1;overflow-y:auto}
+.sp-signal{padding:12px 14px;border-bottom:1px solid var(--border)}
+.sp-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sp-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.sp-nm{font-weight:600;font-size:12px;flex:1}
+.sp-amt{font-family:'JetBrains Mono',monospace;font-weight:600}
+.sp-mid{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:8px}
+.sp-mid b{font-weight:700}
+.sp-timer{font-family:'JetBrains Mono',monospace}
+.sp-copy{width:100%;padding:8px;border-radius:8px;border:1px solid var(--accent);color:var(--accent);font-weight:600;font-size:12px}
+.sp-copy:hover{background:var(--accent);color:#fff}
+.sp-empty{padding:40px 20px;text-align:center;color:var(--dim)}
+
+/* ── POPUPS ── */
+.pop{position:fixed;z-index:600;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);display:none;flex-direction:column}
+.pop.open{display:flex}
+.pop-title{font-size:11px;letter-spacing:1px;color:var(--dim);font-weight:600;margin-bottom:10px}
+#amount-popup,#expiry-popup{padding:14px;min-width:256px}
+.ap-input{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px}
+.ap-input span{color:var(--accent);font-weight:700}
+.ap-input input{flex:1;background:none;border:none;font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace;width:100%}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pre{padding:8px 0;text-align:center;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--dim);background:var(--bg3)}
+.pre:hover{border-color:var(--accent);color:var(--accent)}
+.pre.active{border-color:var(--accent);background:rgba(59,130,246,.15);color:var(--accent)}
+.ep-spin{display:flex;align-items:flex-start;justify-content:center;gap:6px;margin-bottom:12px}
+.ep-unit{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ep-unit small{font-size:9px;color:var(--dim);letter-spacing:1px}
+.ep-val{background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:56px;text-align:center;font-size:20px;font-weight:600;padding:5px 0;font-family:'JetBrains Mono',monospace}
+.ep-b{width:56px;padding:4px 0;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--dim);font-size:13px}
+.ep-b:hover{border-color:var(--accent);color:var(--accent)}
+.ep-colon{font-size:20px;color:var(--dim);margin-top:30px}
+#tf-popup{padding:16px;min-width:340px;gap:12px}
+.tf-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.ct-types{display:flex;gap:8px}
+.ct-type{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:8px;border:1px solid transparent;color:var(--dim);font-size:11px;cursor:pointer}
+.ct-type:hover{background:var(--hover)}
+.ct-type.active{background:var(--bg3);border-color:var(--accent);color:var(--accent)}
+.chk-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);cursor:pointer}
+.chk-row input{accent-color:var(--accent)}
+#asset-picker{width:560px;max-height:500px}
+.apc-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.apc-header input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px}
+.apc-header input:focus{border-color:var(--accent)}
+.apc-x{color:var(--dim);cursor:pointer;font-size:16px;padding:0 4px}.apc-x:hover{color:var(--text)}
+.apc-body{display:flex;flex:1;min-height:0}
+.apc-cats{width:140px;border-right:1px solid var(--border);padding:6px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;flex-shrink:0}
+.apc-cat{padding:9px 10px;border-radius:8px;text-align:left;color:var(--dim);font-size:12px;font-weight:500;display:flex;gap:8px;align-items:center}
+.apc-cat:hover{background:var(--hover);color:var(--text)}
+.apc-cat.active{background:rgba(59,130,246,.14);color:var(--accent)}
+.apc-list{flex:1;overflow-y:auto}
+.apc-lh{display:flex;padding:8px 14px;font-size:10px;letter-spacing:1px;color:var(--dim);border-bottom:1px solid var(--border);justify-content:space-between}
+.apc-row{display:flex;align-items:center;padding:9px 14px;gap:8px;cursor:pointer;border-bottom:1px solid rgba(34,49,79,.5)}
+.apc-row:hover{background:var(--hover)}.apc-row.active{background:rgba(59,130,246,.12)}
+.apc-star{font-size:15px;color:var(--dim2);line-height:1}.apc-star.fav,.apc-star:hover{color:var(--gold)}
+.apc-name{flex:1;font-weight:600;font-size:12px;display:flex;align-items:center;gap:4px}
+.apc-pay{font-weight:700;color:var(--green);font-size:12px;min-width:44px;text-align:right}
+.apc-pay.low{color:var(--dim)}
+.asset-icon-pair{display:inline-flex;align-items:center;margin-right:6px}
+.flag-circle{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);display:inline-flex;align-items:center;justify-content:center;font-size:11px;overflow:hidden}
+.flag-circle:nth-child(2){margin-left:-6px}
+.ai-img{width:16px;height:16px;border-radius:50%;display:block}
+.asset-icon-crypto{display:inline-flex;width:18px;height:18px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.asset-icon-generic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;margin-right:6px;font-size:9px;font-weight:700}
+#ind-panel{width:290px;max-height:520px}
+.ip-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700}
+.ip-body{overflow-y:auto}
+.ip-sec{padding:8px 14px 4px;font-size:10px;letter-spacing:1px;color:var(--dim)}
+.ip-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(34,49,79,.5)}
+.ip-item:hover{background:var(--hover)}
+.ip-item .n{font-size:12px;font-weight:500}.ip-item .p{font-size:10px;color:var(--dim)}
+.ip-item .a{color:var(--dim)}.ip-item.active .a{color:var(--green)}
+.ip-del{color:var(--dim);cursor:pointer}.ip-del:hover{color:var(--red)}
+
+/* ── PAGES (finance / profile) ── */
+.page{flex:1;overflow-y:auto;padding:24px 28px 40px;-webkit-overflow-scrolling:touch}
+.page-in{max-width:1080px;margin:0 auto}
+.page h1{font-size:20px;font-weight:700;margin-bottom:16px}
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);color:var(--dim);font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-h{padding:12px 18px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:13px;color:var(--dim);font-weight:600;display:flex;align-items:center;gap:10px}
+.card-b{padding:6px 18px 14px}
+.frow{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:16px;flex-wrap:wrap}
+.frow:last-child{border-bottom:none}
+.frow .lab{width:220px;font-size:13px}
+.frow .lab i{color:var(--red);font-style:normal}
+.frow .val{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.inp{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);width:100%;max-width:360px;transition:.15s}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--dim2)}
+.tag{font-size:10px;padding:3px 7px;border-radius:5px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.tag.warn{background:rgba(245,158,11,.18);color:#f59e0b}
+.tag.err{background:rgba(239,68,68,.18);color:var(--red)}
+.tag.ok{background:rgba(34,197,94,.18);color:var(--green)}
+.tag.info{background:rgba(59,130,246,.18);color:var(--accent)}
+.switch{width:38px;height:22px;border-radius:11px;background:var(--bg4);position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#94a3b8;transition:.2s}
+.switch.on{background:var(--green)}.switch.on::after{left:19px;background:#fff}
+.note{padding:12px 14px;border-radius:8px;border:1px dashed rgba(239,68,68,.5);background:rgba(239,68,68,.08);font-size:12px;color:#fca5a5;margin:12px 0;line-height:1.5}
+.note.blue{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.08);color:#93c5fd}
+.avatar-big{width:88px;height:88px;border-radius:50%;background:var(--bg3);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;overflow:hidden;flex-shrink:0}
+.avatar-big img{width:100%;height:100%;object-fit:cover}
+.dropzone{flex:1;min-height:88px;border:1px dashed var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px;cursor:pointer;background:rgba(59,130,246,.04)}
+.dropzone:hover{background:rgba(59,130,246,.1)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.stat small{font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.stat b{display:block;font-size:20px;font-family:'JetBrains Mono',monospace;margin-top:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:10px 12px;text-align:left;font-size:10px;letter-spacing:1px;color:var(--dim);border-bottom:1px solid var(--border);font-weight:600}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(34,49,79,.6);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.tbl tr:hover td{background:var(--hover)}
+.fin-grid{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+.methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px 18px}
+.method{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.15s;text-align:center}
+.method:hover{border-color:var(--border2);transform:translateY(-1px)}
+.method.active{border-color:var(--accent);background:rgba(59,130,246,.1)}
+.method .ci{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff}
+.method b{font-size:12px}.method small{font-size:10px;color:var(--dim)}
+.qr{width:168px;height:168px;margin:12px auto;background:#fff;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(21,1fr)}
+.qr i{display:block}.qr i.on{background:#0b1322}
+.addr{display:flex;gap:6px;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all}
+.addr span{flex:1}
+.addr button{flex-shrink:0;padding:5px 10px;border-radius:6px;background:var(--bg4);font-size:11px;font-weight:600}
+.addr button:hover{background:var(--accent);color:#fff}
+.op{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);font-size:12px}
+.op:last-child{border-bottom:none}
+.op .oi{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.op .ot{flex:1;min-width:0}.op .ot small{display:block;color:var(--dim);font-size:11px;margin-top:2px}
+.op .oa{font-family:'JetBrains Mono',monospace;font-weight:600;white-space:nowrap}
+
+/* ── AUTH ── */
+#auth{position:fixed;inset:0;z-index:2000;background:radial-gradient(1200px 600px at 20% 10%,rgba(59,130,246,.18),transparent 60%),radial-gradient(900px 500px at 90% 90%,rgba(139,92,246,.15),transparent 60%),var(--bg);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#auth.open{display:flex}
+.auth-lang{position:absolute;top:18px;right:24px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;z-index:5;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:rgba(13,20,33,.6)}
+.auth-lang:hover{background:var(--hover)}
+.auth-card{width:420px;max-width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.auth-card .logo{justify-content:center;margin-bottom:20px;font-size:18px}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;font-weight:600;font-size:13px;color:var(--dim);cursor:pointer}
+.auth-tab.active{background:var(--accent);color:#fff}
+.auth-form{display:none;flex-direction:column;gap:12px}.auth-form.active{display:flex}
+.auth-form .inp{max-width:none;padding:12px 14px}
+.auth-form label{font-size:11px;color:var(--dim);margin-bottom:-6px}
+.auth-err{color:var(--red);font-size:12px;min-height:16px}
+.auth-foot{text-align:center;font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6}
+
+/* ── MODAL / TOASTS / STATUS ── */
+.overlay{position:fixed;inset:0;background:rgba(3,7,18,.7);z-index:900;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.modal .mi{font-size:36px;margin-bottom:10px}
+.modal h3{font-size:15px;margin-bottom:6px}
+.modal p{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:16px}
+.modal .btn{margin-top:8px;height:42px}
+#toasts{position:fixed;top:66px;right:16px;z-index:3000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+/* J2: чат поддержки */
+#chat-box{position:fixed;left:64px;bottom:16px;width:330px;height:430px;z-index:1500;background:var(--bg2);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.6);display:none;flex-direction:column;overflow:hidden}
+#chat-head{display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--bg3);border-bottom:1px solid var(--border);font-weight:700;font-size:13px}
+#chat-status{font-size:10px;color:var(--green);font-weight:600}
+#chat-close{margin-left:auto;cursor:pointer;color:var(--dim);font-size:13px}
+#chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.cm{max-width:85%;padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.45;word-break:break-word}
+.cm small{display:block;margin-top:4px;font-size:9px;opacity:.55}
+.cm.ag{align-self:flex-start;background:var(--bg3)}
+.cm.me{align-self:flex-end;background:rgba(59,130,246,.25)}
+#chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+#chat-input{flex:1}
+#chat-send{width:40px;height:38px;padding:0;border:none;border-radius:9px;background:var(--accent);color:#fff;font-size:14px;cursor:pointer}
+.toast{padding:10px 14px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:tin .25s ease,tout .4s ease 2.8s forwards;min-width:220px}
+.toast.win{border-color:var(--green);color:var(--green)}
+.toast.loss{border-color:var(--red);color:var(--red)}
+.toast.info{border-color:var(--accent)}
+.toast.err{border-color:var(--red)}
+@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(-8px)}}
+#statusbar{height:24px;flex-shrink:0;display:flex;align-items:center;gap:18px;padding:0 14px;background:var(--bg2);border-top:1px solid var(--border);font-size:10px;color:var(--dim);letter-spacing:.5px;font-family:'JetBrains Mono',monospace}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#statusbar .hint{margin-left:auto}
+
+/* ── MOBILE ── */
+@media (max-width:820px){
+  #header{height:52px;padding:0 10px;gap:8px}
+  .promo-pill,.logo span,#statusbar,#chart-clock,.desk-only{display:none!important}
+  #acc-switcher{min-width:0;padding:4px 8px}
+  #deposit-btn{padding:0 10px;height:34px}
+  #deposit-btn span{display:none}
+  #body-row{flex-direction:column}
+  #sidebar{order:2;width:100%;height:58px;flex-direction:row;justify-content:space-around;border-right:none;border-top:1px solid var(--border);padding:4px 0}
+  .sb-item{width:auto;flex:1;padding:6px 0;gap:3px}
+  .sb-spacer{display:none}
+  #trade-row{flex-direction:column}
+  #trade-panel,#signals-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
+  #trade-panel{max-height:48%}
+  .tp-body{padding:10px 10px 4px;gap:8px}
+  .tp-row2{flex-direction:row}
+  .tp-row2 .field{flex:1;padding:6px 6px 6px 10px}
+  .field .fv{font-size:14px}
+  .tp-btns{grid-template-columns:1fr 1fr}
+  .trade-btn{height:46px}
+  .page{padding:16px 12px 30px}
+  .fin-grid{grid-template-columns:1fr}
+  #chat-box{left:8px;right:8px;width:auto;bottom:8px}
+  .frow .lab{width:100%}
+  #asset-picker{width:calc(100vw - 16px)!important;left:8px!important;max-height:75vh}
+  #tf-popup{min-width:0;width:calc(100vw - 16px);left:8px!important}
+  .tf-grid{grid-template-columns:repeat(3,1fr)}
+  .apc-cats{width:110px}
+}
+/* X: лента избранного над графиком */
+#fav-strip{display:none;gap:6px;overflow-x:auto;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.fav-chip{display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;font-size:12px;white-space:nowrap}
+.fav-chip.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.fav-chip .fc-pay{color:var(--green);font-weight:700;font-size:11px}
+.fav-chip .fav-x{display:none;margin-left:2px;color:var(--dim);font-size:10px;padding:2px 4px;border-radius:4px}
+.fav-chip:hover .fav-x{display:inline-block;background:rgba(255,80,80,.15);color:#ff6b6b}
+@media (hover:none){ .fav-chip .fav-x{display:inline-block} }
+/* Y: приколюхи */
+#amt-chips{display:flex;gap:6px}
+.amt-chip{flex:1;padding:5px 0;text-align:center;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--dim);font-size:11px;cursor:pointer}
+.amt-chip.active{border-color:var(--accent);color:var(--text)}
+#streak-box{display:none;align-items:center;justify-content:center;gap:6px;font-size:12px;color:#f59e0b}
+.trade-btn.tick-up{box-shadow:0 0 0 2px rgba(34,197,94,.55)}
+.trade-btn.tick-dn{box-shadow:0 0 0 2px rgba(239,68,68,.5)}
+#acc-bal.flash-up{animation:balUp .7s} #acc-bal.flash-dn{animation:balDn .7s}
+@keyframes balUp{0%{color:var(--green)}100%{}} @keyframes balDn{0%{color:var(--red)}100%{}}
+#snd-btn{background:none;border:1px solid var(--border);border-radius:8px;height:34px;width:38px;cursor:pointer;font-size:15px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ AUTH ═══════════ -->
+<div id="auth">
+  <div class="auth-lang" onclick="toggleDD('lang-dd',this,event)"><span style="font-size:15px">🌐</span><span id="lang-cur-auth">English</span><span class="arr" style="font-size:10px">▼</span></div>
+  <div class="auth-card">
+    <div class="logo"><div class="logo-mark"><svg viewBox="0 0 32 32" width="19" height="19" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="14.5" r="8" stroke="#fff" stroke-width="2.6"/><path d="M20 20l6.5 6.5" stroke="#fff" stroke-width="2.6"/><path d="M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5" stroke="#4ade80" stroke-width="2.2"/></svg></div><span>QUANT<b>FX</b></span></div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="at-login" onclick="authTab('login')">Вход</div>
+      <div class="auth-tab" id="at-reg" onclick="authTab('reg')">Регистрация</div>
+    </div>
+    <form class="auth-form active" id="af-login" onsubmit="doLogin(event)" autocomplete="off">
+      <label>Эл. почта</label><input class="inp" id="li-email" type="email" placeholder="you@example.com" required autocomplete="off">
+      <label>Пароль</label><input class="inp" id="li-pass" type="password" placeholder="••••••••" required autocomplete="off">
+      <div class="auth-err" id="li-err"></div>
+      <button class="btn btn-primary btn-block" style="height:44px">Войти</button>
+    </form>
+    <form class="auth-form" id="af-reg" onsubmit="doRegister(event)" autocomplete="off">
+      <label>Эл. почта</label><input class="inp" id="rg-email" type="email" placeholder="you@example.com" required autocomplete="off">
+      <label>Пароль</label><input class="inp" id="rg-pass" type="password" placeholder="минимум 6 символов" required minlength="6" autocomplete="new-password">
+      <label>Повторите пароль</label><input class="inp" id="rg-pass2" type="password" required autocomplete="new-password">
+      <label class="chk-row"><input type="checkbox" id="rg-agree" required> Мне есть 18 лет, я принимаю условия соглашения</label>
+      <div class="auth-err" id="rg-err"></div>
+      <button class="btn btn-green btn-block" style="height:44px">Создать аккаунт</button>
+    </form>
+    <div id="auth-blocked" style="display:none;margin:0 16px 12px;padding:12px;border:1px solid rgba(255,90,90,.4);border-radius:10px;background:rgba(255,60,60,.08)">
+      <div style="font-weight:700;margin-bottom:8px">⛔ Аккаунт заблокирован. Обратитесь в поддержку.</div>
+      <button type="button" class="btn btn-primary btn-block" style="height:40px" onclick="openSupportChat(true)">Написать в поддержку</button>
+    </div>
+    <div class="auth-foot">Демо-платформа. Все котировки синтетические,<br>реальные деньги не используются.</div>
+  </div>
+</div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div id="header">
+  <div class="logo" style="cursor:pointer" onclick="logoHome()" title="Quant FX"><div class="logo-mark"><svg viewBox="0 0 32 32" width="19" height="19" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="14.5" r="8" stroke="#fff" stroke-width="2.6"/><path d="M20 20l6.5 6.5" stroke="#fff" stroke-width="2.6"/><path d="M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5" stroke="#4ade80" stroke-width="2.2"/></svg></div><span>QUANT<b>FX</b></span></div>
+  <div id="hdr-right">
+    <div class="promo-pill" onclick="showView('finance','deposit')">
+      <span style="font-size:18px">🎁</span>
+      <div><b>Бонус +50%</b><small>по промокоду WELCOME</small></div>
+    </div>
+    <div id="acc-switcher" onclick="toggleDD('acc-dd',this,event)">
+      <div><div class="acc-lbl" id="acc-lbl">DEMO · USD</div><div class="acc-bal" id="acc-bal">$10,000.00</div></div>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <button id="deposit-btn" onclick="showView('finance','deposit')"><i class="ic" data-icon="wallet"></i><span>ПОПОЛНИТЬ СЧЁТ</span></button>
+    <button id="snd-btn" onclick="toggleSound()" title="Звук">🔊</button>
+    <div class="avatar" id="hdr-avatar" onclick="toggleDD('user-dd',this,event)">U</div>
+  </div>
+</div>
+
+<!-- account dropdown -->
+<div class="dd" id="acc-dd">
+  <div class="dd-acc active" id="dd-acc-demo" onclick="switchAccount('demo')">
+    <div class="ico demo">🎓</div>
+    <div><div class="nm">Демо-счёт</div><div class="bl" id="dd-bal-demo">$10,000.00</div></div>
+    <span class="chk">✓</span>
+  </div>
+  <div class="dd-acc" id="dd-acc-real" onclick="switchAccount('real')">
+    <div class="ico real">💼</div>
+    <div><div class="nm">Реальный счёт</div><div class="bl" id="dd-bal-real">$0.00</div></div>
+    <span class="chk">✓</span>
+  </div>
+  <div class="dd-foot">
+    <button class="btn btn-green" style="flex:1" onclick="showView('finance','deposit')">Пополнить</button>
+  </div>
+</div>
+
+<!-- user dropdown -->
+<div class="dd" id="user-dd">
+  <div class="um-head">
+    <div class="avatar" id="um-avatar">U</div>
+    <div><div class="um-name" id="um-name">Unknown client</div><div class="um-id" id="um-id">ID: —</div></div>
+  </div>
+  <div class="um-item" onclick="showView('profile','info')"><i class="ic" data-icon="user"></i>Профиль</div>
+  <div class="um-item" onclick="showView('finance','deposit')"><i class="ic" data-icon="wallet"></i>Пополнение</div>
+  <div class="um-item" onclick="showView('finance','withdraw')"><i class="ic" data-icon="withdraw"></i>Вывод средств</div>
+  <div class="um-item" onclick="showView('profile','security')"><i class="ic" data-icon="shield"></i>Безопасность</div>
+  <div class="um-item" onclick="showView('profile','history')"><i class="ic" data-icon="history"></i>История торговли</div>
+  <div class="um-item" onclick="toggleDD('lang-dd',this,event)"><span style="width:16px;text-align:center">🌐</span>Язык<span id="lang-cur-user" style="margin-left:auto;color:var(--dim);font-size:11px"></span></div>
+  <div class="um-item" onclick="logout()" style="border-top:1px solid var(--border);color:var(--red)"><i class="ic" data-icon="logout"></i>Выйти</div>
+</div>
+
+<!-- language dropdown -->
+<div class="dd" id="lang-dd"><div id="lang-list" style="min-width:190px"></div></div>
+
+<!-- ═══════════ BODY ═══════════ -->
+<div id="body-row">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-item active" id="sb-trade" onclick="showView('trade')"><i class="ic" data-icon="chart"></i>Торговля</div>
+    <div class="sb-item" id="sb-signals" onclick="showView('trade');switchRightPanel('signals')"><i class="ic" data-icon="signal"></i>Сигналы<span class="badge" id="sb-signals-badge"></span></div>
+    <div class="sb-item" id="sb-finance" onclick="showView('finance')"><i class="ic" data-icon="wallet"></i>Финансы</div>
+    <div class="sb-item" id="sb-profile" onclick="showView('profile')"><i class="ic" data-icon="user"></i>Профиль</div>
+    <div class="sb-item desk-only" id="sb-history" onclick="showView('profile','history')"><i class="ic" data-icon="history"></i>История</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-item desk-only" id="sb-help" onclick="openSupportChat()"><i class="ic" data-icon="help"></i>Помощь</div>
+  </div>
+
+  <div id="content">
+
+    <!-- ═══ TRADE VIEW ═══ -->
+    <div class="view active" id="view-trade">
+      <div id="chart-toolbar">
+        <div class="ct-asset" id="ct-asset" onclick="openAssetPicker(event)">
+          <span id="ct-asset-icon"></span><span id="ct-asset-name">EUR/USD</span>
+          <span class="pay" id="ct-asset-pay">92%</span><span class="arr">▼</span>
+        </div>
+        <div class="ct-sep"></div>
+        <button class="ct-btn on" id="ct-tf-btn" onclick="toggleTfPopup(event)">M1</button>
+        <button class="ct-btn" id="ind-btn" onclick="toggleIndPanel(event)" title="Индикаторы"><i class="ic" data-icon="ind"></i></button>
+        <button class="ct-btn" onclick="toggleTfPopup(event)" title="Настройки графика"><i class="ic" data-icon="gear"></i></button>
+      </div>
+      <div id="fav-strip"></div>
+      <div id="trade-row">
+        <div id="chart-col">
+          <div id="chart-wrap">
+            <canvas id="chart-canvas"></canvas>
+            <div id="ohlc-overlay"></div>
+            <div id="chart-clock"></div>
+          </div>
+          <div id="sub-panels"></div>
+        </div>
+
+        <!-- TRADE PANEL -->
+        <div id="trade-panel">
+          <div class="tp-body">
+            <div class="tp-row2">
+              <div class="field">
+                <div class="fmain"><div class="fl">Время</div><div class="fv" id="expiry-shown" onclick="openExpiryPopup(event)">00:01:00</div></div>
+                <button class="stp" onclick="stepExpiry(-1)">−</button><button class="stp" onclick="stepExpiry(1)">+</button>
+              </div>
+              <div class="field">
+                <div class="fmain"><div class="fl">Сумма</div><div class="fv" id="amount-shown" onclick="openAmountPopup(event)">$100</div></div>
+                <button class="stp" onclick="stepAmount(-1)">−</button><button class="stp" onclick="stepAmount(1)">+</button>
+              </div>
+            </div>
+            <div class="payout-box">
+              <div class="pl">Выплата</div>
+              <div class="pv"><b id="payout-pct">+92%</b><small id="payout-sum">+$92.00</small></div>
+            </div>
+            <div id="amt-chips"></div>
+            <div class="tp-btns">
+              <button class="trade-btn" id="btn-up" onclick="openTrade('UP')"><i class="ic" data-icon="up"></i>КУПИТЬ</button>
+              <button class="trade-btn" id="btn-down" onclick="openTrade('DOWN')"><i class="ic" data-icon="down"></i>ПРОДАТЬ</button>
+            </div>
+            <div id="streak-box"></div>
+          </div>
+          <div id="trades-area">
+            <div class="trades-tabs">
+              <div class="trades-tab active" id="tab-open" onclick="switchTab('open')">Открытые<span class="cnt" id="cnt-open"></span></div>
+              <div class="trades-tab" id="tab-closed" onclick="switchTab('closed')">Закрытые</div>
+            </div>
+            <div class="trades-pane active" id="pane-open"><div class="no-trades" id="no-open-msg">Нет открытых сделок</div></div>
+            <div class="trades-pane" id="pane-closed"><div class="no-trades" id="no-closed-msg">Нет закрытых сделок</div></div>
+          </div>
+        </div>
+
+        <!-- SIGNALS PANEL -->
+        <div id="signals-panel">
+          <div class="sp-header"><span>Сигналы</span><span class="sp-x" onclick="switchRightPanel('trade')">✕</span></div>
+          <div class="sp-list" id="sp-list"><div class="sp-empty">Ожидание сигналов...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FINANCE VIEW ═══ -->
+    <div class="view" id="view-finance">
+      <div class="page"><div class="page-in">
+        <h1>Финансы</h1>
+        <div class="stats">
+          <div class="stat"><small>Реальный счёт</small><b id="fin-bal-real">$0.00</b></div>
+          <div class="stat"><small>Демо-счёт</small><b id="fin-bal-demo">$10,000.00</b></div>
+          <div class="stat"><small>Всего пополнено</small><b id="fin-total-dep">$0.00</b></div>
+          <div class="stat"><small>Всего выведено</small><b id="fin-total-wd">$0.00</b></div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" id="ftab-deposit" onclick="finTab('deposit')">Пополнение</div>
+          <div class="tab" id="ftab-withdraw" onclick="finTab('withdraw')">Вывод</div>
+          <div class="tab" id="ftab-ops" onclick="finTab('ops')">История операций</div>
+        </div>
+
+        <div class="tab-pane active" id="fpane-deposit">
+          <div class="fin-grid">
+            <div>
+              <div class="card">
+                <div class="card-h">Криптовалюта <span class="tag ok">Без комиссии</span></div>
+                <div class="methods" id="methods"></div>
+              </div>
+              <div class="card">
+                <div class="card-h">Банковские карты и электронные кошельки <span class="tag warn">Скоро</span></div>
+                <div class="methods" style="opacity:.45;pointer-events:none">
+                  <div class="method"><div class="ci" style="background:#1a1f71">VISA</div><b>Visa</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci" style="background:#eb001b">MC</div><b>Mastercard</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci" style="background:#0070ba">PP</div><b>PayPal</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci" style="background:#7b2ff7">SK</div><b>Skrill</b><small>недоступно</small></div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="dep-side">
+              <div class="card-h">Детали пополнения <span class="tag info" id="dep-method-tag">—</span></div>
+              <div class="card-b">
+                <div class="frow" style="border:none"><div class="lab" style="width:auto">Сумма (USD)</div><div class="val"><input class="inp" id="dep-amount" type="number" value="100" min="10" oninput="updateDepDetails()"></div></div>
+                <div class="frow" style="border:none"><div class="lab" style="width:auto">Промокод</div><div class="val"><input class="inp" id="dep-promo" placeholder="Например, WELCOME" style="max-width:190px" autocomplete="off" onchange="checkPromo()"><span id="dep-promo-hint" style="font-size:11px"></span></div></div>
+                <div class="grid3" style="margin-bottom:12px">
+                  <button class="pre" onclick="setDepAmt(50)">$50</button><button class="pre active" onclick="setDepAmt(100)">$100</button><button class="pre" onclick="setDepAmt(250)">$250</button>
+                  <button class="pre" onclick="setDepAmt(500)">$500</button><button class="pre" onclick="setDepAmt(1000)">$1 000</button><button class="pre" onclick="setDepAmt(5000)">$5 000</button>
+                </div>
+                <div style="font-size:11px;color:var(--dim);margin:4px 0">К отправке: <b id="dep-crypto-amt" style="color:var(--text);font-family:'JetBrains Mono',monospace">—</b></div>
+                <div style="font-size:11px;color:var(--dim);margin:4px 0" id="dep-bonus-row" class="hidden">Бонус по промокоду: <b id="dep-bonus-amt" style="color:var(--green);font-family:'JetBrains Mono',monospace"></b></div>
+                <div class="addr"><span id="dep-addr">—</span><button onclick="copyAddr()">Копировать</button></div>
+                <button class="btn btn-green btn-block" style="height:44px" onclick="confirmDeposit()">Я оплатил — создать заявку</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="fpane-withdraw">
+          <div class="card">
+            <div class="card-h">Вывод средств</div>
+            <div class="card-b">
+              <div class="frow"><div class="lab">Доступно к выводу</div><div class="val mono" id="wd-avail" style="font-size:16px;font-weight:600">$0.00</div></div>
+              <div class="frow"><div class="lab">Способ</div><div class="val"><select class="inp" id="wd-method"></select></div></div>
+              <div class="frow"><div class="lab">Адрес кошелька</div><div class="val"><input class="inp" id="wd-addr" placeholder="Адрес получателя"></div></div>
+              <div class="frow"><div class="lab">Сумма (USD)</div><div class="val"><input class="inp" id="wd-amount" type="number" min="10" placeholder="Минимум $10"></div></div>
+              <div class="note">Заявки обрабатываются до 24 часов</div>
+              <button class="btn btn-primary" style="height:42px;padding:0 28px" onclick="submitWithdraw()">Создать заявку</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="fpane-ops">
+          <div class="card"><div class="card-h">Операции</div><div id="ops-list"></div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ═══ PROFILE VIEW ═══ -->
+    <div class="view" id="view-profile">
+      <div class="page"><div class="page-in">
+        <h1>Профиль</h1>
+        <div class="tabs">
+          <div class="tab active" id="ptab-info" onclick="profTab('info')">Профиль</div>
+          <div class="tab" id="ptab-security" onclick="profTab('security')">Безопасность</div>
+          <div class="tab" id="ptab-history" onclick="profTab('history')">История торговли</div>
+        </div>
+
+        <div class="tab-pane active" id="ppane-info">
+          <div class="card">
+            <div class="card-h">Информация о личности</div>
+            <div class="card-b">
+              <div class="frow"><div class="lab">Имя <i>*</i></div><div class="val"><input class="inp" id="pf-first" placeholder="Не заполнено" autocomplete="off"></div></div>
+              <div class="frow"><div class="lab">Фамилия <i>*</i></div><div class="val"><input class="inp" id="pf-last" placeholder="Не заполнено" autocomplete="off"></div></div>
+              <div class="frow"><div class="lab">Эл. почта</div><div class="val"><span id="pf-email" style="color:var(--accent)">—</span><span class="tag warn" id="pf-email-tag">Не верифицирован</span><button class="btn btn-ghost" id="pf-email-btn" style="padding:4px 10px;font-size:11px" onclick="verifyEmail()">Подтвердить</button></div></div>
+              <div class="frow"><div class="lab">Телефон</div><div class="val"><input class="inp" id="pf-phone" placeholder="+1 555 000 0000"></div></div>
+              <div class="frow"><div class="lab">Дата рождения <i>*</i></div><div class="val"><input class="inp" id="pf-dob" type="text" placeholder="ДД.ММ.ГГГГ" autocomplete="off"></div></div>
+              <div class="frow"><div class="lab">Страна</div><div class="val"><select class="inp" id="pf-country"></select></div></div>
+              <div class="frow"><div class="lab">Никнейм</div><div class="val"><input class="inp" id="pf-nick" placeholder="user" autocomplete="off"></div></div>
+              <div class="frow"><div class="lab">Скрыть мой профиль</div><div class="val"><div class="switch" id="pf-hide" onclick="this.classList.toggle('on')"></div></div></div>
+              <div style="font-size:11px;color:var(--dim);padding:10px 0"><i style="color:var(--red);font-style:normal">*</i> Обязательно для заполнения</div>
+              <button class="btn btn-primary" style="padding:0 24px;height:40px" onclick="saveProfile()">Сохранить</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Статус личности <span class="tag warn" id="pf-status-tag">Не верифицирован</span></div>
+            <div class="card-b">
+              <div id="kyc-wizard"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Аватар</div>
+            <div class="card-b">
+              <div class="frow" style="border:none">
+                <div class="avatar-big" id="pf-avatar-big">U</div>
+                <div class="dropzone" onclick="document.getElementById('pf-file').click()">Кликните, чтобы загрузить изображение</div>
+                <input type="file" id="pf-file" accept="image/*" hidden onchange="uploadAvatar(this)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="ppane-security">
+          <div class="card">
+            <div class="card-h">Смена пароля</div>
+            <div class="card-b">
+              <form autocomplete="off" onsubmit="return false">
+              <div class="frow"><div class="lab">Текущий пароль</div><div class="val"><input class="inp" type="password" id="sec-cur" autocomplete="new-password"></div></div>
+              <div class="frow"><div class="lab">Новый пароль</div><div class="val"><input class="inp" type="password" id="sec-new" placeholder="минимум 6 символов" autocomplete="new-password"></div></div>
+              <div class="frow"><div class="lab">Повторите новый пароль</div><div class="val"><input class="inp" type="password" id="sec-new2" autocomplete="new-password"></div></div>
+              <div style="padding-top:12px"><button class="btn btn-primary" style="height:40px;padding:0 24px" onclick="changePassword()">Изменить пароль</button></div>
+              </form>
+            </div>
+          </div>
+          <div class="card" style="display:none">
+            <div class="card-h">Двухфакторная аутентификация</div>
+            <div class="card-b"><div class="frow" style="border:none"><div class="lab">Google Authenticator</div><div class="val"><div class="switch" id="sec-2fa" onclick="toggle2fa()"></div><span style="font-size:12px;color:var(--dim)" id="sec-2fa-lbl">Выключена</span></div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-h">Активные сессии</div>
+            <div id="sec-sessions"></div>
+            <div style="padding:12px 18px"><button class="btn btn-ghost" onclick="killSessions()">Завершить все другие сессии</button></div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="ppane-history">
+          <div class="stats" id="ph-stats"></div>
+          <div class="card"><div class="card-h">Сделки <span class="tag info" id="ph-acc-tag">DEMO</span></div><div style="overflow-x:auto" id="ph-table"></div></div>
+        </div>
+      </div></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /body-row -->
+
+<div id="statusbar">
+  <span><span class="dot"></span>LIVE</span>
+  <span id="st-tf">—</span><span id="st-time">—</span><span id="st-online" style="color:var(--dim)"></span>
+  <span class="hint">DRAG = история · SCROLL = зум</span>
+</div>
+
+<!-- ═══════════ POPUPS ═══════════ -->
+<div class="pop" id="tf-popup">
+  <div class="pop-title">ИНТЕРВАЛ</div>
+  <div class="tf-grid" id="tf-grid"></div>
+  <div class="pop-title" style="margin-top:6px">ТИП ГРАФИКА</div>
+  <div class="ct-types">
+    <div class="ct-type" id="ct-pop-line" onclick="setChartType('line')"><i class="ic" style="width:28px;height:28px" data-icon="tline"></i>Линия</div>
+    <div class="ct-type active" id="ct-pop-candle" onclick="setChartType('candle')"><i class="ic" style="width:28px;height:28px" data-icon="tcandle"></i>Свечи</div>
+    <div class="ct-type" id="ct-pop-bar" onclick="setChartType('bar')"><i class="ic" style="width:28px;height:28px" data-icon="tbar"></i>Бары</div>
+    <div class="ct-type" id="ct-pop-hollow" onclick="setChartType('hollow')"><i class="ic" style="width:28px;height:28px" data-icon="thollow"></i>Полые</div>
+  </div>
+</div>
+
+<div class="pop" id="asset-picker">
+  <div class="apc-header">
+    <input id="apc-search" placeholder="Поиск актива..." autocomplete="off">
+    <span class="apc-x" onclick="closeAssetPicker()">✕</span>
+  </div>
+  <div class="apc-body">
+    <div class="apc-cats" id="apc-cats"></div>
+    <div class="apc-list">
+      <div class="apc-lh"><span>АКТИВ</span><span>ВЫПЛАТА</span></div>
+      <div id="apc-rows"></div>
+    </div>
+  </div>
+</div>
+
+<div class="pop" id="amount-popup">
+  <div class="pop-title">СУММА СДЕЛКИ</div>
+  <div class="ap-input"><span>$</span><input id="ap-input" type="number" min="1" max="100000" value="100"></div>
+  <div class="grid3" id="ap-presets"></div>
+</div>
+
+<div class="pop" id="expiry-popup">
+  <div class="pop-title">ВРЕМЯ ЭКСПИРАЦИИ</div>
+  <div class="ep-spin">
+    <div class="ep-unit"><button class="ep-b" onclick="epStep('h',1)">+</button><div class="ep-val" id="ep-hh">00</div><button class="ep-b" onclick="epStep('h',-1)">−</button><small>Ч</small></div>
+    <div class="ep-colon">:</div>
+    <div class="ep-unit"><button class="ep-b" onclick="epStep('m',1)">+</button><div class="ep-val" id="ep-mm">01</div><button class="ep-b" onclick="epStep('m',-1)">−</button><small>М</small></div>
+    <div class="ep-colon">:</div>
+    <div class="ep-unit"><button class="ep-b" onclick="epStep('s',1)">+</button><div class="ep-val" id="ep-ss">00</div><button class="ep-b" onclick="epStep('s',-1)">−</button><small>С</small></div>
+  </div>
+  <div class="grid3" id="ep-presets"></div>
+</div>
+
+<div class="pop" id="ind-panel">
+  <div class="ip-head"><span>Индикаторы</span><span class="apc-x" onclick="closeIndPanel()">✕</span></div>
+  <div class="ip-body">
+    <div class="ip-sec">АКТИВНЫЕ</div><div id="ip-active-list"></div>
+    <div class="ip-sec">ДОСТУПНЫЕ</div><div id="ip-avail-list"></div>
+  </div>
+</div>
+
+<!-- insufficient funds modal -->
+<div class="overlay" id="funds-overlay" onclick="closeFundsModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mi">💳</div>
+    <h3>Недостаточно средств</h3>
+    <p>Баланса не хватает для открытия сделки.<br>Пополните счёт или переключитесь на демо.</p>
+    <div class="mono" style="font-size:18px;color:var(--red);margin-bottom:8px" id="funds-bal">$0.00</div>
+    <button class="btn btn-green btn-block" onclick="closeFundsModal();showView('finance','deposit')">Пополнить счёт</button>
+    <button class="btn btn-ghost btn-block" onclick="closeFundsModal()">Отмена</button>
+  </div>
+</div>
+
+<div id="chat-box">
+  <div id="chat-head"><span id="chat-agent">Поддержка</span><span id="chat-status">Онлайн</span><span id="chat-close" onclick="closeSupportChat()">✕</span></div>
+  <div id="chat-msgs"></div>
+  <div id="chat-input-row">
+    <input class="inp" id="chat-input" placeholder="Напишите сообщение..." autocomplete="off">
+    <button class="btn btn-primary" id="chat-send" onclick="sendSupportMsg()" title="Отправить">➤</button>
+  </div>
+</div>
+<div id="toasts"></div>
+<script src="/i18n.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   0. ICONS
+   ══════════════════════════════════════════════════════════════ */
+const ICONS = {
+chart:'<path d="M18 20V10M12 20V4M6 20v-6"/>',
+signal:'<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2a6 6 0 0 1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19"/>',
+wallet:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
+history:'<path d="M1 4v6h6M3.5 15a9 9 0 1 0 2-9.7L1 10"/><path d="M12 7v5l4 2"/>',
+help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+withdraw:'<path d="M23 18 13.5 8.5 8.5 13.5 1 6"/><path d="M17 18h6v-6"/>',
+ind:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.8H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+up:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+down:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
+tline:'<path d="M3 17l5-5 4 3 6-8"/><path d="M3 17l5-5 4 3 6-8v14H3Z" fill="currentColor" opacity=".15" stroke="none"/>',
+tcandle:'<rect x="4" y="8" width="4" height="9" rx="1"/><path d="M6 5v3M6 17v2"/><rect x="14" y="6" width="4" height="11" rx="1"/><path d="M16 3v3M16 17v3"/>',
+tbar:'<path d="M6 4v16M4 8h2M6 15h2M16 4v16M14 10h2M16 17h2"/>',
+thollow:'<rect x="4" y="8" width="4" height="9" rx="1" fill="none"/><path d="M6 5v3M6 17v2"/><rect x="14" y="6" width="4" height="11" rx="1" fill="currentColor"/><path d="M16 3v3M16 17v3"/>',
+copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'
+};
+function renderIcons(root){
+  (root||document).querySelectorAll('i.ic[data-icon]').forEach(el=>{
+    const k=el.dataset.icon; if(!ICONS[k]||el.dataset.done)return;
+    el.dataset.done='1';
+    el.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[k]+'</svg>';
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1. UTILS
+   ══════════════════════════════════════════════════════════════ */
+const isMobile = () => window.innerWidth <= 820;
+function money(n){ return '$'+(n<0?'-':'')+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function hms(sec){ sec=Math.max(0,Math.floor(sec)); return pad2(Math.floor(sec/3600))+':'+pad2(Math.floor(sec%3600/60))+':'+pad2(sec%60); }
+function shortRem(sec){ sec=Math.max(0,sec); return sec>=3600? Math.floor(sec/3600)+':'+pad2(Math.floor(sec%3600/60))+':'+pad2(Math.floor(sec%60))
+  : sec>=60? Math.floor(sec/60)+':'+pad2(Math.floor(sec%60)) : Math.ceil(sec)+'с'; }
+function clockOf(sec){ const d=new Date(sec*1000); return pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds()); }
+function dateOf(sec){ const d=new Date(sec*1000); return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+'.'+d.getFullYear(); }
+/* H6: даты в локали сайта, а не браузера */
+function fmtDT(sec){ const L={ru:'ru-RU',en:'en-GB',fr:'fr-FR',de:'de-DE',pt:'pt-PT',es:'es-ES',it:'it-IT',hi:'hi-IN'}[(window.getLang&&getLang())||'en']||'en-GB';
+  try{ return new Date(sec*1000).toLocaleString(L,{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){ return new Date(sec*1000).toLocaleString(); } }
+function toast(msg,type){
+  const box=document.getElementById('toasts'); if(!box)return;
+  const el=document.createElement('div'); el.className='toast '+(type||'info'); el.textContent=(window.t?t(msg):msg);
+  box.appendChild(el); setTimeout(()=>el.remove(),3300);
+}
+
+/* ── J2: чат с поддержкой ── */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let chatId=null, chatPoll=null;
+async function openSupportChat(force){ /* force: S1 — заблокированному тоже нужен чат */
+  if(!U&&!force){ openAuth(); return; }
+  document.getElementById('chat-box').style.display='flex';
+  if(chatId==null){
+    try{
+      const r=await api('/support/chats');
+      if(r.chats&&r.chats.length) chatId=r.chats[0].id;
+      else { const c=await api('/support/chats',{method:'POST'}); chatId=c.chat.id; }
+    }catch(e){ return; }
+  }
+  loadSupportMsgs();
+  if(!chatPoll) chatPoll=setInterval(loadSupportMsgs,3000);
+}
+function closeSupportChat(){ document.getElementById('chat-box').style.display='none'; if(chatPoll){ clearInterval(chatPoll); chatPoll=null; } }
+async function loadSupportMsgs(){
+  if(chatId==null) return;
+  try{
+    const r=await api('/support/chats/'+chatId+'/messages');
+    document.getElementById('chat-agent').textContent=(r.specialist||'')+' · '+t('Поддержка');
+    document.getElementById('chat-status').textContent=t('Онлайн');
+    const el=document.getElementById('chat-msgs');
+    el.innerHTML=r.messages.map(m=>'<div class="cm '+(m.sender==='user'?'me':'ag')+'"><div>'+esc(m.text)+'</div><small>'+fmtDT(m.created_at)+'</small></div>').join('');
+    el.scrollTop=el.scrollHeight;
+  }catch(e){}
+}
+async function sendSupportMsg(){
+  const inp=document.getElementById('chat-input'); const v=inp.value.trim(); if(!v||chatId==null) return;
+  inp.value='';
+  try{ await api('/support/chats/'+chatId+'/messages',{method:'POST',body:{text:v}}); loadSupportMsgs(); }catch(e){}
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='chat-input') sendSupportMsg(); });
+
+/* ── W: клиент сообщает серверу язык системы ── */
+function reportLang(){ if(U&&window.getLang) api('/lang',{method:'PUT',body:{lang:getLang()}}).catch(()=>{}); }
+window.onLangChanged=function(){ reportLang(); };
+
+/* ── X: лента избранного над графиком ── */
+function renderFavStrip(){
+  const el=document.getElementById('fav-strip'); if(!el) return;
+  const list=[...favorites];
+  const was=el.style.display;
+  el.style.display=list.length?'flex':'none';
+  el.innerHTML=list.map(id=>`<div class="fav-chip ${id===curAsset?'active':''}" data-id="${esc(id)}">
+    ${getAssetIconHTML(id)}<span class="fc-name">${esc(id)}</span><span class="fc-pay">+${payoutOf(id)}%</span>
+    <span class="fav-x" title="${t('Убрать из избранного')}">✕</span></div>`).join('');
+  el.querySelectorAll('.fav-chip').forEach(c=>{
+    c.onclick=()=>selectAsset(c.dataset.id);
+    c.querySelector('.fav-x').onclick=ev=>{ ev.stopPropagation(); favorites.delete(c.dataset.id); persistFavs(); renderApcRows(); renderFavStrip(); };
+  });
+  if(was!==el.style.display) requestAnimationFrame(()=>{ resize(); draw(); });
+}
+
+/* ── Y: звук (WebAudio, без файлов) ── */
+let sndOn=null, AC=null; /* sndOn читаем лениво: LS_KEY объявлен ниже по файлу */
+function sndEnabled(){ if(sndOn==null){ try{ sndOn=localStorage.getItem(LS_KEY+'_snd')!=='0'; }catch(e){ sndOn=true; } } return sndOn; }
+function toggleSound(){ sndOn=!sndEnabled(); try{ localStorage.setItem(LS_KEY+'_snd',sndOn?'1':'0'); }catch(e){} updSndBtn(); }
+function updSndBtn(){ const b=document.getElementById('snd-btn'); if(b) b.textContent=sndEnabled()?'🔊':'🔇'; }
+function beep(f0,f1,dur,type,vol){
+  if(!sndEnabled()) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain(), t0=AC.currentTime;
+    o.type=type||'sine'; o.frequency.setValueAtTime(f0,t0);
+    if(f1) o.frequency.exponentialRampToValueAtTime(f1,t0+dur);
+    g.gain.setValueAtTime(vol||.08,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+    o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0+dur+.02);
+  }catch(e){}
+}
+const sClick=()=>beep(620,0,.06,'triangle',.045);
+const sWin=()=>{ beep(520,780,.16,'sine',.09); setTimeout(()=>beep(780,1046,.2,'sine',.09),110); };
+const sLose=()=>beep(300,150,.24,'sawtooth',.05);
+
+/* ── Y: конфетти при win ── */
+function confetti(){
+  const c=document.createElement('canvas');
+  c.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:9999';
+  c.width=innerWidth; c.height=innerHeight; document.body.appendChild(c);
+  const x=c.getContext('2d'), cols=['#22c55e','#f59e0b','#3b82f6','#ef4444','#a855f7'], P=[];
+  const cx=innerWidth-240, cy=innerHeight*.32;
+  for(let i=0;i<90;i++){ const a=Math.random()*Math.PI*2, v=3+Math.random()*6;
+    P.push({x:cx,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,s:3+Math.random()*4,r:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,c:cols[i%cols.length]}); }
+  let n=0;
+  (function step(){ x.clearRect(0,0,c.width,c.height); n++;
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.18; p.r+=p.vr;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); x.restore(); });
+    if(n<110) requestAnimationFrame(step); else c.remove();
+  })();
+}
+
+/* ── Y: стрик побед ── */
+function updateStreak(){
+  const el=document.getElementById('streak-box'); if(!el) return;
+  let n=0; for(const tr of state.closed){ if(tr.won) n++; else break; }
+  if(n>=2){ el.style.display='flex'; el.innerHTML='🔥 '+esc(t('Серия побед'))+': <b>'+n+'</b>'; }
+  else el.style.display='none';
+}
+
+/* ── Y: пульс кнопок на тик ── */
+function pulseTicks(prevP,np){
+  const bu=document.getElementById('btn-up'), bd=document.getElementById('btn-down');
+  if(!bu||!bd||!prevP) return;
+  const cls=np>prevP?'tick-up':np<prevP?'tick-dn':'';
+  if(!cls) return;
+  bu.classList.remove('tick-up','tick-dn'); bd.classList.remove('tick-up','tick-dn');
+  void bu.offsetWidth;
+  bu.classList.add(cls); bd.classList.add(cls);
+  setTimeout(()=>{ bu.classList.remove(cls); bd.classList.remove(cls); },320);
+}
+
+/* ── Y: быстрые суммы ── */
+function buildAmtChips(){
+  const el=document.getElementById('amt-chips'); if(!el) return;
+  el.innerHTML=[1,5,10,50,100].map(v=>`<div class="amt-chip" data-v="${v}" onclick="setAmount(${v})">$${v}</div>`).join('');
+}
+
+/* ── Y: псевдо-онлайн в статусбаре ── */
+let onlineN=8200+Math.floor(Math.random()*500);
+function tickOnline(){
+  onlineN=Math.max(5200,onlineN+Math.floor(Math.random()*61)-28);
+  const el=document.getElementById('st-online'); if(el) el.textContent=t('онлайн: {n}').replace('{n}',onlineN.toLocaleString('en-US'));
+}
+
+/* ── Y: count-up баланса ── */
+let shownBal=null, balRaf=null;
+function animBal(to){
+  const el=document.getElementById('acc-bal'); if(!el) return;
+  const from=shownBal==null? to : shownBal; shownBal=to;
+  if(balRaf) cancelAnimationFrame(balRaf);
+  el.classList.remove('flash-up','flash-dn'); void el.offsetWidth;
+  if(to>from+.004) el.classList.add('flash-up'); else if(to<from-.004) el.classList.add('flash-dn');
+  const t0=performance.now(), dur=450;
+  (function step(t){ const k=Math.min(1,(t-t0)/dur); el.textContent=money(from+(to-from)*(1-Math.pow(1-k,3)));
+    balRaf=k<1? requestAnimationFrame(step):null; })(t0);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. API + ДАННЫЕ РЫНКА (всё с сервера)
+   ══════════════════════════════════════════════════════════════ */
+async function api(path, opts={}){
+  const init={method:opts.method||'GET', credentials:'same-origin'};
+  if(opts.body!==undefined){
+    if(opts.body instanceof FormData){ init.body=opts.body; }
+    else { init.headers={'Content-Type':'application/json'}; init.body=JSON.stringify(opts.body); }
+  }
+  const res=await fetch('/api'+path, init);
+  let data={}; try{ data=await res.json(); }catch(e){}
+  if(!res.ok){ const e=new Error(data.error||('http_'+res.status)); e.status=res.status; e.code=data.error; throw e; }
+  return data;
+}
+
+const LS_KEY='synth_otc_v2';
+const TFS={S5:5,S15:15,S30:30,M1:60,M5:300,M15:900,M30:1800,H1:3600};
+const TF_MAX={S5:1600,S15:1600,S30:1600,M1:2000,M5:1500,M15:1200,M30:900,H1:700};
+
+class TFAgg{
+  constructor(sec,max){ this.sec=sec; this.max=max; this.data=[]; this.cur=null; }
+  push(price,ts){
+    const ct=Math.floor(ts/this.sec)*this.sec;
+    if(!this.cur||this.cur.time!==ct){
+      if(this.cur){ this.data.push(this.cur); if(this.data.length>this.max) this.data.shift(); }
+      const o=this.cur?this.cur.close:price;
+      this.cur={time:ct,open:o,high:Math.max(o,price),low:Math.min(o,price),close:price};
+    }else{
+      if(price>this.cur.high)this.cur.high=price;
+      if(price<this.cur.low)this.cur.low=price;
+      this.cur.close=price;
+    }
+  }
+  all(){ return this.cur? this.data.concat([this.cur]) : this.data.slice(); }
+}
+/* Контейнер актива: цены и свечи приходят с сервера, локальный генерации нет */
+class Asset{
+  constructor(name,dec,cat,payout){
+    this.name=name; this.dec=dec; this.cat=cat; this.payout=payout; this._price=0;
+    this.aggs={};
+    for(const [tf,sec] of Object.entries(TFS)) this.aggs[tf]=new TFAgg(sec,TF_MAX[tf]);
+  }
+  setPrice(p,ts){ this._price=p; for(const a of Object.values(this.aggs)) a.push(p,ts); }
+  price(){ return this._price; }
+  candles(tf){ return this.aggs[tf].all(); }
+  fmt(p){ return p.toFixed(this.dec); }
+}
+
+/* каталог активов: [id, cat, payout, base, fS, sS, dec] (base/fS/sS больше не используются — остались для совместимости) */
+
+const RAW=[
+['EUR/USD','currencies',92,1.08500,.00020,.000014,5],['GBP/USD','currencies',91,1.26500,.00025,.000017,5],
+['AUD/USD','currencies',88,0.65200,.00018,.000012,5],['EUR/GBP','currencies',87,0.85800,.00016,.000011,5],
+['NZD/USD','currencies',86,0.60100,.00017,.000012,5],['USD/JPY','currencies',88,149.500,.00020,.000014,3],
+['USD/CHF','currencies',87,0.86800,.00015,.000010,5],['EUR/JPY','currencies',88,162.000,.00023,.000016,3],
+['GBP/JPY','currencies',86,188.500,.00027,.000018,3],['AUD/CAD','currencies',86,0.91200,.00016,.000011,5],
+['USD/CAD','currencies',85,1.38500,.00018,.000012,5],['EUR/CHF','currencies',84,0.94200,.00014,.000010,5],
+['EUR/NZD','currencies',83,1.75000,.00026,.000018,5],['GBP/AUD','currencies',82,2.02000,.00028,.000019,5],
+['AUD/JPY','currencies',82,97.5000,.00022,.000015,3],['EUR/HUF','currencies',80,395.000,.00055,.000038,2],
+['USD/SGD','currencies',80,1.35000,.00016,.000011,5],['USD/MXN','currencies',78,17.2000,.00028,.000019,3],
+['USD/MYR','currencies',76,4.72000,.00020,.000014,4],
+['EUR/USD OTC','currencies',92,1.08500,.00020,.000014,5],['GBP/USD OTC','currencies',92,1.26500,.00025,.000017,5],
+['AUD/USD OTC','currencies',92,0.65200,.00018,.000012,5],['EUR/GBP OTC','currencies',92,0.85800,.00016,.000011,5],
+['NZD/USD OTC','currencies',92,0.60100,.00017,.000012,5],['USD/JPY OTC','currencies',92,149.500,.00020,.000014,3],
+['USD/CHF OTC','currencies',91,0.86800,.00015,.000010,5],['EUR/JPY OTC','currencies',90,162.000,.00023,.000016,3],
+['AUD/JPY OTC','currencies',82,97.5000,.00022,.000015,3],['AUD/CAD OTC','currencies',75,0.91200,.00016,.000011,5],
+['USD/CAD OTC','currencies',75,1.38500,.00018,.000012,5],['EUR/CHF OTC','currencies',74,0.94200,.00014,.000010,5],
+['EUR/NZD OTC','currencies',72,1.75000,.00026,.000018,5],['GBP/AUD OTC','currencies',80,2.02000,.00028,.000019,5],
+['GBP/JPY OTC','currencies',88,188.500,.00027,.000018,3],['USD/SGD OTC','currencies',82,1.35000,.00016,.000011,5],
+['USD/MXN OTC','currencies',31,17.2000,.00028,.000019,3],['EUR/HUF OTC','currencies',85,395.000,.00055,.000038,2],
+['USD/MYR OTC','currencies',75,4.72000,.00020,.000014,4],['BHD/CNY OTC','currencies',80,18.7500,.00025,.000017,3],
+['USD/EGP OTC','currencies',80,48.7500,.00035,.000024,3],['USD/CLP OTC','currencies',86,900.000,.00060,.000042,1],
+['MAD/USD OTC','currencies',85,0.09900,.00018,.000012,5],['USD/COP OTC','currencies',32,4100.00,.00055,.000038,1],
+['OMR/CNY OTC','currencies',45,18.9500,.00025,.000017,3],['QAR/CNY OTC','currencies',43,1.95000,.00022,.000015,4],
+['AUD/NZD OTC','currencies',37,1.09200,.00017,.000012,5],['UAH/USD OTC','currencies',39,0.02440,.00035,.000024,6],
+['USD/IDR OTC','currencies',52,15680.0,.00040,.000028,1],['CHF/NOK OTC','currencies',80,12.2000,.00030,.000021,3],
+['Bitcoin OTC','crypto',81,67500,.0022,.00015,2],['Ethereum OTC','crypto',92,3250,.0018,.00012,2],
+['Cardano OTC','crypto',74,0.580,.0015,.00010,4],['Solana OTC','crypto',74,165.00,.0017,.00011,2],
+['Dogecoin OTC','crypto',80,0.1450,.0014,.000090,4],['BNB OTC','crypto',92,585.00,.0019,.00013,2],
+['Polkadot OTC','crypto',92,6.850,.0020,.00014,3],['Chainlink OTC','crypto',92,14.50,.0021,.00014,3],
+['Litecoin OTC','crypto',92,85.00,.0018,.00012,2],['Avalanche OTC','crypto',86,38.00,.0022,.00015,2],
+['TRON OTC','crypto',86,0.1650,.0016,.00011,4],['Polygon OTC','crypto',82,0.7200,.0019,.00013,4],
+['Bitcoin ETF OTC','crypto',92,67500,.0022,.00015,2],
+['Gold OTC','commodities',80,2650.00,.00035,.000024,2],['Silver OTC','commodities',80,31.500,.00042,.000029,3],
+['Brent Oil OTC','commodities',80,85.500,.00045,.000031,2],['WTI Crude Oil OTC','commodities',80,81.250,.00044,.000030,2],
+['Natural Gas OTC','commodities',45,3.2500,.00070,.000048,3],['Palladium spot OTC','commodities',45,1050.00,.00040,.000028,2],
+['Platinum spot OTC','commodities',45,980.00,.00038,.000026,2],
+['US100','indices',75,17800,.00030,.000021,1],['SP500','indices',75,5100,.00027,.000019,1],
+['AUS 200','indices',75,7800,.00029,.000020,1],['CAC 40','indices',53,8050,.00033,.000023,1],
+['D30EUR','indices',53,18200,.00032,.000022,1],['DJI30','indices',53,39200,.00025,.000017,1],
+['JPN225','indices',53,38500,.00028,.000019,1],['E35EUR','indices',53,4850,.00031,.000021,1],
+['E50EUR','indices',53,5050,.00030,.000021,1],['F40EUR','indices',53,8100,.00032,.000022,1],
+['SMI 20','indices',53,11900,.00026,.000018,1],['AEX 25','indices',53,880,.00029,.000020,1],
+['HONG KONG 33','indices',53,17200,.00034,.000023,1]
+];
+const ASSET_CATALOG = RAW.map(r=>({id:r[0],cat:r[1],payout:r[2],dec:r[6]}));
+const ASSETS={};
+ASSET_CATALOG.forEach(a=>{ ASSETS[a.id]=new Asset(a.id,a.dec,a.cat,a.payout); });
+function payoutOf(name){ return ASSETS[name]?ASSETS[name].payout:85; }
+
+const historyLoaded=new Set();
+async function loadHistory(name,tf){
+  const key=name+'|'+tf;
+  if(historyLoaded.has(key)) return;
+  const r=await api('/chart/'+encodeURIComponent(name)+'?tf='+tf);
+  const agg=ASSETS[name].aggs[tf];
+  const cs=r.candles||[];
+  agg.data=cs.slice(0,-1);
+  agg.cur=cs.length? cs[cs.length-1] : null;
+  historyLoaded.add(key);
+  historyAsset=name; /* V1 */
+}
+
+
+/* ── icons for assets ── */
+const CUR_COUNTRY={USD:'us',EUR:'eu',GBP:'gb',JPY:'jp',AUD:'au',CAD:'ca',CHF:'ch',NZD:'nz',HUF:'hu',
+SGD:'sg',MXN:'mx',MYR:'my',BHD:'bh',CNY:'cn',EGP:'eg',CLP:'cl',MAD:'ma',COP:'co',OMR:'om',QAR:'qa',
+UAH:'ua',IDR:'id',NOK:'no'};
+const COIN_SLUG={'Bitcoin ETF':'btc','Bitcoin':'btc','Ethereum':'eth','Cardano':'ada','Solana':'sol','Dogecoin':'doge','BNB':'bnb',
+'Polkadot':'dot','Chainlink':'link','Litecoin':'ltc','Avalanche':'avax','TRON':'trx','Polygon':'matic'};
+const CRYPTO_COL={'Bitcoin ETF':['#F7931A','ETF'],'Bitcoin':['#F7931A','B'],'Ethereum':['#627EEA','E'],
+'Cardano':['#0033AD','A'],'Solana':['#9945FF','S'],'Dogecoin':['#C2A633','D'],'BNB':['#F3BA2F','B'],
+'Polkadot':['#E6007A','P'],'Chainlink':['#375BD2','L'],'Litecoin':['#A6A9AA','L'],'Avalanche':['#E84142','A'],
+'TRON':['#FF060A','T'],'Polygon':['#8247E5','M']};
+function fbSpan(bg,fg,tx){ return `<span class='asset-icon-generic' style='background:${bg};color:${fg};margin:0'>${tx}</span>`; }
+function flagCircle(cc,cur){ return `<span class="flag-circle"><img class="ai-img" src="/img/icons/flags/${cc}.svg" alt="${cur}" data-fb="${fbSpan('#334155','#cbd5e1',cur)}"></span>`; }
+document.addEventListener('error',e=>{ const t=e.target;
+  if(t&&t.tagName==='IMG'&&t.dataset&&t.dataset.fb){ t.insertAdjacentHTML('afterend',t.dataset.fb); t.remove(); } },true);
+function getAssetIconHTML(id){
+  for(const k in CRYPTO_COL){ if(id.indexOf(k)===0){ const c=CRYPTO_COL[k], slug=COIN_SLUG[k]||'btc';
+    return `<span class="asset-icon-crypto"><img class="ai-img" src="/img/icons/coins/${slug}.svg" alt="${k}" data-fb="${fbSpan(c[0],'#fff',c[1])}"></span>`; } }
+  const m=id.match(/^([A-Z]{3})\/([A-Z]{3})/);
+  if(m&&CUR_COUNTRY[m[1]]&&CUR_COUNTRY[m[2]])
+    return `<span class="asset-icon-pair">${flagCircle(CUR_COUNTRY[m[1]],m[1])}${flagCircle(CUR_COUNTRY[m[2]],m[2])}</span>`;
+  const g=(bg,fg,tx)=>`<span class="asset-icon-generic" style="background:${bg};color:${fg}">${tx}</span>`;
+  if(id.indexOf('Gold')===0) return g('linear-gradient(135deg,#FFD700,#DAA520)','#000','Au');
+  if(id.indexOf('Silver')===0) return g('linear-gradient(135deg,#C0C0C0,#808080)','#000','Ag');
+  if(/Oil|Brent|WTI/.test(id)) return g('#2b2b2b','#c9a227','🛢');
+  if(/Gas/.test(id)) return g('#2a4d69','#87ceeb','G');
+  if(/Palladium/.test(id)) return g('#e8e8e8','#333','Pd');
+  if(/Platinum/.test(id)) return g('#e5e4e2','#444','Pt');
+  if(/US100|SP500|DJI/.test(id)) return `<span class="asset-icon-pair">${flagCircle('us','US')}</span>`;
+  if(/AUS/.test(id)) return `<span class="asset-icon-pair">${flagCircle('au','AU')}</span>`;
+  if(/JPN/.test(id)) return `<span class="asset-icon-pair">${flagCircle('jp','JP')}</span>`;
+  if(/HONG/.test(id)) return `<span class="asset-icon-pair">${flagCircle('hk','HK')}</span>`;
+  if(/CAC|F40/.test(id)) return `<span class="asset-icon-pair">${flagCircle('fr','FR')}</span>`;
+  if(/E35|E50/.test(id)) return `<span class="asset-icon-pair">${flagCircle('eu','EU')}</span>`;
+  if(/D30/.test(id)) return `<span class="asset-icon-pair">${flagCircle('de','DE')}</span>`;
+  if(/SMI/.test(id)) return `<span class="asset-icon-pair">${flagCircle('ch','CH')}</span>`;
+  if(/AEX/.test(id)) return `<span class="asset-icon-pair">${flagCircle('nl','NL')}</span>`;
+  return g('#334155','#cbd5e1','◆');
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   3. СОСТОЯНИЕ ПОЛЬЗОВАТЕЛЯ (серверное)
+   ══════════════════════════════════════════════════════════════ */
+let U=null;
+let curAccount='demo';
+let balance=10000;
+let tradeAmount=100;
+let tradeExpiry=60;
+let favorites=new Set();
+const state={open:[],closed:[]};
+let knownClosed=new Set();
+let suppressCloseToasts=true;
+
+function getTrades(){ return state.open; }
+function getHistory(){ return state.closed; }
+function persistFavs(){ try{ localStorage.setItem(LS_KEY+'_favs',JSON.stringify([...favorites])); }catch(e){} }
+function loadFavs(){ try{ favorites=new Set(JSON.parse(localStorage.getItem(LS_KEY+'_favs')||'[]')); }catch(e){ favorites=new Set(); } }
+function mapTrade(t){
+  return { id:t.id, asset:t.asset, dir:t.dir, amount:t.amount, payoutPct:t.payoutPct,
+    entryPrice:t.entryPrice, entryTime:t.entryTime, closeTime:t.closeTime,
+    tfLabel:t.tfLabel, dur:(t.closeTime-t.entryTime),
+    closePrice:t.closePrice, won:t.won, tie:t.tie, payout:t.payout, profit:t.profit };
+}
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   5. TRADING (сделки на сервере)
+   ══════════════════════════════════════════════════════════════ */
+
+let activeTab='open', expandedOpenId=null, expandedClosedId=null;
+
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById('tab-open').classList.toggle('active',tab==='open');
+  document.getElementById('tab-closed').classList.toggle('active',tab==='closed');
+  document.getElementById('pane-open').classList.toggle('active',tab==='open');
+  document.getElementById('pane-closed').classList.toggle('active',tab==='closed');
+  if(tab==='closed') renderClosed();
+}
+
+function updateBalance(){
+  animBal(balance); /* Y3: count-up + вспышка */
+  const lbl=document.getElementById('acc-lbl');
+  if(lbl){ lbl.textContent=(curAccount==='demo'?'DEMO':t('РЕАЛЬНЫЙ'))+' · USD'; lbl.className='acc-lbl'+(curAccount==='real'?' real':''); }
+  if(U&&U.balances){
+    const d=document.getElementById('dd-bal-demo'), r=document.getElementById('dd-bal-real');
+    if(d) d.textContent=money(U.balances.demo);
+    if(r) r.textContent=money(U.balances.real);
+    document.getElementById('dd-acc-demo').classList.toggle('active',curAccount==='demo');
+    document.getElementById('dd-acc-real').classList.toggle('active',curAccount==='real');
+  }
+  updatePayoutBox();
+}
+
+function updatePayoutBox(){
+  const p=payoutOf(curAsset);
+  const a=document.getElementById('payout-pct'), s=document.getElementById('payout-sum');
+  if(a) a.textContent='+'+p+'%';
+  if(s) s.textContent='+'+money(tradeAmount*p/100);
+}
+
+function showFundsModal(){
+  document.getElementById('funds-bal').textContent=money(Math.max(0,balance));
+  document.getElementById('funds-overlay').classList.add('open');
+}
+
+function closeFundsModal(){ document.getElementById('funds-overlay').classList.remove('open'); }
+
+let tradeBusy=false;
+async function openTrade(dir){
+  if(!U){ openAuth(); return; }
+  if(tradeBusy) return;
+  if(tradeAmount<1){ toast('Минимальная сумма — $1','err'); return; }
+  if(balance<tradeAmount){ showFundsModal(); return; }
+  tradeBusy=true; sClick(); /* Y2 */
+  try{
+    const r=await api('/trades',{method:'POST',body:{account:curAccount,asset:curAsset,dir,amount:tradeAmount,expiry:tradeExpiry,tfLabel:curTF}});
+    state.open.push(mapTrade(r.trade));
+    U.balances=r.balances; balance=r.balances[curAccount];
+    updateBalance(); renderOpen();
+    toast((dir==='UP'?'▲ ':'▼ ')+curAsset+' · '+money(tradeAmount)+' · '+hms(tradeExpiry),'info');
+  }catch(e){
+    if(e.status===402) showFundsModal();
+    else if(e.code==='blocked') forceLogout();
+    else if(e.status===401) openAuth();
+    else toast('Не удалось открыть сделку','err');
+  } finally{ tradeBusy=false; }
+}
+
+/* сервер закрывает сделки сам; клиент периодически забирает состояние */
+let pollingTrades=false;
+async function pollTrades(withToasts=true){
+  if(!U||pollingTrades) return;
+  pollingTrades=true;
+  try{
+    const r=await api('/trades?account='+curAccount);
+    applyTrades(r,withToasts);
+  }catch(e){
+    if(e.status===401){ U=null; openAuth(); }
+    else if(e.status===403&&e.code==='blocked'){ forceLogout(); }
+  } finally{ pollingTrades=false; }
+}
+function applyTrades(r,withToasts){
+  const closed=(r.closed||[]).map(mapTrade);
+  if(!suppressCloseToasts&&withToasts){
+    for(const t of closed){
+      if(!knownClosed.has(t.id)){
+        toast(t.tie?('= '+t.asset+' возврат '+money(t.amount)):(t.won?('+'+money(t.profit)+' · '+t.asset):('−'+money(t.amount)+' · '+t.asset)),
+          t.tie?'info':(t.won?'win':'loss'));
+        if(t.won){ sWin(); confetti(); } else if(!t.tie) sLose(); /* Y1/Y2 */
+      }
+    }
+  }
+  knownClosed=new Set(closed.map(t=>t.id));
+  state.open=(r.open||[]).map(mapTrade);
+  state.closed=closed;
+  updateStreak(); /* Y4 */
+  suppressCloseToasts=false;
+  if(r.balances&&U){
+    U.balances=r.balances;
+    const nb=r.balances[curAccount];
+    if(nb!==balance){ balance=nb; }
+    updateBalance();
+    const fr=document.getElementById('fin-bal-real');
+    if(fr){ fr.textContent=money(r.balances.real); document.getElementById('fin-bal-demo').textContent=money(r.balances.demo); }
+  }
+  renderOpen();
+  if(activeTab==='closed') renderClosed();
+  if(curView==='profile') renderTradeHistory();
+}
+
+function tradeDetailHTML(td,live){ /* FL: t() в рендере — без мигания; параметр td, чтобы не перекрыть window.t */
+  const a=ASSETS[td.asset];
+  const cur = live? ASSETS[td.asset].price() : td.closePrice;
+  const pts = Math.round((cur-td.entryPrice)/td.entryPrice*10000);
+  const win = live ? (td.dir==='UP'? cur>td.entryPrice : cur<td.entryPrice) : td.won;
+  const col = win?'var(--green)':'var(--red)';
+  const rem = live? Math.max(0,td.closeTime-Date.now()/1000) : 0;
+  const pct = live? Math.max(0,Math.min(100,(1-rem/(td.dur||1))*100)) : 100;
+  const payout = live? (win? td.amount*(1+td.payoutPct/100):0) : td.payout;
+  const profit = live? (win? td.amount*td.payoutPct/100 : -td.amount) : td.profit;
+  return `
+  <div class="di-row">
+    <div><span class="di-label">${t('ОТКРЫТА')}</span>${clockOf(td.entryTime)}</div>
+    <div style="text-align:center"><span class="di-label">${t('ТФ')}</span>${td.tfLabel||'—'}</div>
+    <div style="text-align:right"><span class="di-label">${t('ЗАКРЫТИЕ')}</span>${clockOf(td.closeTime)}</div>
+  </div>
+  ${live?`<div class="pbar"><i style="width:${pct}%;background:${col}"></i></div>
+  <div style="text-align:center;color:var(--dim);font-size:11px">${t('Осталось:')} ${shortRem(rem)}</div>`:''}
+  <div class="di-box" style="border-color:${col};background:${win?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)'}">
+    <span class="di-label">${t('ПРОГНОЗ')}</span>
+    <div style="color:${col};font-weight:700">${td.dir==='UP'?t('▲ ВВЕРХ'):t('▼ ВНИЗ')} · ${td.payoutPct}%</div>
+    <div style="color:var(--dim);font-size:11px">${t('Выплата')} <b style="color:var(--text)">${money(payout)}</b> · ${t('Профит')} <b style="color:${col}">${profit>=0?'+':''}${money(profit)}</b></div>
+  </div>
+  <div class="di-row">
+    <div><span class="di-label">${t('ЦЕНА ВХОДА')}</span>${a.fmt(td.entryPrice)}</div>
+    <div style="text-align:center"><span class="di-label">${live?t('ТЕКУЩАЯ'):t('ЗАКРЫТИЕ')}</span>${a.fmt(cur)}</div>
+    <div style="text-align:right"><span class="di-label">${t('РАЗНИЦА')}</span><span style="color:${pts>=0?'var(--green)':'var(--red)'}">${pts>=0?'+':''}${pts} п.</span></div>
+  </div>`;
+}
+
+function renderOpen(){
+  const pane=document.getElementById('pane-open'), msg=document.getElementById('no-open-msg');
+  if(!pane) return;
+  pane.querySelectorAll('.ti,.ti-detail').forEach(e=>e.remove());
+  const list=U?getTrades():[];
+  const cnt=document.getElementById('cnt-open'); if(cnt) cnt.textContent=list.length||'';
+  if(!list.length){ msg.style.display='block'; return; }
+  msg.style.display='none';
+  const now=Date.now()/1000;
+  list.forEach(t=>{
+    const rem=Math.max(0,t.closeTime-now);
+    const cur=ASSETS[t.asset].price();
+    const win=t.dir==='UP'? cur>t.entryPrice : cur<t.entryPrice;
+    const col=win?'var(--green)':'var(--red)';
+    const row=document.createElement('div'); row.className='ti';
+    row.innerHTML=`<div class="ti-head">
+        <span style="color:${t.dir==='UP'?'var(--green)':'var(--red)'}">${t.dir==='UP'?'▲':'▼'}</span>
+        <span class="nm">${getAssetIconHTML(t.asset)}${t.asset}</span>
+        <span class="tm">${shortRem(rem)}</span></div>
+      <div class="ti-mid"><span>${money(t.amount)}</span>
+        <span class="pf" style="color:${col}">${win?'+'+money(t.amount*t.payoutPct/100):money(0)}</span></div>`;
+    row.onclick=()=>{ expandedOpenId = expandedOpenId===t.id?null:t.id; renderOpen(); };
+    pane.appendChild(row);
+    if(expandedOpenId===t.id){
+      const d=document.createElement('div'); d.className='ti-detail';
+      d.innerHTML=tradeDetailHTML(t,true); pane.appendChild(d);
+    }
+  });
+}
+
+function renderClosed(){
+  const pane=document.getElementById('pane-closed'), msg=document.getElementById('no-closed-msg');
+  if(!pane) return;
+  pane.querySelectorAll('.ti,.ti-detail,.ti-date-sep').forEach(e=>e.remove());
+  const list=U?getHistory():[];
+  if(!list.length){ msg.style.display='block'; return; }
+  msg.style.display='none';
+  let lastD='';
+  list.forEach(t=>{
+    const d=dateOf(t.closeTime);
+    if(d!==lastD){ lastD=d; const s=document.createElement('div'); s.className='ti-date-sep'; s.textContent=d; pane.appendChild(s); }
+    const col=t.tie?'var(--dim)':(t.won?'var(--green)':'var(--red)');
+    const row=document.createElement('div'); row.className='ti';
+    row.innerHTML=`<div class="ti-head">
+        <span style="color:${t.dir==='UP'?'var(--green)':'var(--red)'}">${t.dir==='UP'?'▲':'▼'}</span>
+        <span class="nm">${getAssetIconHTML(t.asset)}${t.asset}</span>
+        <span class="tm" style="color:var(--dim)">${clockOf(t.closeTime)}</span></div>
+      <div class="ti-mid"><span>${money(t.amount)}</span>
+        <span class="pf" style="color:${col}">${t.profit>=0?'+':''}${money(t.profit)}</span></div>`;
+    row.onclick=()=>{ expandedClosedId = expandedClosedId===t.id?null:t.id; renderClosed(); };
+    pane.appendChild(row);
+    if(expandedClosedId===t.id){
+      const dd=document.createElement('div'); dd.className='ti-detail';
+      dd.innerHTML=tradeDetailHTML(t,false); pane.appendChild(dd);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. CHART RENDERER
+   ══════════════════════════════════════════════════════════════ */
+const canvas=document.getElementById('chart-canvas');
+const ctx=canvas.getContext('2d');
+const wrap=document.getElementById('chart-wrap');
+const overlay=document.getElementById('ohlc-overlay');
+
+const PW=66, TH=26;
+let curAsset='EUR/USD OTC';
+let curTF='M1';
+let candleW=9;
+const WORLD_MAP=new Image(); WORLD_MAP.src='img/world.svg'; /* I2 */
+let pan=0;
+let chartType='candle';
+let mx=-1,my=-1,onChart=false;
+const activeInds=new Set();
+
+let prevDisplayPrice=0, curDisplayPrice=0, lastTickTime=performance.now();
+let historyAsset=null; /* V1: актив, для которого реально загружены свечи */
+const TICK_MS=500;
+function smoothPrice(){
+  const t=Math.min(1,(performance.now()-lastTickTime)/TICK_MS);
+  const e=1-Math.pow(1-t,3);
+  return prevDisplayPrice+(curDisplayPrice-prevDisplayPrice)*e;
+}
+function resize(){
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  CW=wrap.clientWidth; CH=wrap.clientHeight;
+}
+let CW=800, CH=500;
+
+function futureSlots(){ return Math.max(5,Math.round((CW-PW)*0.26/candleW)); }
+function clampPan(p){
+  const all=ASSETS[curAsset].candles(curTF).length;
+  return Math.max(0,Math.min(Math.max(0,all-8),p));
+}
+function getVisible(){
+  const all=ASSETS[curAsset].candles(curTF);
+  const cw=CW-PW;
+  const nSlots=Math.max(4,Math.floor(cw/candleW));
+  const fut=pan===0?Math.min(nSlots-2,futureSlots()):0; /* G7: маржа будущего только на живом крае */
+  const usable=Math.max(1,nSlots-fut);
+  const end=Math.max(1,all.length-pan);
+  const start=Math.max(0,end-usable);
+  const candles=all.slice(start,end);
+  const leftPad=Math.max(0,usable-candles.length);
+  return {candles,leftPad,startIdx:start,nSlots,fut};
+}
+function priceRange(cs,live){
+  if(!cs.length) return {lo:0,hi:1};
+  let lo=Infinity,hi=-Infinity;
+  for(const c of cs){ if(c.low<lo)lo=c.low; if(c.high>hi)hi=c.high; }
+  if(live!==null){ if(live<lo)lo=live; if(live>hi)hi=live; }
+  for(const t of (U?getTrades():[])) if(t.asset===curAsset){
+    if(t.entryPrice<lo)lo=t.entryPrice; if(t.entryPrice>hi)hi=t.entryPrice;
+  }
+  const pad=(hi-lo)*.16||hi*.001;
+  return {lo:lo-pad,hi:hi+pad};
+}
+function fmtAxisTime(ts){
+  const d=new Date(ts*1000);
+  const s=TFS[curTF];
+  if(s<60) return pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+  if(s<86400) return pad2(d.getHours())+':'+pad2(d.getMinutes());
+  return pad2(d.getDate())+'.'+pad2(d.getMonth()+1);
+}
+
+function draw(){
+  if(!CW||!CH) return;
+  const cW=CW-PW, cH=CH-TH;
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#0a101c'; ctx.fillRect(0,0,CW,CH);
+  if(WORLD_MAP.complete&&WORLD_MAP.naturalWidth){ const iw=WORLD_MAP.naturalWidth, ih=WORLD_MAP.naturalHeight;
+    const sc=Math.min(CW/iw,CH/ih), w=iw*sc, h=ih*sc; ctx.save(); ctx.globalAlpha=.13; ctx.drawImage(WORLD_MAP,(CW-w)/2,(CH-h)/2,w,h); ctx.restore(); } /* I2/T1: подложка должна читаться */
+
+  const V=getVisible();
+  const vis=V.candles;
+  if(!vis.length) return;
+  const atLive = pan===0 && historyAsset===curAsset; /* V1: без истории своего актива живую свечу не рисуем */
+  const lp = atLive? smoothPrice() : null;
+
+  const dv=vis.slice();
+  if(atLive){
+    const last=Object.assign({},dv[dv.length-1]);
+    last.close=lp;
+    if(lp>last.high) last.high=lp;
+    if(lp<last.low) last.low=lp;
+    dv[dv.length-1]=last;
+  }
+  const R=priceRange(dv,lp), lo=R.lo, hi=R.hi;
+  const py=p=>cH*(1-(p-lo)/(hi-lo));
+  const xOf=i=>(V.leftPad+i)*candleW;
+  const tfSec=TFS[curTF];
+  const lastC=dv[dv.length-1];
+  const lastX=xOf(dv.length-1);
+  const timeToX=t=>lastX+((t-lastC.time)/tfSec)*candleW;
+  const xToTime=x=>lastC.time+((x-lastX)/candleW)*tfSec;
+
+  /* grid: price */
+  ctx.font='10px JetBrains Mono';
+  ctx.textBaseline='middle';
+  for(let i=0;i<=6;i++){
+    const p=lo+(hi-lo)*(i/6), y=py(p);
+    ctx.strokeStyle='rgba(34,49,79,.6)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(cW,y+.5); ctx.stroke();
+    ctx.fillStyle='#5c6a86'; ctx.textAlign='left';
+    ctx.fillText(ASSETS[curAsset].fmt(p),cW+7,y);
+  }
+  /* grid: time (covers future area too) */
+  const stepSlots=Math.max(1,Math.round(78/candleW));
+  ctx.textAlign='center';
+  for(let s=V.leftPad+dv.length-1;s>=0;s-=stepSlots){
+    const x=s*candleW+candleW/2;
+    if(x<0||x>cW) continue;
+    const t=lastC.time+(s-(V.leftPad+dv.length-1))*tfSec;
+    ctx.strokeStyle='rgba(34,49,79,.45)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,cH); ctx.stroke();
+    ctx.fillStyle='#5c6a86'; ctx.fillText(fmtAxisTime(t),x,cH+13);
+  }
+  for(let s=V.leftPad+dv.length-1+stepSlots;s*candleW<cW;s+=stepSlots){
+    const x=s*candleW+candleW/2;
+    const t=lastC.time+(s-(V.leftPad+dv.length-1))*tfSec;
+    ctx.strokeStyle='rgba(34,49,79,.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,cH); ctx.stroke();
+    ctx.fillStyle='#46536d'; ctx.fillText(fmtAxisTime(t),x,cH+13);
+  }
+
+  /* series */
+  const GR='#22c55e', RD='#ef4444';
+  if(chartType==='line'){
+    ctx.beginPath();
+    for(let i=0;i<dv.length;i++){ const x=xOf(i)+candleW/2,y=py(dv[i].close); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+    ctx.lineTo(xOf(dv.length-1)+candleW/2,cH); ctx.lineTo(xOf(0)+candleW/2,cH); ctx.closePath();
+    const ag=ctx.createLinearGradient(0,0,0,cH);
+    ag.addColorStop(0,'rgba(59,130,246,.25)'); ag.addColorStop(1,'rgba(59,130,246,0)');
+    ctx.fillStyle=ag; ctx.fill();
+  } else if(chartType==='bar'){
+    for(let i=0;i<dv.length;i++){
+      const c=dv[i],bull=c.close>=c.open,cx=xOf(i)+candleW/2,tk=Math.max(2,candleW*.32);
+      ctx.strokeStyle=bull?GR:RD; ctx.lineWidth=Math.max(1.5,candleW*.11); /* I1: насыщенный фитиль */
+      ctx.beginPath(); ctx.moveTo(cx,py(c.high)); ctx.lineTo(cx,py(c.low)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-tk,py(c.open)); ctx.lineTo(cx,py(c.open)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx,py(c.close)); ctx.lineTo(cx+tk,py(c.close)); ctx.stroke();
+    }
+  } else {
+    const hollow=chartType==='hollow';
+    for(let i=0;i<dv.length;i++){
+      const c=dv[i],bull=c.close>=c.open,x0=xOf(i),cx=x0+candleW/2;
+      const pd=Math.max(1,Math.round(candleW*.14)), bw=Math.max(candleW-pd*2,2); /* I1: тело не тоньше 2px */
+      const oY=py(c.open),cY=py(c.close),top=Math.min(oY,cY),bot=Math.max(oY,cY);
+      const col=bull?GR:RD;
+      ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,Math.min(2,candleW*.1));
+      ctx.beginPath(); ctx.moveTo(cx,py(c.high)); ctx.lineTo(cx,top); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx,bot); ctx.lineTo(cx,py(c.low)); ctx.stroke();
+      const bh=Math.max(bot-top,1);
+      if(hollow&&bull){ ctx.lineWidth=1.4; ctx.strokeRect(x0+pd+.5,top+.5,bw-1,bh-1); }
+      else { ctx.fillStyle=col; ctx.fillRect(x0+pd,top,bw,bh); }
+    }
+  }
+
+  if(activeInds.size) drawOverlayIndicators(dv,V.leftPad,py,cW,cH,V.startIdx);
+
+  /* ── TRADE MARKERS (time-accurate) ── */
+  const nowSec=Date.now()/1000;
+  const labelRows=[];
+  const trs=U?getTrades():[];
+  for(const t of trs){
+    if(t.asset!==curAsset) continue;
+    const curP = lp!==null? lp : ASSETS[curAsset].price();
+    const win = t.dir==='UP'? curP>t.entryPrice : curP<t.entryPrice;
+    const col = win?'#22c55e':'#ef4444';
+    const rem = Math.max(0,t.closeTime-nowSec);
+    const eY = py(t.entryPrice);
+    const eX = timeToX(t.entryTime);
+    const xX = timeToX(t.closeTime);
+    if(eY<-40||eY>cH+40) continue;
+
+    /* strike line: full width */
+    ctx.save();
+    ctx.strokeStyle=col; ctx.globalAlpha=.9; ctx.lineWidth=1; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(0,eY+.5); ctx.lineTo(cW,eY+.5); ctx.stroke();
+    ctx.restore();
+    /* strike price tag on axis */
+    ctx.fillStyle=col; ctx.fillRect(cW,eY-9,PW,18);
+    ctx.fillStyle='#0a101c'; ctx.font='bold 10px JetBrains Mono'; ctx.textAlign='left';
+    ctx.fillText(ASSETS[curAsset].fmt(t.entryPrice),cW+5,eY);
+
+    /* entry vertical (thin) */
+    if(eX>=0&&eX<=cW){
+      ctx.save(); ctx.strokeStyle=col; ctx.globalAlpha=.28; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(eX+.5,0); ctx.lineTo(eX+.5,cH); ctx.stroke(); ctx.restore();
+    }
+    /* expiry vertical (bright) */
+    if(xX>=0&&xX<=cW){
+      ctx.save(); ctx.strokeStyle=col; ctx.globalAlpha=.85; ctx.lineWidth=1.4; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(xX+.5,0); ctx.lineTo(xX+.5,cH); ctx.stroke(); ctx.restore();
+      /* label above, staggered */
+      let row=0; while(labelRows.indexOf(row)>=0 && row<4) row++;
+      labelRows.push(row);
+      const ly=8+row*26;
+      const txt=clockOf(t.closeTime);
+      ctx.font='600 10px Inter'; const tw=ctx.measureText(txt).width;
+      let bx=Math.min(cW-tw-14,Math.max(2,xX-(tw+12)/2));
+      ctx.fillStyle='rgba(10,16,28,.92)'; ctx.strokeStyle=col; ctx.lineWidth=1;
+      roundRect(ctx,bx,ly,tw+12,20,5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=col; ctx.textAlign='left'; ctx.fillText(txt,bx+6,ly+10);
+      ctx.fillStyle='#5c6a86'; ctx.font='9px Inter';
+      ctx.fillText('закрытие',bx+6,ly+30>cH?ly+10:ly-6);
+    }
+    /* dot at entry */
+    if(eX>=-4&&eX<=cW){
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(eX,eY,3.5,0,6.284); ctx.fill();
+      ctx.strokeStyle='#0a101c'; ctx.lineWidth=1.4; ctx.stroke();
+    }
+    /* dot at expiry */
+    if(xX>=0&&xX<=cW){ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(xX,eY,3.5,0,6.284); ctx.fill(); }
+
+    /* pill: amount + countdown, anchored at entry */
+    const label=(t.dir==='UP'?'▲ ':'▼ ')+money(t.amount);
+    const timer=shortRem(rem);
+    ctx.font='bold 10px Inter';
+    const w1=ctx.measureText(label).width;
+    ctx.font='bold 10px JetBrains Mono';
+    const w2=ctx.measureText(timer).width;
+    const pw=w1+w2+22;
+    let px=eX-pw-8;
+    if(px<2) px=Math.min(cW-pw-2,eX+8);
+    const pyv=eY-11;
+    ctx.fillStyle='rgba(10,16,28,.95)'; ctx.strokeStyle=col; ctx.lineWidth=1.2;
+    roundRect(ctx,px,pyv,pw,22,6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=col; ctx.font='bold 10px Inter'; ctx.textAlign='left';
+    ctx.fillText(label,px+7,pyv+11);
+    ctx.fillStyle='#e8eef8'; ctx.font='bold 10px JetBrains Mono';
+    ctx.fillText(timer,px+w1+15,pyv+11);
+  }
+
+  /* current price line */
+  const cur = lp!==null? lp : ASSETS[curAsset].price();
+  if(cur>=lo&&cur<=hi){
+    const y=py(cur);
+    ctx.save(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(cW,y+.5); ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#3b82f6'; ctx.fillRect(cW,y-10,PW,20);
+    ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='left';
+    ctx.fillText(ASSETS[curAsset].fmt(cur),cW+5,y);
+  }
+
+  /* crosshair */
+  if(onChart&&mx>=0&&mx<cW&&my>=0&&my<cH){
+    ctx.save(); ctx.strokeStyle='rgba(139,155,180,.5)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(mx+.5,0); ctx.lineTo(mx+.5,cH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,my+.5); ctx.lineTo(cW,my+.5); ctx.stroke(); ctx.restore();
+    const hp=lo+(hi-lo)*(1-my/cH);
+    ctx.fillStyle='#334155'; ctx.fillRect(cW,my-9,PW,18);
+    ctx.fillStyle='#e8eef8'; ctx.font='10px JetBrains Mono'; ctx.textAlign='left';
+    ctx.fillText(ASSETS[curAsset].fmt(hp),cW+5,my);
+    const tt=xToTime(mx);
+    const lbl=fmtAxisTime(Math.floor(tt/tfSec)*tfSec);
+    ctx.font='10px JetBrains Mono'; const lw=ctx.measureText(lbl).width+12;
+    ctx.fillStyle='#334155'; ctx.fillRect(Math.min(cW-lw,Math.max(0,mx-lw/2)),cH,lw,18);
+    ctx.fillStyle='#e8eef8'; ctx.textAlign='center';
+    ctx.fillText(lbl,Math.min(cW-lw/2,Math.max(lw/2,mx)),cH+9);
+    const ci=Math.floor(mx/candleW)-V.leftPad;
+    if(ci>=0&&ci<dv.length){
+      const c=dv[ci], a=ASSETS[curAsset], col=c.close>=c.open?'#22c55e':'#ef4444';
+      overlay.style.display='block';
+      overlay.innerHTML=`<span style="color:${col}">■</span> ${fmtAxisTime(c.time)} &nbsp; O<b>${a.fmt(c.open)}</b> H<b>${a.fmt(c.high)}</b> L<b>${a.fmt(c.low)}</b> C<b style="color:${col}">${a.fmt(c.close)}</b>`;
+    } else overlay.style.display='none';
+  } else overlay.style.display='none';
+
+  if(activeInds.size){ resizeSubPanels(); drawSubPanels(dv,V.leftPad,V.startIdx); }
+}
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. INDICATORS
+   ══════════════════════════════════════════════════════════════ */
+const IND_CATALOG=[
+ {id:'sma',name:'Moving Average',params:'SMA 20',type:'overlay'},
+ {id:'ema',name:'EMA',params:'EMA 14',type:'overlay'},
+ {id:'bb',name:'Bollinger Bands',params:'BB 20,2',type:'overlay'},
+ {id:'rsi',name:'RSI',params:'RSI 14',type:'sub'},
+ {id:'macd',name:'MACD',params:'12,26,9',type:'sub'},
+ {id:'stoch',name:'Stochastic',params:'14,3',type:'sub'},
+ {id:'mom',name:'Momentum',params:'14',type:'sub'},
+ {id:'cci',name:'CCI',params:'20',type:'sub'}
+];
+function calcSMA(d,p){const o=[];for(let i=0;i<d.length;i++){if(i<p-1){o.push(null);continue}let s=0;for(let j=i-p+1;j<=i;j++)s+=d[j].close;o.push(s/p)}return o}
+function calcEMA(d,p){const k=2/(p+1),o=[];let e=null;for(let i=0;i<d.length;i++){if(e===null){e=d[i].close;o.push(null);continue}e=d[i].close*k+e*(1-k);o.push(e)}return o}
+function calcBB(d,p,m){const s=calcSMA(d,p),u=[],l=[];for(let i=0;i<d.length;i++){if(s[i]===null){u.push(null);l.push(null);continue}let v=0;for(let j=i-p+1;j<=i;j++)v+=Math.pow(d[j].close-s[i],2);const sd=Math.sqrt(v/p);u.push(s[i]+m*sd);l.push(s[i]-m*sd)}return{sma:s,upper:u,lower:l}}
+function calcRSI(d,p){const o=[];for(let i=0;i<d.length;i++){if(i<p){o.push(null);continue}let g=0,ls=0;for(let j=i-p+1;j<=i;j++){const x=d[j].close-d[j-1].close;x>0?g+=x:ls-=x}const rs=ls===0?100:(g/p)/(ls/p);o.push(ls===0?100:100-100/(1+rs))}return o}
+function calcMACD(d){const a=calcEMA(d,12),b=calcEMA(d,26),m=[],md=[];for(let i=0;i<d.length;i++){const v=(a[i]!==null&&b[i]!==null)?a[i]-b[i]:null;m.push(v);md.push({close:v||0})}const s=calcEMA(md,9);return{macdLine:m,signal:s,hist:m.map((v,i)=>v!==null&&s[i]!==null?v-s[i]:null)}}
+function calcStoch(d,kp,dp){const K=[],D=[];for(let i=0;i<d.length;i++){if(i<kp-1){K.push(null);continue}let lo=Infinity,hi=-Infinity;for(let j=i-kp+1;j<=i;j++){if(d[j].low<lo)lo=d[j].low;if(d[j].high>hi)hi=d[j].high}K.push(hi===lo?50:(d[i].close-lo)/(hi-lo)*100)}for(let i=0;i<K.length;i++){if(i<dp-1||K[i]===null){D.push(null);continue}let s=0,c=0;for(let j=i-dp+1;j<=i;j++)if(K[j]!==null){s+=K[j];c++}D.push(c?s/c:null)}return{K,D}}
+function calcMom(d,p){return d.map((c,i)=>i<p?null:c.close-d[i-p].close)}
+function calcCCI(d,p){const o=[];for(let i=0;i<d.length;i++){if(i<p-1){o.push(null);continue}let tp=0;for(let j=i-p+1;j<=i;j++)tp+=(d[j].high+d[j].low+d[j].close)/3;const mt=tp/p;let md=0;for(let j=i-p+1;j<=i;j++)md+=Math.abs((d[j].high+d[j].low+d[j].close)/3-mt);o.push((((d[i].high+d[i].low+d[i].close)/3)-mt)/(0.015*(md/p)))}return o}
+
+function drawOverlayIndicators(vis,leftPad,py,cW,cH,startIdx){
+  const all=ASSETS[curAsset].candles(curTF), W=60;
+  const s=Math.max(0,startIdx-W), data=all.slice(s,startIdx+vis.length), off=startIdx-s;
+  const xOf=i=>(leftPad+i)*candleW+candleW/2;
+  const line=(vals,col,lw)=>{
+    ctx.strokeStyle=col; ctx.lineWidth=lw||1.3; ctx.beginPath(); let st=false;
+    for(let i=0;i<vis.length;i++){ const v=vals[off+i]; if(v==null)continue;
+      const x=xOf(i),y=py(v); if(y<-50||y>cH+50){st=false;continue}
+      st?ctx.lineTo(x,y):(ctx.moveTo(x,y),st=true); }
+    ctx.stroke();
+  };
+  if(activeInds.has('sma')) line(calcSMA(data,20),'rgba(250,204,21,.85)');
+  if(activeInds.has('ema')) line(calcEMA(data,14),'rgba(167,139,250,.9)');
+  if(activeInds.has('bb')){
+    const b=calcBB(data,20,2);
+    line(b.sma,'rgba(56,189,248,.5)',1); line(b.upper,'rgba(56,189,248,.8)',1); line(b.lower,'rgba(56,189,248,.8)',1);
+    ctx.beginPath(); let st=false;
+    for(let i=0;i<vis.length;i++){const v=b.upper[off+i];if(v==null)continue;const x=xOf(i),y=py(v);st?ctx.lineTo(x,y):(ctx.moveTo(x,y),st=true)}
+    for(let i=vis.length-1;i>=0;i--){const v=b.lower[off+i];if(v==null)continue;ctx.lineTo(xOf(i),py(v))}
+    ctx.closePath(); ctx.fillStyle='rgba(56,189,248,.05)'; ctx.fill();
+  }
+}
+function buildSubPanels(){
+  const c=document.getElementById('sub-panels'); c.innerHTML='';
+  [...activeInds].filter(id=>IND_CATALOG.find(x=>x.id===id).type==='sub').forEach(id=>{
+    const cfg=IND_CATALOG.find(x=>x.id===id);
+    const d=document.createElement('div'); d.className='sub-panel'; d.id='sp-'+id;
+    d.innerHTML=`<div class="sub-panel-label">${cfg.name} (${cfg.params})</div>
+      <span class="sub-panel-close" onclick="removeIndicator('${id}')">✕</span>
+      <canvas id="spc-${id}"></canvas>`;
+    c.appendChild(d);
+  });
+  resize(); resizeSubPanels(); draw();
+}
+function resizeSubPanels(){
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  [...activeInds].filter(id=>IND_CATALOG.find(x=>x.id===id).type==='sub').forEach(id=>{
+    const p=document.getElementById('sp-'+id), cv=document.getElementById('spc-'+id);
+    if(!p||!cv) return;
+    cv.width=p.clientWidth*dpr; cv.height=p.clientHeight*dpr;
+    cv.style.width=p.clientWidth+'px'; cv.style.height=p.clientHeight+'px';
+    cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  });
+}
+function drawSubPanels(vis,leftPad,startIdx){
+  const all=ASSETS[curAsset].candles(curTF), W=60;
+  const s=Math.max(0,startIdx-W), data=all.slice(s,startIdx+vis.length), off=startIdx-s;
+  [...activeInds].filter(id=>IND_CATALOG.find(x=>x.id===id).type==='sub').forEach(id=>{
+    const cv=document.getElementById('spc-'+id); if(!cv) return;
+    const c=cv.getContext('2d'); const chips=[]; /* G9: занятые Y бейджей */
+    const w=cv.clientWidth,h=cv.clientHeight,cw=w-PW;
+    c.clearRect(0,0,w,h); c.fillStyle='#0a101c'; c.fillRect(0,0,w,h);
+    const xOf=i=>(leftPad+i)*candleW+candleW/2;
+    const Y=(v,mn,mx)=>h-5-(v-mn)/(mx-mn)*(h-10);
+    const ln=(vals,col,mn,mx,lw)=>{c.strokeStyle=col;c.lineWidth=lw||1.2;c.beginPath();let st=false;
+      for(let i=0;i<vis.length;i++){const v=vals[off+i];if(v==null)continue;const x=xOf(i),y=Y(v,mn,mx);
+        if(y<0||y>h){st=false;continue} st?c.lineTo(x,y):(c.moveTo(x,y),st=true)} c.stroke();
+      let last=null; for(let i=vis.length-1;i>=0;i--){if(vals[off+i]!=null){last=vals[off+i];break}}
+      if(last!=null){ let y=Math.max(9,Math.min(h-9,Y(last,mn,mx)));
+        while(chips.some(cy=>Math.abs(cy-y)<16)) y=Math.min(h-9,y+16); /* G9: бейджи друг над другом */
+        chips.push(y);
+        c.fillStyle=col; c.fillRect(cw,y-8,PW,16);
+        c.fillStyle='#0a101c'; c.font='bold 9px JetBrains Mono'; c.textAlign='left'; c.textBaseline='middle';
+        c.fillText(Math.abs(last)<1?last.toFixed(4):last.toFixed(2),cw+4,y); }
+    };
+    const hl=(v,col,mn,mx)=>{const y=Y(v,mn,mx);c.strokeStyle=col;c.lineWidth=1;c.setLineDash([3,4]);
+      c.beginPath();c.moveTo(0,y);c.lineTo(cw,y);c.stroke();c.setLineDash([])};
+    if(id==='rsi'){ const v=calcRSI(data,14); hl(70,'rgba(239,68,68,.45)',0,100); hl(30,'rgba(34,197,94,.45)',0,100); ln(v,'#f5b921',0,100); }
+    else if(id==='macd'){ const m=calcMACD(data);
+      const arr=[].concat(m.macdLine,m.signal,m.hist).filter(x=>x!=null);
+      const mn=Math.min.apply(null,arr)||-.0001, mx=Math.max.apply(null,arr)||.0001;
+      for(let i=0;i<vis.length;i++){ const v=m.hist[off+i]; if(v==null)continue;
+        const x=(leftPad+i)*candleW+1, bw=Math.max(candleW-2,2);
+        const y0=Y(0,mn,mx), y1=Y(v,mn,mx);
+        c.fillStyle=v>=0?'rgba(34,197,94,.5)':'rgba(239,68,68,.5)';
+        c.fillRect(x,Math.min(y0,y1),bw,Math.abs(y1-y0)||1); }
+      ln(m.macdLine,'#3b82f6',mn,mx); ln(m.signal,'#ef4444',mn,mx,1); }
+    else if(id==='stoch'){ const s2=calcStoch(data,14,3); hl(80,'rgba(239,68,68,.4)',0,100); hl(20,'rgba(34,197,94,.4)',0,100);
+      ln(s2.K,'#f5b921',0,100); ln(s2.D,'#ef4444',0,100,1); }
+    else if(id==='mom'){ const v=calcMom(data,14), nn=v.filter(x=>x!=null);
+      const ab=Math.max(Math.abs(Math.min.apply(null,nn)||0),Math.abs(Math.max.apply(null,nn)||0))||.001;
+      hl(0,'rgba(100,116,139,.4)',-ab,ab); ln(v,'#a78bfa',-ab,ab); }
+    else if(id==='cci'){ const v=calcCCI(data,20), nn=v.filter(x=>x!=null);
+      const ab=Math.max(200,Math.abs(Math.min.apply(null,nn)||0),Math.abs(Math.max.apply(null,nn)||0));
+      hl(100,'rgba(239,68,68,.4)',-ab,ab); hl(-100,'rgba(34,197,94,.4)',-ab,ab); ln(v,'#38bdf8',-ab,ab); }
+    c.fillStyle='rgba(11,19,34,.6)'; c.fillRect(cw,0,PW,h);
+    c.strokeStyle='rgba(34,49,79,.8)'; c.lineWidth=1; c.beginPath(); c.moveTo(cw+.5,0); c.lineTo(cw+.5,h); c.stroke();
+    const cfg=IND_CATALOG.find(x=>x.id===id);
+    const lab=document.querySelector('#sp-'+id+' .sub-panel-label'); if(lab) lab.textContent=cfg.name+' ('+cfg.params+')';
+  });
+}
+/* ══════════════════════════════════════════════════════════════
+   8. DROPDOWNS / POPUPS
+   ══════════════════════════════════════════════════════════════ */
+function closeAll(){ document.querySelectorAll('.pop.open,.dd.open').forEach(e=>e.classList.remove('open')); }
+function toggleDD(id,anchor,e){
+  if(e) e.stopPropagation();
+  const dd=document.getElementById(id); const was=dd.classList.contains('open');
+  const r=anchor.getBoundingClientRect(); /* H2: меряем ДО closeAll, пока якорь виден */
+  closeAll(); if(was) return;
+  dd.style.top=(r.bottom+6)+'px'; dd.style.left='auto'; dd.style.right=(window.innerWidth-r.right)+'px';
+  dd.classList.add('open');
+  const pr=dd.getBoundingClientRect();
+  if(pr.left<8){ dd.style.right='auto'; dd.style.left='8px'; }
+}
+function placePop(pop,anchor,e){
+  if(e) e.stopPropagation();
+  const was=pop.classList.contains('open');
+  closeAll(); if(was) return false;
+  const r=anchor.getBoundingClientRect();
+  pop.classList.add('open');
+  pop.style.top=(r.bottom+6)+'px'; pop.style.left=r.left+'px';
+  const pr=pop.getBoundingClientRect();
+  if(pr.right>window.innerWidth-8) pop.style.left=Math.max(8,window.innerWidth-pr.width-8)+'px';
+  if(pr.bottom>window.innerHeight-8) pop.style.top=Math.max(8,r.top-pr.height-6)+'px';
+  return true;
+}
+document.addEventListener('click',e=>{ if(e.target.closest('.pop,.dd')) return; closeAll(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeAll(); closeFundsModal(); } });
+
+
+/* ══════════════════════════════════════════════════════════════
+   9. VIEWS / NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+
+let curView='trade';
+let currentRightPanel='trade';
+/* R1: запоминаем вью и саб-табы, чтобы F5 не сбрасывал на торговлю */
+let lastFinTab='deposit', lastProfTab='info';
+function viewPrefKey(){ return LS_KEY+'_view_'+(U?U.id:'guest'); }
+function saveViewState(){ try{ localStorage.setItem(viewPrefKey(),JSON.stringify({view:curView,fin:lastFinTab,prof:lastProfTab,rp:currentRightPanel})); }catch(e){} }
+function loadViewPref(){ try{ return JSON.parse(localStorage.getItem(viewPrefKey())||'null'); }catch(e){ return null; } }
+function showView(view,sub){
+  closeAll();
+  if(!U && view!=='trade'){ openAuth(); return; }
+  curView=view;
+  if(view==='finance'&&sub) lastFinTab=sub;
+  if(view==='profile'&&sub) lastProfTab=sub;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));
+  if(view==='trade'){ requestAnimationFrame(()=>{ resize(); resizeSubPanels(); draw(); }); }
+  if(view==='finance'){ renderFinance(); loadOps().then(()=>renderFinance()); finTab(sub||lastFinTab||'deposit'); }
+  if(view==='profile'){ renderProfile(); profTab(sub||lastProfTab||'info'); }
+  updateSidebar(sub); saveViewState();
+}
+function updateSidebar(sub){
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  let id='sb-trade';
+  if(curView==='trade'&&currentRightPanel==='signals') id='sb-signals';
+  if(curView==='finance') id='sb-finance';
+  if(curView==='profile') id= sub==='history'?'sb-history':'sb-profile';
+  const el=document.getElementById(id); if(el) el.classList.add('active');
+}
+function switchRightPanel(p){
+  currentRightPanel=p;
+  const tp=document.getElementById('trade-panel'), sp=document.getElementById('signals-panel');
+  if(p==='signals'){ tp.style.display='none'; sp.classList.add('open'); renderSignals();
+    document.getElementById('sb-signals-badge').classList.remove('show'); }
+  else { tp.style.display='flex'; sp.classList.remove('open'); }
+  updateSidebar(); saveViewState(); requestAnimationFrame(()=>{ resize(); resizeSubPanels(); draw(); });
+}
+function finTab(t){
+  ['deposit','withdraw','ops'].forEach(k=>{
+    document.getElementById('ftab-'+k).classList.toggle('active',k===t);
+    document.getElementById('fpane-'+k).classList.toggle('active',k===t);
+  });
+  lastFinTab=t; saveViewState();
+}
+function profTab(t){
+  ['info','security','history'].forEach(k=>{
+    document.getElementById('ptab-'+k).classList.toggle('active',k===t);
+    document.getElementById('ppane-'+k).classList.toggle('active',k===t);
+  });
+  lastProfTab=t; updateSidebar(t); saveViewState();
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   10. TOOLBAR / TF / CHART TYPE / ASSET PICKER
+   ══════════════════════════════════════════════════════════════ */
+
+function logoHome(){ /* LK: лого ведёт на главную */
+  if(currentRightPanel==='signals') switchRightPanel('trade');
+  showView('trade');
+}
+function updateToolbar(){
+  document.getElementById('ct-asset-icon').innerHTML=getAssetIconHTML(curAsset);
+  document.getElementById('ct-asset-name').textContent=curAsset;
+  document.getElementById('ct-asset-pay').textContent=payoutOf(curAsset)+'%';
+  document.getElementById('ct-tf-btn').textContent=curTF;
+  document.querySelectorAll('#tf-grid .pre').forEach(b=>b.classList.toggle('active',b.dataset.tf===curTF));
+  ['line','candle','bar','hollow'].forEach(t=>{ const el=document.getElementById('ct-pop-'+t); if(el) el.classList.toggle('active',chartType===t); });
+  document.getElementById('ind-btn').classList.toggle('on',activeInds.size>0);
+}
+
+function buildTfGrid(){
+  const g=document.getElementById('tf-grid'); g.style.gridTemplateColumns='repeat(4,1fr)'; g.innerHTML='';
+  Object.keys(TFS).forEach(tf=>{
+    const b=document.createElement('button'); b.className='pre'; b.dataset.tf=tf; b.textContent=tf;
+    b.onclick=()=>selectTF(tf); g.appendChild(b);
+  });
+}
+
+function selectTF(tf){
+  curTF=tf; pan=0; updateToolbar(); updateStatus(); savePrefs(); closeAll(); draw();
+  loadHistory(curAsset,tf).then(()=>draw()).catch(()=>{});
+}
+function toggleTfPopup(e){ placePop(document.getElementById('tf-popup'),document.getElementById('ct-tf-btn'),e); }
+
+let apcCat='currencies', apcSearch='';
+function renderApcRows(){
+  const el=document.getElementById('apc-rows'); el.innerHTML='';
+  let list= apcCat==='favorites'? ASSET_CATALOG.filter(a=>favorites.has(a.id)) : ASSET_CATALOG.filter(a=>a.cat===apcCat);
+  if(apcSearch) list=ASSET_CATALOG.filter(a=>a.id.toLowerCase().includes(apcSearch));
+  if(!list.length){ el.innerHTML='<div class="sp-empty">Ничего не найдено</div>'; return; }
+  list.forEach(a=>{
+    const r=document.createElement('div'); r.className='apc-row'+(a.id===curAsset?' active':'');
+    r.innerHTML=`<span class="apc-star ${favorites.has(a.id)?'fav':''}">★</span>
+      <span class="apc-name">${getAssetIconHTML(a.id)}${a.id}</span>
+      <span class="apc-pay ${a.payout<60?'low':''}">+${a.payout}%</span>`;
+    r.querySelector('.apc-star').onclick=ev=>{ ev.stopPropagation(); favorites.has(a.id)?favorites.delete(a.id):favorites.add(a.id); persistFavs(); renderApcRows(); renderFavStrip(); }; /* X */
+    r.onclick=()=>{ closeAll(); selectAsset(a.id); };
+    el.appendChild(r);
+  });
+  applyLang();
+}
+async function selectAsset(name){
+  if(!ASSETS[name]||name===curAsset) return;
+  curAsset=name; pan=0;
+  renderFavStrip(); /* X: подсветка активного чипа */
+  prevDisplayPrice=curDisplayPrice=ASSETS[name].price(); /* V1: сразу, чтобы во время загрузки живая цена нового актива не растягивала старые свечи */
+  updateToolbar(); updatePayoutBox(); savePrefs();
+  try{ await loadHistory(name,curTF); }catch(e){ toast(t('Не удалось загрузить историю {a}',{a:name}),'err'); }
+  updateStatus(); draw();
+}
+
+function setChartType(t){ chartType=t; updateToolbar(); savePrefs(); draw(); }
+
+const APC_CATS=[
+ {id:'favorites',l:'Избранное',i:'★'},{id:'currencies',l:'Валюты',i:'$'},
+ {id:'crypto',l:'Крипто',i:'₿'},{id:'commodities',l:'Сырьё',i:'◈'},{id:'indices',l:'Индексы',i:'≋'}
+]
+
+function buildApc(){
+  const c=document.getElementById('apc-cats'); c.innerHTML='';
+  APC_CATS.forEach(k=>{
+    const b=document.createElement('button'); b.className='apc-cat'+(k.id===apcCat?' active':''); b.dataset.id=k.id;
+    b.innerHTML=`<span style="width:16px;text-align:center">${k.i}</span>${k.l}`;
+    b.onclick=()=>{ apcCat=k.id; c.querySelectorAll('.apc-cat').forEach(x=>x.classList.toggle('active',x.dataset.id===apcCat)); renderApcRows(); };
+    c.appendChild(b);
+  });
+  document.getElementById('apc-search').addEventListener('input',e=>{ apcSearch=e.target.value.toLowerCase(); renderApcRows(); });
+}
+
+function openAssetPicker(e){
+  const ok=placePop(document.getElementById('asset-picker'),document.getElementById('ct-asset'),e);
+  if(!ok) return;
+  apcSearch=''; document.getElementById('apc-search').value=''; renderApcRows();
+  if(!isMobile()) setTimeout(()=>document.getElementById('apc-search').focus(),30);
+}
+
+function closeAssetPicker(){ document.getElementById('asset-picker').classList.remove('open'); }
+
+/* ══════════════════════════════════════════════════════════════
+   11. AMOUNT / EXPIRY
+   ══════════════════════════════════════════════════════════════ */
+const AMT_PRESETS=[5,10,25,50,100,250,500,1000,5000];
+function buildAmount(){
+  const p=document.getElementById('ap-presets'); p.innerHTML='';
+  AMT_PRESETS.forEach(v=>{ const b=document.createElement('button'); b.className='pre'; b.dataset.v=v; b.textContent='$'+v; b.onclick=()=>setAmount(v); p.appendChild(b); });
+  document.getElementById('ap-input').addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(!isNaN(v)&&v>0) setAmount(v); });
+}
+function setAmount(v){
+  v=Math.max(1,Math.min(100000,Math.round(v*100)/100)); tradeAmount=v;
+  document.getElementById('amount-shown').textContent='$'+(Number.isInteger(v)?v:v.toFixed(2));
+  const inp=document.getElementById('ap-input'); if(document.activeElement!==inp) inp.value=v;
+  document.querySelectorAll('#ap-presets .pre').forEach(b=>b.classList.toggle('active',+b.dataset.v===v));
+  document.querySelectorAll('.amt-chip').forEach(b=>b.classList.toggle('active',+b.dataset.v===v)); /* Y5 */
+  updatePayoutBox(); if(currentRightPanel==='signals') renderSignals(); savePrefs();
+}
+function stepAmount(d){ const a=tradeAmount, st=a<10?1:a<100?5:a<1000?50:500; setAmount(d>0?a+st:a-st); }
+function openAmountPopup(e){ if(placePop(document.getElementById('amount-popup'),document.getElementById('amount-shown'),e)&&!isMobile()) setTimeout(()=>document.getElementById('ap-input').select(),30); }
+
+const EP_LIST=[5,15,30,60,120,180,300,600,900,1800,3600,7200];
+const EP_SHOW=[5,15,30,60,180,300,900,1800,3600];
+const EP_LABELS={5:'S5',15:'S15',30:'S30',60:'M1',120:'M2',180:'M3',300:'M5',600:'M10',900:'M15',1800:'M30',3600:'H1',7200:'H2'};
+let epH=0,epM=1,epS=0;
+function epTotal(){ return epH*3600+epM*60+epS; }
+function epSetFromSec(s){ s=Math.max(5,Math.min(86399,Math.round(s))); epH=Math.floor(s/3600); epM=Math.floor(s%3600/60); epS=s%60; epSync(); }
+function epSync(){
+  const t=Math.max(5,epTotal()); tradeExpiry=t;
+  document.getElementById('ep-hh').textContent=pad2(epH);
+  document.getElementById('ep-mm').textContent=pad2(epM);
+  document.getElementById('ep-ss').textContent=pad2(epS);
+  document.getElementById('expiry-shown').textContent=hms(t);
+  document.querySelectorAll('#ep-presets .pre').forEach(b=>b.classList.toggle('active',+b.dataset.v===t));
+  savePrefs();
+}
+function epStep(u,d){
+  if(u==='h') epH=Math.max(0,Math.min(23,epH+d));
+  if(u==='m') epM=Math.max(0,Math.min(59,epM+d));
+  if(u==='s'){ let n=epS+d; if(n<0&&epM>0){epM--;n=59;} else if(n>59){epM=Math.min(59,epM+1);n=0;} epS=Math.max(0,n); }
+  if(epTotal()<5){ epH=0;epM=0;epS=5; }
+  epSync();
+}
+function stepExpiry(d){
+  let n=tradeExpiry;
+  if(d>0){ const x=EP_LIST.find(v=>v>tradeExpiry); if(x) n=x; }
+  else { const arr=EP_LIST.filter(v=>v<tradeExpiry); if(arr.length) n=arr[arr.length-1]; }
+  epSetFromSec(n);
+}
+function buildExpiry(){
+  const p=document.getElementById('ep-presets'); p.innerHTML='';
+  EP_SHOW.forEach(v=>{ const b=document.createElement('button'); b.className='pre'; b.dataset.v=v; b.textContent=EP_LABELS[v]; b.onclick=()=>epSetFromSec(v); p.appendChild(b); });
+}
+function openExpiryPopup(e){ if(placePop(document.getElementById('expiry-popup'),document.getElementById('expiry-shown'),e)) epSync(); }
+
+/* ══════════════════════════════════════════════════════════════
+   12. INDICATOR PANEL
+   ══════════════════════════════════════════════════════════════ */
+function renderIndPanel(){
+  const a=document.getElementById('ip-active-list'), v=document.getElementById('ip-avail-list');
+  a.innerHTML= activeInds.size? [...activeInds].map(id=>{ const c=IND_CATALOG.find(x=>x.id===id);
+    return `<div class="ip-item active"><div><div class="n">${c.name}</div><div class="p">${c.params}</div></div><span class="ip-del" onclick="removeIndicator('${id}')">🗑</span></div>`; }).join('')
+    : '<div style="padding:8px 14px;font-size:11px;color:var(--dim)">Нет активных</div>';
+  v.innerHTML=IND_CATALOG.map(c=>`<div class="ip-item ${activeInds.has(c.id)?'active':''}" onclick="toggleIndicator('${c.id}')">
+    <div><div class="n">${c.name}</div><div class="p">${c.params} · <span>${c.type==='overlay'?'на графике':'отдельная панель'}</span></div></div>
+    <span class="a">${activeInds.has(c.id)?'✓':'+'}</span></div>`).join('');
+  updateToolbar(); applyLang();
+}
+function toggleIndicator(id){ activeInds.has(id)?activeInds.delete(id):activeInds.add(id); buildSubPanels(); renderIndPanel(); }
+function removeIndicator(id){ activeInds.delete(id); buildSubPanels(); renderIndPanel(); }
+function toggleIndPanel(e){ if(placePop(document.getElementById('ind-panel'),document.getElementById('ind-btn'),e)) renderIndPanel(); }
+function closeIndPanel(){ document.getElementById('ind-panel').classList.remove('open'); }
+
+/* ══════════════════════════════════════════════════════════════
+   13. CHART INPUT
+   ══════════════════════════════════════════════════════════════ */
+let dragging=false,dragX0=0,pan0=0;
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect(); mx=e.clientX-r.left; my=e.clientY-r.top; onChart=true;
+  if(dragging){ pan=clampPan(pan0+Math.round((e.clientX-dragX0)/candleW)); }
+});
+canvas.addEventListener('mouseleave',()=>{ onChart=false; overlay.style.display='none'; });
+canvas.addEventListener('mousedown',e=>{ dragging=true; dragX0=e.clientX; pan0=pan; });
+window.addEventListener('mouseup',()=>{ dragging=false; });
+canvas.addEventListener('dblclick',()=>{ pan=0; });
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  candleW=Math.max(4,Math.min(40,candleW*(e.deltaY<0?1.12:0.89))); /* I1 */
+  pan=clampPan(pan);
+},{passive:false});
+let pinch0=null,tX0=null,tPan0=0;
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(e.touches.length===2){ pinch0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); tX0=null; }
+  else if(e.touches.length===1){ tX0=e.touches[0].clientX; tPan0=pan; pinch0=null; }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===2&&pinch0){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    candleW=Math.max(4,Math.min(40,candleW*(d/pinch0))); pinch0=d; pan=clampPan(pan); /* I1 */ }
+  else if(e.touches.length===1&&tX0!==null){ pan=clampPan(tPan0+Math.round((e.touches[0].clientX-tX0)/candleW)); }
+},{passive:false});
+canvas.addEventListener('touchend',()=>{ pinch0=null; tX0=null; },{passive:true});
+window.addEventListener('resize',()=>{ resize(); resizeSubPanels(); draw(); });
+
+
+/* ══════════════════════════════════════════════════════════════
+   14. SIGNALS
+   ══════════════════════════════════════════════════════════════ */
+
+const SIGNAL_TRADERS=['Alex T.','Maria S.','Chen W.','Ivan K.','Hans M.','Carlos R.','Yuki T.','Omar H.','Lena P.','Tom B.',
+'Sofia L.','Kim J.','Raj P.','Erik N.','Diana K.','Trader228','Profi_99','MoneyMaker','CryptoKing','ForexGuru','NightOwl',
+'LuckyStrike','GoldRush','ScalperX','TrendHunter','ShadowTrader','RocketMan']
+
+const SIGNAL_FLAGS=['🇺🇸','🇩🇪','🇨🇳','🇷🇺','🇳🇱','🇧🇷','🇯🇵','🇦🇪','🇵🇱','🇬🇧','🇮🇹','🇰🇷','🇮🇳','🇸🇪','🇺🇦']
+
+const SIGNAL_EXP=[30,60,120,180,300]
+
+let signals=[];
+
+function generateSignal(){
+  const now=Date.now()/1000;
+  let name; do{ name=SIGNAL_TRADERS[Math.floor(Math.random()*SIGNAL_TRADERS.length)]; }while(signals[0]&&signals[0].trader===name);
+  const pool=ASSET_CATALOG.filter(a=>a.payout>=80);
+  const asset=Math.random()<.5? curAsset : pool[Math.floor(Math.random()*pool.length)].id;
+  signals.unshift({id:Date.now()+Math.random(),trader:name,flag:SIGNAL_FLAGS[Math.floor(Math.random()*SIGNAL_FLAGS.length)],
+    asset,dir:Math.random()<.5?'UP':'DOWN',expiry:SIGNAL_EXP[Math.floor(Math.random()*SIGNAL_EXP.length)],closeTime:now+SIGNAL_EXP[2]+Math.random()*120});
+  if(signals.length>40) signals.pop();
+  if(currentRightPanel==='signals') renderSignals(); else document.getElementById('sb-signals-badge').classList.add('show');
+}
+
+function renderSignals(){
+  const l=document.getElementById('sp-list'); const now=Date.now()/1000;
+  signals=signals.filter(s=>s.closeTime>now);
+  if(!signals.length){ l.innerHTML='<div class="sp-empty">Ожидание сигналов...</div>'; return; }
+  l.innerHTML=signals.map(s=>`<div class="sp-signal" data-sid="${s.id}">
+    <div class="sp-head"><div class="sp-av">${s.trader[0]}</div><span class="sp-nm">${s.flag} ${s.trader}</span><span class="sp-amt">${money(tradeAmount)}</span></div>
+    <div class="sp-mid"><b class="${s.dir==='UP'?'up':'dn'}"><span>${s.dir==='UP'?'▲ ВВЕРХ':'▼ ВНИЗ'}</span> · ${EP_LABELS[s.expiry]||s.expiry+'с'}</b><span class="sp-timer">${s.asset} · ${shortRem(s.closeTime-now)}</span></div>
+    <button class="sp-copy" onclick="copySignal(${s.id})">Скопировать сигнал</button></div>`).join('');
+  applyLang();
+}
+
+async function copySignal(id){
+  const s=signals.find(x=>x.id===id); if(!s) return;
+  if(!U){ openAuth(); return; }
+  epSetFromSec(s.expiry);
+  try{
+    if(s.asset!==curAsset) await selectAsset(s.asset);
+    await openTrade(s.dir);
+    switchRightPanel('trade');
+  }catch(e){}
+}
+
+function updateSignalTimers(){
+  if(currentRightPanel!=='signals') return;
+  const now=Date.now()/1000; let expired=false;
+  document.querySelectorAll('.sp-signal').forEach(el=>{
+    const s=signals.find(x=>x.id==el.dataset.sid); if(!s) return;
+    if(s.closeTime<=now) expired=true;
+    const t=el.querySelector('.sp-timer'); if(t) t.textContent=s.asset+' · '+shortRem(s.closeTime-now);
+  });
+  if(expired) renderSignals();
+}
+
+function startSignals(){ setTimeout(generateSignal,4000); setInterval(generateSignal,18000+Math.random()*14000); }
+
+/* ══════════════════════════════════════════════════════════════
+   15. STATUS
+   ══════════════════════════════════════════════════════════════ */
+function updateStatus(){
+  const t=new Date().toLocaleTimeString();
+  document.getElementById('st-tf').textContent=curTF;
+  document.getElementById('st-time').textContent=t;
+  document.getElementById('chart-clock').textContent=t+' UTC'+(-(new Date().getTimezoneOffset()/60)>=0?'+':'')+(-(new Date().getTimezoneOffset()/60));
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   16. FINANCE (заявки через админа)
+   ══════════════════════════════════════════════════════════════ */
+
+const METHODS=[
+ {id:'btc',name:'Bitcoin',sym:'BTC',col:'#F7931A',rate:67500,net:'Bitcoin',addr:'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'},
+ {id:'eth',name:'Ethereum',sym:'ETH',col:'#627EEA',rate:3250,net:'ERC-20',addr:'0x71C7656EC7ab88b098defB751B7401B5f6d8976F'},
+ {id:'usdt_trc',name:'Tether',sym:'USDT',col:'#26A17B',rate:1,net:'TRC-20',addr:'TN3W4H6rK2ce4vX9YnFQHwKENnHjoxb3m9'},
+ {id:'usdt_erc',name:'Tether',sym:'USDT',col:'#26A17B',rate:1,net:'ERC-20',addr:'0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'},
+ {id:'usdc',name:'USD Coin',sym:'USDC',col:'#2775CA',rate:1,net:'ERC-20',addr:'0x4E83362442B8d1beC281594cEa3050c8EB01311C'},
+ {id:'ltc',name:'Litecoin',sym:'LTC',col:'#A6A9AA',rate:85,net:'Litecoin',addr:'ltc1qz8k2v3n0sdw5s3hq0l4h7v9n5x6kfp8z4a3vqm'},
+ {id:'sol',name:'Solana',sym:'SOL',col:'#9945FF',rate:165,net:'Solana',addr:'7EqQdEULxWcraVx3mXKFjc84LhCkMGZCkRuDpvcMwJeK'},
+ {id:'bnb',name:'BNB',sym:'BNB',col:'#F3BA2F',rate:585,net:'BEP-20',addr:'0xB8c77482e45F1F44dE1745F52C74426C631bDD52'},
+ {id:'doge',name:'Dogecoin',sym:'DOGE',col:'#C2A633',rate:0.145,net:'Dogecoin',addr:'D7Y55r6Yoc1G8EECxkQ6SuSjTgGbJ8BVLv'},
+ {id:'trx',name:'TRON',sym:'TRX',col:'#FF060A',rate:0.165,net:'TRC-20',addr:'TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7'}
+]
+
+function renderMethods(){
+  const el=document.getElementById('methods');
+  el.innerHTML=METHODS.map(m=>`<div class="method ${m.id===depMethod?'active':''}" onclick="selectMethod('${m.id}')">
+    <div class="ci" style="background:${m.col}">${m.sym.slice(0,1)}</div><b>${m.name}</b><small>${m.sym} · ${m.net}</small></div>`).join('');
+  const sel=document.getElementById('wd-method');
+  sel.innerHTML=METHODS.map(m=>`<option value="${m.id}">${m.name} (${m.sym} · ${m.net})</option>`).join('');
+  updateDepDetails();
+}
+
+function selectMethod(id){ depMethod=id; renderMethods(); }
+
+function setDepAmt(v){ document.getElementById('dep-amount').value=v; document.querySelectorAll('#fpane-deposit .pre').forEach(b=>b.classList.toggle('active',b.textContent.replace(/\D/g,'')==String(v))); updateDepDetails(); }
+
+let depMethod='usdt_trc';
+let appliedPromo=null; /* {code,pct} */
+
+function updateDepDetails(){
+  const m=METHODS.find(x=>x.id===depMethod); const usd=parseFloat(document.getElementById('dep-amount').value)||0;
+  document.getElementById('dep-method-tag').textContent=m.sym+' · '+m.net;
+  const amt=usd/m.rate;
+  document.getElementById('dep-crypto-amt').textContent=(amt>=1?amt.toFixed(4):amt.toFixed(6))+' '+m.sym;
+  document.getElementById('dep-addr').textContent=m.addr;
+  const row=document.getElementById('dep-bonus-row');
+  if(row){
+    if(appliedPromo&&usd>0){
+      const bonus=Math.round(usd*appliedPromo.pct)/100;
+      document.getElementById('dep-bonus-amt').textContent='+'+money(bonus);
+      row.classList.remove('hidden');
+    } else row.classList.add('hidden');
+  }
+}
+async function checkPromo(){
+  const inp=document.getElementById('dep-promo'), hint=document.getElementById('dep-promo-hint');
+  const code=inp.value.trim();
+  if(!code){ appliedPromo=null; hint.textContent=''; updateDepDetails(); return; }
+  try{
+    const r=await api('/finance/promo/check?code='+encodeURIComponent(code));
+    appliedPromo={code:r.code,pct:r.bonusPct};
+    hint.textContent='✓ +'+r.bonusPct+'% к депозиту'; hint.style.color='var(--green)';
+  }catch(e){
+    appliedPromo=null;
+    hint.textContent='✗ код не найден'; hint.style.color='var(--red)';
+  }
+  updateDepDetails();
+}
+async function confirmDeposit(){
+  if(!U) return openAuth();
+  const usd=parseFloat(document.getElementById('dep-amount').value)||0;
+  if(usd<10){ toast('Минимальная сумма пополнения — $10','err'); return; }
+  try{
+    await api('/finance/deposits',{method:'POST',body:{method:depMethod,amount:usd,promo:appliedPromo?appliedPromo.code:''}});
+    toast('Заявка на '+money(usd)+' создана и ожидает подтверждения','info');
+    await loadOps(); renderFinance();
+  }catch(e){
+    if(e.code==='invalid_promo'){ toast('Промокод не найден или отключён','err'); appliedPromo=null; const h=document.getElementById('dep-promo-hint'); h.textContent=''; updateDepDetails(); }
+    else if(e.code==='blocked') forceLogout();
+    else if(e.status===401) openAuth();
+    else toast('Не удалось создать заявку','err');
+  }
+}
+async function submitWithdraw(){
+  if(!U) return openAuth();
+  const usd=parseFloat(document.getElementById('wd-amount').value)||0;
+  const addr=document.getElementById('wd-addr').value.trim();
+  const method=document.getElementById('wd-method').value;
+  if(usd<10){ toast('Минимальная сумма вывода — $10','err'); return; }
+  if(addr.length<10){ toast('Укажите адрес кошелька','err'); return; }
+  if(usd>U.balances.real){ toast('Недостаточно средств на реальном счёте','err'); return; }
+  if(usd>U.balances.real-(U.bonusLocked||0)){ toast('Бонус недоступен для вывода до выполнения условий','err'); return; }
+  try{
+    const r=await api('/finance/withdrawals',{method:'POST',body:{method,amount:usd,addr}});
+    U.balances.real=r.realBalance;
+    if(curAccount==='real') balance=r.realBalance;
+    updateBalance();
+    document.getElementById('wd-amount').value=''; document.getElementById('wd-addr').value='';
+    await loadOps(); renderFinance();
+    toast('Заявка на вывод '+money(usd)+' создана','info');
+  }catch(e){
+    if(e.status===402) toast(e.code==='bonus_locked'?'Бонус недоступен для вывода до выполнения условий':'Недостаточно средств на реальном счёте','err');
+    else if(e.code==='blocked') forceLogout();
+    else if(e.status===401) openAuth();
+    else toast('Не удалось создать заявку','err');
+  }
+}
+let opsCache=[];
+async function loadOps(){
+  try{ const r=await api('/finance/ops'); opsCache=r.ops||[]; }catch(e){}
+}
+function renderFinance(){
+  if(!U) return;
+  const dep=opsCache.filter(o=>o.type==='deposit'&&o.status==='done').reduce((s,o)=>s+o.amount,0);
+  const wd=opsCache.filter(o=>o.type==='withdraw'&&o.status==='done').reduce((s,o)=>s+o.amount,0);
+  document.getElementById('fin-bal-real').textContent=money(U.balances.real);
+  document.getElementById('fin-bal-demo').textContent=money(U.balances.demo);
+  document.getElementById('fin-total-dep').textContent=money(dep);
+  document.getElementById('fin-total-wd').textContent=money(wd);
+  document.getElementById('wd-avail').textContent=money(Math.max(0,U.balances.real-(U.bonusLocked||0)));
+  const stTag=s=> s==='done'? '<span class="tag ok">Выполнено</span>' : s==='pending'? '<span class="tag warn">В обработке</span>' : '<span class="tag err">Отклонено</span>';
+  const ops=document.getElementById('ops-list');
+  ops.innerHTML= opsCache.length? opsCache.map(o=>{
+    const isDep=o.type==='deposit';
+    return `<div class="op"><div class="oi" style="background:${isDep?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'}">${isDep?'⬇':'⬆'}</div>
+      <div class="ot"><span>${isDep?'Пополнение':'Вывод'}</span> · ${o.method}<small><span>${fmtDT(o.ts)}</span>${o.promo?'<span> · промокод</span> '+o.promo:''}${o.bonus?'<span> · бонус</span> '+money(o.bonus):''}${o.addr?' · '+o.addr.slice(0,10)+'…':''}${o.reason?' · '+o.reason:''}</small></div>
+      ${stTag(o.status)}
+      <span class="oa" style="color:${isDep?'var(--green)':'var(--red)'}">${isDep?'+':'−'}${money(o.amount)}</span></div>`;
+  }).join('') : '<div class="sp-empty">Операций пока нет</div>';
+  applyLang();
+}
+
+/* QR удалён (G5) */
+
+function copyAddr(){ const a=document.getElementById('dep-addr').textContent;
+  if(navigator.clipboard) navigator.clipboard.writeText(a).then(()=>toast('Адрес скопирован','info')); else toast(a,'info'); }
+
+
+/* ══════════════════════════════════════════════════════════════
+   17. PROFILE
+   ══════════════════════════════════════════════════════════════ */
+
+const COUNTRIES=[['RU','Россия'],['UA','Украина'],['KZ','Казахстан'],['BY','Беларусь'],['US','United States'],['GB','United Kingdom'],
+['DE','Deutschland'],['FR','France'],['ES','España'],['IT','Italia'],['BR','Brasil'],['IN','India'],['TR','Türkiye'],['AE','UAE'],['JP','Japan'],['CN','China'],['OTHER','Другая']]
+
+function initials(){ const p=U.profile; const s=(p.first?p.first[0]:'')+(p.last?p.last[0]:''); return (s||(p.nick||U.email)[0]).toUpperCase(); }
+
+function displayName(){ const p=U.profile; return (p.first||p.last)? (p.first+' '+p.last).trim() : (p.nick&&p.nick!=='user'? p.nick : U.email.split('@')[0]); }
+
+let avatarTs=0;
+function setAvatarEl(el){
+  if(!el) return;
+  if(U.avatar) el.innerHTML=`<img src="${U.avatar}${U.avatar.includes('?')?'&':'?'}t=${avatarTs}" alt="">`;
+  else el.textContent=initials();
+}
+function renderProfile(){
+  if(!U) return;
+  const p=U.profile;
+  document.getElementById('pf-first').value=p.first||''; document.getElementById('pf-last').value=p.last||'';
+  document.getElementById('pf-phone').value=p.phone||''; document.getElementById('pf-dob').value=p.dob||'';
+  document.getElementById('pf-nick').value=p.nick||''; document.getElementById('pf-hide').classList.toggle('on',!!p.hide);
+  const cs=document.getElementById('pf-country'); if(!cs.options.length) cs.innerHTML=COUNTRIES.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join(''); cs.value=p.country||'RU';
+  /* PF: после верификации (ok/pending) имя/фамилия/дата/страна намертво, телефон и ник — можно */
+  const pfLocked=U.verifyStatus==='ok'||U.verifyStatus==='pending';
+  ['pf-first','pf-last','pf-dob','pf-country'].forEach(id=>{ const el=document.getElementById(id); el.disabled=pfLocked; el.style.opacity=pfLocked?'.55':''; });
+  document.getElementById('pf-email').textContent=U.email;
+  const et=document.getElementById('pf-email-tag'), eb=document.getElementById('pf-email-btn');
+  et.textContent=U.emailVerified?'Подтверждён':'Не верифицирован'; et.className='tag '+(U.emailVerified?'ok':'warn'); eb.style.display=U.emailVerified?'none':'';
+  const st=document.getElementById('pf-status-tag');
+  if(U.verifyStatus==='pending'){ st.textContent=t('На проверке'); st.className='tag info'; }
+  else if(U.verifyStatus==='ok'){ st.textContent=t('Верифицирован'); st.className='tag ok'; }
+  else if(U.verifyStatus==='rejected'){ st.textContent=t('Отклонено'); st.className='tag warn'; }
+  else { st.textContent=t('Не верифицирован'); st.className='tag warn'; }
+  renderKyc();
+  const ua=navigator.userAgent, br=/Chrome/.test(ua)?'Chrome':/Firefox/.test(ua)?'Firefox':/Safari/.test(ua)?'Safari':'Browser';
+  const os=/Windows/.test(ua)?'Windows':/Mac/.test(ua)?'macOS':/Android/.test(ua)?'Android':/iPhone|iPad/.test(ua)?'iOS':/Linux/.test(ua)?'Linux':'OS';
+  document.getElementById('sec-sessions').innerHTML=`
+    <div class="op"><div class="oi" style="background:rgba(34,197,94,.15)">💻</div><div class="ot">${br} · ${os}<small>Текущая сессия · сейчас</small></div><span class="tag ok">Активна</span></div>`;
+  updateUserUI(); renderTradeHistory();
+}
+async function saveProfile(){
+  if(!U) return;
+  const g=id=>document.getElementById(id).value;
+  const phone=g('pf-phone').trim(); /* PF: валидация номера — цифры 7–15 */
+  if(phone){ const dig=phone.replace(/\D/g,'');
+    if(!/^[+0-9][0-9\s\-()]*$/.test(phone)||dig.length<7||dig.length>15){ toast(t('Некорректный номер телефона. Введите цифры, от 7 до 15.'),'err'); return; } }
+  try{
+    const r=await api('/me',{method:'PUT',body:{
+      first:g('pf-first'), last:g('pf-last'), phone, dob:g('pf-dob'),
+      country:g('pf-country'), nick:g('pf-nick'), hide:document.getElementById('pf-hide').classList.contains('on')
+    }});
+    U=r.user; renderProfile(); toast('Профиль сохранён','win');
+  }catch(e){ toast(e.code==='bad_phone'?t('Некорректный номер телефона. Введите цифры, от 7 до 15.'):t('Не удалось сохранить профиль'),'err'); }
+}
+async function verifyEmail(){
+  if(!U) return;
+  try{
+    await api('/me/verify-email',{method:'POST'});
+    /* EM: без реальной отправки и без автоподтверждения — статус не меняется */
+    toast(t('Письмо отправлено на')+' '+U.email,'info');
+  }catch(e){ toast(t('Ошибка подтверждения'),'err'); }
+}
+/* ── KYC-мастер в стиле Pocket (F3): данные ✔ → страна → шаги → тип дока → советы → файлы ── */
+let kycStep='data', kycDocType='passport', kycOk={}, kycDocs=[], kycSelfie=null, kycDraft={}; /* Q1: draft — введённое не теряется при ✓/перерисовке */
+const KYC_DOCTYPES=[['id','ID-карта'],['passport','Паспорт'],['residence','Вид на жительство']];
+function kycReset(){ kycStep='data'; kycOk={}; kycDocs=[]; kycSelfie=null; kycDraft={}; }
+/* Q2: строго ДД.ММ.ГГГГ, реальная дата, возраст 18–100 */
+function validDob(s){
+  const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s||''); if(!m) return false;
+  const d=+m[1], mo=+m[2], y=+m[3];
+  const dt=new Date(Date.UTC(y,mo-1,d));
+  if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d) return false;
+  const now=new Date(); let age=now.getUTCFullYear()-y;
+  if(now<new Date(Date.UTC(now.getUTCFullYear(),mo-1,d))) age--;
+  return age>=18&&age<=100;
+}
+function kycType(k,el){
+  kycDraft[k]=el.value;
+  if(k==='dob'&&kycOk.dob){ /* дату поменяли после ✓ — галку снимаем */
+    kycOk.dob=false;
+    const b=el.parentElement&&el.parentElement.querySelector('button');
+    if(b){ b.classList.remove('btn-green'); b.classList.add('btn-ghost'); }
+  }
+}
+function renderKyc(){
+  const box=document.getElementById('kyc-wizard'); if(!box||!U) return;
+  const p=U.profile;
+  if(U.verifyStatus==='ok'){ box.innerHTML=`<div class="note blue">${t('Личность подтверждена.')}</div>`; return; } /* F4: кнопок нет */
+  if(U.verifyStatus==='pending'){ box.innerHTML=`<div class="note blue">${t('Документы получены. Проверка занимает до 24 часов.')}</div>`; return; }
+  if(U.verifyStatus==='rejected'){
+    box.innerHTML=`<div class="note">${t('Заявка отклонена. Можно подать повторно.')}</div>
+      <button class="btn btn-primary" style="height:40px;padding:0 20px" onclick="kycStartOver()">${t('Начать верификацию')}</button>`;
+    api('/verify').then(r=>{ const rq=(r.requests||[])[0]; const n=box.querySelector('.note');
+      if(n&&rq&&rq.reject_reason) n.textContent=t('Заявка отклонена: {r}').replace('{r}',rq.reject_reason); }).catch(()=>{});
+    return;
+  }
+  if(kycStep==='data'){
+    const row=(key,lab,val,ph,type)=>`<div class="frow"><div class="lab">${lab}</div><div class="val" style="gap:8px">
+      <input class="inp" id="kyc-${key}" type="${type||'text'}" value="${esc(val||'')}" placeholder="${ph}" autocomplete="off" oninput="kycType('${key}',this)">
+      <button class="btn ${kycOk[key]?'btn-green':'btn-ghost'}" style="padding:0 12px;height:38px" onclick="kycConfirm('${key}')" title="${t('Подтвердить поле')}">✓</button></div></div>`;
+    const dv=k=>kycDraft[k]!=null?kycDraft[k]:p[k];
+    box.innerHTML=`
+      <div class="note blue">${t('Шаг 1/4. Проверьте ваши личные данные.')}</div>
+      ${row('first',t('Имя'),dv('first'),t('Не заполнено'))}
+      ${row('last',t('Фамилия'),dv('last'),t('Не заполнено'))}
+      ${row('dob',t('Дата рождения'),dv('dob'),t('ДД.ММ.ГГГГ'))}
+      <div class="frow"><div class="lab">${t('Страна выдачи документа')}</div><div class="val"><select class="inp" id="kyc-country">${COUNTRIES.map(c=>`<option value="${c[0]}" ${c[0]===(p.country||'RU')?'selected':''}>${c[1]}</option>`).join('')}</select></div></div>
+      <button class="btn btn-primary btn-block" style="height:42px" onclick="kycDataNext()">${t('Подтвердить')}</button>`;
+    return;
+  }
+  if(kycStep==='intro'){
+    box.innerHTML=`
+      <div class="note blue" style="font-weight:700">${t('Начнём верификацию')}</div>
+      <div class="note">1. ${t('Личные данные подтверждены')} ✓<br>2. ${t('Выберите тип документа')}<br>3. ${t('Прочитайте советы')}<br>4. ${t('Загрузите документ и селфи с документом')}</div>
+      <button class="btn btn-primary btn-block" style="height:42px" onclick="kycGo('doctype')">${t('Начнём')}</button>`;
+    return;
+  }
+  if(kycStep==='doctype'){
+    box.innerHTML=`<div class="note blue">${t('Шаг 2/4. Выберите тип документа')}</div>`+
+      KYC_DOCTYPES.map(d=>`<label class="frow" style="cursor:pointer"><div class="lab" style="display:flex;align-items:center"><input type="radio" name="kyc-dt" value="${d[0]}" ${kycDocType===d[0]?'checked':''} onchange="kycDocType=this.value"></div><div class="val">${t(d[1])}</div></label>`).join('')+
+      `<button class="btn btn-primary btn-block" style="height:42px" onclick="kycGo('tips')">${t('Далее')}</button>`;
+    return;
+  }
+  if(kycStep==='tips'){
+    box.innerHTML=`<div class="note blue">${t('Шаг 3/4. Несколько советов')}</div>
+      <div class="note">• ${t('Видны все четыре угла документа')}<br>• ${t('Без бликов и размытия')}<br>• ${t('Селфи: держите документ рядом с лицом')}</div>
+      <button class="btn btn-primary btn-block" style="height:42px" onclick="kycGo('upload')">${t('К загрузке')}</button>`;
+    return;
+  }
+  box.innerHTML=`<div class="note blue">${t('Шаг 4/4. Загрузите файлы')}</div>
+    <button class="btn btn-ghost btn-block" style="height:40px" onclick="document.getElementById('kyc-docs').click()">${t('Документ (до 2 файлов)')}</button>
+    <div id="kyc-docs-list" style="font-size:11px;color:var(--dim);padding:6px 2px"></div>
+    <button class="btn btn-ghost btn-block" style="height:40px" onclick="document.getElementById('kyc-selfie').click()">${t('Селфи с документом (обязательно)')}</button>
+    <div id="kyc-selfie-list" style="font-size:11px;color:var(--dim);padding:6px 2px"></div>
+    <input type="file" id="kyc-docs" multiple accept="image/jpeg,image/png,image/webp,application/pdf" hidden onchange="kycPickDocs(this)">
+    <input type="file" id="kyc-selfie" accept="image/jpeg,image/png,image/webp" hidden onchange="kycPickSelfie(this)">
+    <button class="btn btn-green btn-block" style="height:44px" onclick="kycSubmit()">${t('Отправить на проверку')}</button>`;
+  kycRenderFiles();
+}
+function kycConfirm(k){
+  if(!kycOk[k]&&k==='dob'){ /* Q2: ✓ по дате только если дата валидна */
+    const el=document.getElementById('kyc-dob'); const v=el? el.value.trim():'';
+    if(!validDob(v)){ toast(t('Некорректная дата рождения. Формат: ДД.ММ.ГГГГ, возраст 18–100.'),'err'); return; }
+  }
+  kycOk[k]=!kycOk[k]; renderKyc();
+}
+function kycGo(s){ kycStep=s; renderKyc(); }
+function kycStartOver(){ kycReset(); renderKyc(); }
+async function kycDataNext(){
+  const g=k=>document.getElementById('kyc-'+k).value.trim();
+  if(['first','last','dob'].some(k=>!g(k))){ toast(t('Заполните все поля'),'err'); return; }
+  if(!validDob(g('dob'))){ toast(t('Некорректная дата рождения. Формат: ДД.ММ.ГГГГ, возраст 18–100.'),'err'); return; } /* Q2 */
+  if(['first','last','dob'].some(k=>!kycOk[k])){ toast(t('Подтвердите каждое поле кнопкой ✓'),'err'); return; }
+  try{
+    const r=await api('/me',{method:'PUT',body:{first:g('first'),last:g('last'),dob:g('dob'),
+      country:document.getElementById('kyc-country').value,phone:U.profile.phone,nick:U.profile.nick,hide:U.profile.hide}});
+    U=r.user; kycDraft={}; kycOk={}; kycStep='intro'; renderKyc();
+  }catch(e){ toast(e.code==='reserved_name'?t('Это имя зарезервировано системой'):t('Не удалось сохранить данные'),'err'); }
+}
+function kycPickDocs(inp){ kycDocs=[...inp.files].slice(0,2); inp.value=''; kycRenderFiles(); }
+function kycPickSelfie(inp){ kycSelfie=inp.files[0]||null; inp.value=''; kycRenderFiles(); }
+function kycRenderFiles(){
+  const d=document.getElementById('kyc-docs-list'), s=document.getElementById('kyc-selfie-list');
+  if(d) d.textContent=kycDocs.length? t('Выбрано: {f}').replace('{f}',kycDocs.map(f=>f.name).join(', ')) : t('Не выбрано');
+  if(s) s.textContent=kycSelfie? t('Выбрано: {f}').replace('{f}',kycSelfie.name) : t('Не выбрано');
+}
+async function kycSubmit(){
+  if(!kycDocs.length){ toast(t('Загрузите документ'),'err'); return; }
+  if(!kycSelfie){ toast(t('Селфи с документом обязательно'),'err'); return; }
+  const fd=new FormData(); fd.append('doc_type',kycDocType);
+  kycDocs.forEach(f=>fd.append('docs',f)); fd.append('selfie',kycSelfie);
+  try{
+    await api('/verify',{method:'POST',body:fd});
+    U.verifyStatus='pending'; kycReset(); renderProfile();
+    toast(t('Документы отправлены на проверку'),'info');
+  }catch(e){
+    if(e.code==='already_pending') toast(t('Заявка уже на проверке'),'info');
+    else toast(t('Ошибка загрузки документов'),'err');
+  }
+}
+async function uploadAvatar(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f||!U) return;
+  const fd=new FormData(); fd.append('avatar',f);
+  try{
+    const r=await api('/me/avatar',{method:'POST',body:fd});
+    U.avatar=r.avatar; avatarTs=Date.now();
+    updateUserUI(); renderProfile();
+    toast('Аватар обновлён','win');
+  }catch(e){ toast('Не удалось загрузить изображение','err'); }
+}
+async function changePassword(){
+  if(!U) return;
+  const c=document.getElementById('sec-cur').value, n=document.getElementById('sec-new').value, n2=document.getElementById('sec-new2').value;
+  if(n.length<6){ toast('Новый пароль — минимум 6 символов','err'); return; }
+  if(n!==n2){ toast('Пароли не совпадают','err'); return; }
+  try{
+    await api('/me/password',{method:'POST',body:{current:c,next:n}});
+    ['sec-cur','sec-new','sec-new2'].forEach(id=>document.getElementById(id).value='');
+    toast('Пароль изменён','win');
+  }catch(e){
+    if(e.code==='bad_current') toast('Текущий пароль неверный','err');
+    else toast('Не удалось сменить пароль','err');
+  }
+}
+function toggle2fa(){ toast('2FA появится в следующих версиях','info'); }
+function killSessions(){ toast('Других активных сессий нет','info'); }
+
+function updateUserUI(){
+  if(!U) return;
+  document.getElementById('um-name').textContent=displayName();
+  document.getElementById('um-id').textContent='ID: '+(U.clientId||U.id)+' · '+U.email;
+  setAvatarEl(document.getElementById('hdr-avatar')); setAvatarEl(document.getElementById('um-avatar')); setAvatarEl(document.getElementById('pf-avatar-big'));
+}
+
+function renderTradeHistory(){
+  if(!U) return;
+  const h=getHistory();
+  const wins=h.filter(t=>t.won).length, net=h.reduce((s,t)=>s+t.profit,0), vol=h.reduce((s,t)=>s+t.amount,0);
+  const best=h.reduce((m,t)=>Math.max(m,t.profit),0);
+  document.getElementById('ph-acc-tag').textContent=curAccount==='demo'?'DEMO':'REAL';
+  document.getElementById('ph-stats').innerHTML=`
+    <div class="stat"><small>Сделок</small><b>${h.length}</b></div>
+    <div class="stat"><small>Винрейт</small><b>${h.length?Math.round(wins/h.length*100):0}%</b></div>
+    <div class="stat"><small>Чистый результат</small><b style="color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${money(net)}</b></div>
+    <div class="stat"><small>Оборот</small><b>${money(vol)}</b></div>
+    <div class="stat"><small>Лучшая сделка</small><b style="color:var(--green)">+${money(best)}</b></div>`;
+  document.getElementById('ph-table').innerHTML= h.length? `<table class="tbl"><thead><tr>
+    <th>ОТКРЫТИЕ</th><th>ЗАКРЫТИЕ</th><th>АКТИВ</th><th>ПРОГНОЗ</th><th>СУММА</th><th>ЦЕНА ВХОДА</th><th>ЦЕНА ЗАКРЫТИЯ</th><th>РЕЗУЛЬТАТ</th><th>ПРОФИТ</th></tr></thead><tbody>`
+    + h.slice(0,150).map(t=>{ const a=ASSETS[t.asset]; const col=t.tie?'var(--dim)':(t.won?'var(--green)':'var(--red)');
+      return `<tr><td>${dateOf(t.entryTime)} ${clockOf(t.entryTime)}</td><td>${dateOf(t.closeTime)} ${clockOf(t.closeTime)}</td><td>${t.asset}</td>
+      <td class="${t.dir==='UP'?'up':'dn'}">${t.dir==='UP'?'▲ Вверх':'▼ Вниз'}</td><td>${money(t.amount)}</td>
+      <td>${a?a.fmt(t.entryPrice):t.entryPrice}</td><td>${a?a.fmt(t.closePrice):t.closePrice}</td>
+      <td style="color:${col}">${t.tie?'Возврат':(t.won?'Выигрыш':'Проигрыш')}</td>
+      <td style="color:${col}">${t.profit>=0?'+':''}${money(t.profit)}</td></tr>`; }).join('')
+    + '</tbody></table>' : '<div class="sp-empty">Сделок пока нет</div>';
+  applyLang();
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   18. ACCOUNTS / AUTH
+   ══════════════════════════════════════════════════════════════ */
+
+function switchAccount(type){
+  if(!U) return openAuth();
+  if(type===curAccount){ closeAll(); return; }
+  curAccount=type; balance=U.balances[type];
+  expandedOpenId=expandedClosedId=null; suppressCloseToasts=true;
+  closeAll(); savePrefs(); updateBalance(); renderOpen(); renderClosed();
+  if(curView==='profile') renderTradeHistory();
+  pollTrades(false);
+  toast(type==='demo'?'Переключено на демо-счёт':'Переключено на реальный счёт','info');
+}
+async function doLogin(e){
+  e.preventDefault();
+  const em=document.getElementById('li-email').value.trim(), ps=document.getElementById('li-pass').value;
+  const errEl=document.getElementById('li-err'); errEl.textContent='';
+  try{
+    await api('/auth/login',{method:'POST',body:{email:em,pass:ps}});
+    const r=await api('/me');
+    carryLangToUser(r.user.id);
+    location.reload(); /* G4: чистое состояние после входа */
+  }catch(err2){
+    console.error('login error', err2);
+    if(err2.code==='blocked'){ errEl.textContent=t('Аккаунт заблокирован. Обратитесь в поддержку.'); showBlockedAuth(); } /* S1: sid уже выставлен сервером — чат доступен */
+    else errEl.textContent=t('Неверная почта или пароль');
+  }
+}
+async function doRegister(e){
+  e.preventDefault();
+  const em=document.getElementById('rg-email').value.trim();
+  const p1=document.getElementById('rg-pass').value, p2=document.getElementById('rg-pass2').value;
+  const err=document.getElementById('rg-err');
+  if(p1.length<6){ err.textContent='Пароль — минимум 6 символов'; return; }
+  if(p1!==p2){ err.textContent='Пароли не совпадают'; return; }
+  err.textContent='';
+  try{
+    await api('/auth/register',{method:'POST',body:{email:em,pass:p1}});
+    const r=await api('/me');
+    carryLangToUser(r.user.id, true); /* выбор гостя переносится в новый аккаунт */
+    location.reload(); /* G4 */
+  }catch(err2){
+    console.error('register error', err2);
+    err.textContent= err2.code==='exists' ? t('Пользователь с такой почтой уже существует')
+      : err2.code==='bad_email' ? t('Некорректная почта')
+      : err2.code==='reserved_name' ? t('Это имя зарезервировано системой')
+      : t('Ошибка регистрации');
+  }
+}
+function setUserState(u){
+  U=u;
+  balance=(u.balances&&u.balances[curAccount]!=null)? u.balances[curAccount] : (curAccount==='demo'?10000:0);
+  state.open=[]; state.closed=[]; knownClosed=new Set(); suppressCloseToasts=true;
+  expandedOpenId=expandedClosedId=null;
+  updateUserUI(); updateBalance(); renderOpen(); renderClosed();
+  reportLang(); updateStreak(); /* W/Y4 */
+  closeAuth();
+  /* R1: возвращаем пользователя туда, где он был до F5/перезахода */
+  const vp=loadViewPref();
+  const vv=vp&&['trade','finance','profile'].includes(vp.view)? vp.view : 'trade';
+  showView(vv, vv==='finance'? (vp.fin||'deposit') : vv==='profile'? (vp.prof||'info') : undefined);
+  if(vv==='trade'&&vp&&vp.rp==='signals'&&currentRightPanel!=='signals') switchRightPanel('signals');
+  pollTrades(false);
+}
+async function logout(){
+  try{ await api('/auth/logout',{method:'POST'}); }catch(e){}
+  location.reload(); /* G4: полный сброс DOM и форм между аккаунтами */
+}
+function forceLogout(){
+  /* S1: сессию НЕ убиваем — через неё заблокированный попадает в чат поддержки */
+  toast('Аккаунт заблокирован администратором','err');
+  location.reload();
+}
+function showBlockedAuth(){
+  const b=document.getElementById('auth-blocked'); if(b) b.style.display='block';
+  openAuth(); applyLang();
+}
+
+function openAuth(){ closeAll(); document.getElementById('auth').classList.add('open'); }
+
+function closeAuth(){ document.getElementById('auth').classList.remove('open'); }
+
+function authTab(t){
+  document.getElementById('at-login').classList.toggle('active',t==='login');
+  document.getElementById('at-reg').classList.toggle('active',t==='reg');
+  document.getElementById('af-login').classList.toggle('active',t==='login');
+  document.getElementById('af-reg').classList.toggle('active',t==='reg');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   19. PREFS / КОТИРОВКИ / ГЛАВНЫЙ ЦИКЛ / ИНИЦИАЛИЗАЦИЯ
+   ══════════════════════════════════════════════════════════════ */
+function savePrefs(){ try{ localStorage.setItem(LS_KEY+'_prefs',JSON.stringify({asset:curAsset,tf:curTF,amount:tradeAmount,expiry:tradeExpiry,chartType,account:curAccount})); }catch(e){} }
+function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(LS_KEY+'_prefs')||'{}');
+  if(p.asset&&ASSETS[p.asset]) curAsset=p.asset; if(p.tf&&TFS[p.tf]) curTF=p.tf;
+  if(p.amount) tradeAmount=p.amount; if(p.expiry) tradeExpiry=p.expiry; if(p.chartType) chartType=p.chartType;
+  if(p.account==='real'||p.account==='demo') curAccount=p.account; }catch(e){} }
+
+/* котировки с сервера: SSE, сэмпл каждые 500 мс */
+let quotesSrc=null, tickN=0, quoteEpoch=null; /* V2: quoteEpoch */
+function connectQuotes(){
+  if(quotesSrc) return;
+  quotesSrc=new EventSource('/api/quotes');
+  quotesSrc.onmessage=e=>{
+    let m; try{ m=JSON.parse(e.data); }catch(err){ return; }
+    if(m.epoch!=null){ /* V2: сервер перезапустился — кэш свечей невалиден */
+      if(quoteEpoch!=null&&m.epoch!==quoteEpoch){ historyLoaded.clear(); loadHistory(curAsset,curTF).then(()=>{ updateStatus(); draw(); }).catch(()=>{}); }
+      quoteEpoch=m.epoch;
+    }
+    const prices=m.prices||{}, ts=m.ts||Date.now()/1000;
+    const prevP=ASSETS[curAsset]? ASSETS[curAsset].price():0;
+    for(const n in prices){ const a=ASSETS[n]; if(a) a.setPrice(prices[n],ts); }
+    pulseTicks(prevP,ASSETS[curAsset].price()); /* Y6 */
+    prevDisplayPrice=curDisplayPrice;
+    curDisplayPrice=ASSETS[curAsset].price();
+    lastTickTime=performance.now();
+    tickN++;
+    if(tickN%2===0){ updateStatus(); renderOpen(); updateSignalTimers(); }
+    if(U&&tickN%4===0) pollTrades();
+  };
+}
+
+function rafLoop(){
+  requestAnimationFrame(rafLoop);
+  if(curView==='trade') draw();
+}
+
+(async function init(){
+  renderIcons();
+  buildTfGrid(); buildApc(); buildAmount(); buildExpiry(); renderMethods();
+  loadPrefs(); loadFavs();
+  buildAmtChips(); updSndBtn(); renderFavStrip(); tickOnline(); setInterval(tickOnline,5000); /* Y5/Y2/X/Y7 */
+  setAmount(tradeAmount); epSetFromSec(tradeExpiry);
+  try{ await loadHistory(curAsset,curTF); }catch(e){}
+  prevDisplayPrice=curDisplayPrice=ASSETS[curAsset].price();
+  resize(); updateToolbar(); updateStatus(); updatePayoutBox();
+  connectQuotes();
+  try{
+    const r=await api('/me'); if(window.i18nBindUser) i18nBindUser(r.user.id); setUserState(r.user);
+  }catch(e){ updateBalance(); if(e&&e.code==='blocked') showBlockedAuth(); else openAuth(); } /* S1 */
+  draw(); requestAnimationFrame(rafLoop); startSignals();
+  document.getElementById('funds-overlay').addEventListener('click',e=>{ if(e.target.id==='funds-overlay') closeFundsModal(); });
+})();
+
+</script>
+</body>
+</html>
