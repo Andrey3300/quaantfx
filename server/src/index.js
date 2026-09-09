@@ -4,7 +4,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 
 const db = require('./db');
-const { ASSETS, TICK_MS, tickAll } = require('./engine');
+const { ASSETS, TICK_MS, tickAll, DEPTH, BUILD_DAYS } = require('./engine');
 const { purgeExpired } = require('./auth');
 
 const app = express();
@@ -19,6 +19,7 @@ app.use('/api/finance', require('./routes/finance'));
 app.use('/api', require('./routes/user'));     // /api/me, /api/trades, /api/verify, /api/avatar
 app.use('/api', require('./routes/market'));   // /api/assets, /api/chart/:asset, /api/quotes (SSE)
 const { broadcast } = require('./routes/market');
+try{ require('./settings').applyBoot(); }catch(e){} /* PLAT1: выплаты из настроек */
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 
@@ -98,5 +99,5 @@ setInterval(purgeExpired, 6 * 3600 * 1000).unref();
 const PORT = Number(process.env.PORT || 3000);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`SYNTH·OTC server: http://localhost:${PORT}`);
-  console.log(`Активов: ${Object.keys(ASSETS).length}, тик: ${TICK_MS}ms`);
+  console.log(`Активов: ${Object.keys(ASSETS).length}, тик: ${TICK_MS}ms, DEPTH=${DEPTH} (${BUILD_DAYS} сут)`);
 });

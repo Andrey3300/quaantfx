@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quant FX — Trading</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b82f6'/%3E%3Ccircle cx='14.5' cy='14.5' r='8' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M20 20l6.5 6.5' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5' fill='none' stroke='%234ade80' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -41,6 +41,9 @@ input,select{outline:none}
 /* ── HEADER ── */
 #header{height:56px;flex-shrink:0;display:flex;align-items:center;padding:0 16px 0 12px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);z-index:300;position:relative}
 .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:.5px}
+.logo img{height:40px;width:auto;display:block}
+.logo .logo-q{display:none}
+.auth-card .logo img{height:44px}
 .logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;flex-shrink:0}
 .logo b{color:var(--accent)}
 #hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
@@ -104,9 +107,31 @@ input,select{outline:none}
 #trade-row{flex:1;display:flex;min-height:0}
 #chart-col{flex:1;display:flex;flex-direction:column;min-width:0}
 #chart-wrap{flex:1;position:relative;overflow:hidden;background:#0a101c}
+#chart-canvas{touch-action:pan-y;display:block}
+.mob-only{display:none}
+.dob3{display:flex;gap:6px;flex:1;min-width:0}
+.dob3 select{flex:1;min-width:0;padding-left:8px;padding-right:6px}
+#dep-backdrop{display:none}
+#trades-modal{width:min(430px,100%);max-height:82vh;padding:0;overflow:hidden;display:flex;flex-direction:column}
+.tm-head{display:flex;align-items:center;border-bottom:1px solid var(--border)}
+.tm-head .trades-tabs{flex:1}
+.tm-x{padding:12px 16px;cursor:pointer;color:var(--dim);font-size:15px}
+.tm-x:hover{color:var(--text)}
+#trades-modal .trades-pane{padding:8px 12px 14px;min-height:140px}
 #chart-canvas{display:block;cursor:crosshair}
-#ohlc-overlay{position:absolute;top:10px;left:12px;background:rgba(11,19,34,.92);border:1px solid var(--border);padding:6px 10px;font-size:11px;color:var(--dim);line-height:1.8;border-radius:6px;pointer-events:none;display:none;font-family:'JetBrains Mono',monospace}
+#ohlc-overlay{position:absolute;top:40px;left:12px;background:rgba(11,19,34,.92);border:1px solid var(--border);padding:6px 10px;font-size:11px;color:var(--dim);line-height:1.8;border-radius:6px;pointer-events:none;display:none;font-family:'JetBrains Mono',monospace}
 #ohlc-overlay b{color:var(--text);font-weight:500;margin-left:3px}
+#draw-chips{position:absolute;top:8px;left:10px;right:76px;display:flex;gap:6px;overflow-x:auto;pointer-events:none;z-index:5;scrollbar-width:none}
+#draw-chips::-webkit-scrollbar{display:none}
+.draw-chip{pointer-events:auto;white-space:nowrap;background:rgba(11,19,34,.93);border:1px solid var(--border);border-radius:8px;padding:4px 6px 4px 8px;font-size:11px;color:var(--text);display:flex;align-items:center;gap:6px;flex:none}
+.draw-chip i{width:7px;height:7px;border-radius:50%;background:#2dd4bf;flex:none}
+.draw-chip b{cursor:pointer;color:var(--dim);font-weight:400;padding:0 2px}
+.draw-chip b:hover{color:var(--red)}
+#draw-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);background:rgba(11,19,34,.95);border:1px solid var(--border);border-radius:10px;padding:8px 8px 8px 14px;font-size:12px;z-index:6;display:none;gap:10px;align-items:center;white-space:nowrap;max-width:94%}
+#draw-hint button{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;flex:none}
+#draw-hint button:hover{border-color:var(--red);color:var(--red)}
+#draw-popup{width:252px;max-height:520px}
+.ct-btn.active-tool{background:rgba(45,212,191,.15)!important;border-color:#2dd4bf!important;color:#2dd4bf!important}
 #chart-clock{position:absolute;left:12px;bottom:34px;font-size:11px;color:var(--dim2);font-family:'JetBrains Mono',monospace;pointer-events:none}
 #sub-panels{display:flex;flex-direction:column;flex-shrink:0}
 .sub-panel{border-top:1px solid var(--border);position:relative;height:90px}
@@ -116,11 +141,18 @@ input,select{outline:none}
 .sub-panel-close:hover{color:var(--red)}
 
 /* ── TRADE PANEL ── */
+#sent-col{width:56px;flex:none;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;--up:50%}
+#sent-up{font-size:11px;font-weight:700;color:var(--green)}
+#sent-dn{font-size:11px;font-weight:700;color:var(--red)}
+#sent-track{flex:1;width:14px;border-radius:7px;background:rgba(239,68,68,.22);display:flex;flex-direction:column;overflow:hidden;min-height:60px}
+#sent-green{height:var(--up);background:linear-gradient(#22c55e,#16a34a);transition:height 1.2s ease,width 1.2s ease}
+#sent-mark{height:2px;flex:none;background:rgba(255,255,255,.9)}
+#sent-red{flex:1;background:linear-gradient(#dc2626,#ef4444)}
 #trade-panel{width:300px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
 .tp-body{padding:14px 14px 4px;display:flex;flex-direction:column;gap:10px}
 .tp-row2{display:flex;flex-direction:column;gap:10px}
 .field{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 8px 8px 12px;display:flex;align-items:center;gap:8px}
-.field .fmain{flex:1;min-width:0}
+.field .fmain{flex:1;min-width:0;text-align:center}
 .field .fl{font-size:10px;color:var(--dim);font-weight:500;margin-bottom:2px}
 .field .fv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;cursor:pointer;white-space:nowrap}
 .field .fv:hover{color:var(--accent)}
@@ -287,7 +319,10 @@ input,select{outline:none}
 .method{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.15s;text-align:center}
 .method:hover{border-color:var(--border2);transform:translateY(-1px)}
 .method.active{border-color:var(--accent);background:rgba(59,130,246,.1)}
-.method .ci{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff}
+.method .ci{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;overflow:hidden;flex:none}
+.method .ci img{width:100%;height:100%;object-fit:contain;display:block}
+.method .ci.wht{background:#fff}
+.method .ci.pad img{width:72%;height:72%}
 .method b{font-size:12px}.method small{font-size:10px;color:var(--dim)}
 .qr{width:168px;height:168px;margin:12px auto;background:#fff;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(21,1fr)}
 .qr i{display:block}.qr i.on{background:#0b1322}
@@ -319,6 +354,7 @@ input,select{outline:none}
 
 /* ── MODAL / TOASTS / STATUS ── */
 .overlay{position:fixed;inset:0;background:rgba(3,7,18,.7);z-index:900;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+#dep-shot-prev{max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--border);display:none;margin-top:8px}
 .overlay.open{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7)}
 .modal .mi{font-size:36px;margin-bottom:10px}
@@ -336,9 +372,29 @@ input,select{outline:none}
 .cm small{display:block;margin-top:4px;font-size:9px;opacity:.55}
 .cm.ag{align-self:flex-start;background:var(--bg3)}
 .cm.me{align-self:flex-end;background:rgba(59,130,246,.25)}
+.cm.sys{align-self:center;background:rgba(92,106,134,.16);color:var(--dim);font-size:11px;text-align:center;max-width:95%}
 #chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
 #chat-input{flex:1}
 #chat-send{width:40px;height:38px;padding:0;border:none;border-radius:9px;background:var(--accent);color:#fff;font-size:14px;cursor:pointer}
+#chat-attach{width:40px;height:38px;padding:0;border:none;border-radius:9px;background:var(--bg3);color:var(--text);font-size:15px;cursor:pointer;flex-shrink:0}
+.att-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.att-thumb{width:110px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;cursor:zoom-in}
+.att-file{display:inline-block;background:rgba(59,130,246,.12);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text);text-decoration:none}
+.att-file small{color:var(--dim)}
+#att-modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);align-items:center;justify-content:center}
+#att-modal.open{display:flex}
+#att-box{width:min(400px,92vw);max-height:86vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:14px}
+#att-box .card-h{padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);font-weight:600}
+#lb-modal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:16px}
+#lb-modal.open{display:flex}
+#lb-img{max-width:96vw;max-height:88vh;border-radius:10px;box-shadow:0 12px 60px rgba(0,0,0,.7);object-fit:contain}
+#lb-x{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.1);border:1px solid var(--border);color:#fff;font-size:18px;border-radius:10px;width:40px;height:40px;cursor:pointer}
+#lb-x:hover{background:rgba(255,255,255,.22)}
+#att-preview{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+#att-preview img{width:110px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+#att-caption{width:calc(100% - 32px);margin:0 16px 8px;min-height:56px;resize:vertical}
+#att-btns{display:flex;gap:8px;justify-content:flex-end;padding:0 16px 14px}
+#chat-msgs.dragover{outline:2px dashed var(--accent);outline-offset:-4px}
 .toast{padding:10px 14px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:tin .25s ease,tout .4s ease 2.8s forwards;min-width:220px}
 .toast.win{border-color:var(--green);color:var(--green)}
 .toast.loss{border-color:var(--red);color:var(--red)}
@@ -353,6 +409,7 @@ input,select{outline:none}
 
 /* ── MOBILE ── */
 @media (max-width:820px){
+  #ohlc-overlay{top:8px!important;left:8px;right:8px;font-size:10px;padding:4px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #header{height:52px;padding:0 10px;gap:8px}
   .promo-pill,.logo span,#statusbar,#chart-clock,.desk-only{display:none!important}
   #acc-switcher{min-width:0;padding:4px 8px}
@@ -362,9 +419,25 @@ input,select{outline:none}
   #sidebar{order:2;width:100%;height:58px;flex-direction:row;justify-content:space-around;border-right:none;border-top:1px solid var(--border);padding:4px 0}
   .sb-item{width:auto;flex:1;padding:6px 0;gap:3px}
   .sb-spacer{display:none}
-  #trade-row{flex-direction:column}
+  #view-trade{overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #trade-row{flex-direction:column;flex:1}
+  #chart-col{flex:1 1 auto;min-height:230px}
+  #fav-strip{display:none!important}
   #trade-panel,#signals-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
-  #trade-panel{max-height:48%}
+  #trade-panel{max-height:none;overflow:visible;flex:none}
+  #amt-chips{display:none!important}
+  #dep-side{position:fixed;left:8px;right:8px;top:12px;bottom:12px;z-index:950;display:none;overflow-y:auto;margin:0}
+  #dep-side.open{display:block}
+  #dep-backdrop.open{display:block;position:fixed;inset:0;background:rgba(3,7,18,.72);z-index:940}
+  #trades-area{display:none}
+  .mob-only{display:flex}
+  .logo img.logo-full{display:none}
+  .logo .logo-q{display:block;height:34px}
+  #sent-col{width:100%;flex-direction:row;border-left:none;border-top:1px solid var(--border);padding:6px 12px}
+  #sent-track{flex:1;width:auto;height:12px;min-height:0;flex-direction:row}
+  #sent-green{height:100%;width:var(--up)}
+  #sent-mark{width:2px;height:100%}
+  #sent-red{flex:1}
   .tp-body{padding:10px 10px 4px;gap:8px}
   .tp-row2{flex-direction:row}
   .tp-row2 .field{flex:1;padding:6px 6px 6px 10px}
@@ -374,11 +447,27 @@ input,select{outline:none}
   .page{padding:16px 12px 30px}
   .fin-grid{grid-template-columns:1fr}
   #chat-box{left:8px;right:8px;width:auto;bottom:8px}
+  #chat-box{height:min(430px,62vh)}
+  #chat-input{min-width:0}
+  #lb-modal{padding:8px}
   .frow .lab{width:100%}
   #asset-picker{width:calc(100vw - 16px)!important;left:8px!important;max-height:75vh}
   #tf-popup{min-width:0;width:calc(100vw - 16px);left:8px!important}
   .tf-grid{grid-template-columns:repeat(3,1fr)}
   .apc-cats{width:110px}
+}
+@media (max-width:400px){
+  #header{gap:6px;padding:0 8px}
+  .logo .logo-q{height:28px}
+  #acc-switcher{padding:4px 6px}
+  #acc-lbl{font-size:9px}
+  #acc-bal{font-size:12px}
+  .acc-arrow{display:none}
+  #snd-btn{width:32px}
+  #chart-toolbar{gap:4px;padding:0 8px}
+  .ct-asset{font-size:12px;gap:6px;padding:6px 6px;max-width:46vw;overflow:hidden}
+  .field .fv{font-size:13px}
+  .stp{width:28px;height:28px}
 }
 /* X: лента избранного над графиком */
 #fav-strip{display:none;gap:6px;overflow-x:auto;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -397,16 +486,22 @@ input,select{outline:none}
 .trade-btn.tick-dn{box-shadow:0 0 0 2px rgba(239,68,68,.5)}
 #acc-bal.flash-up{animation:balUp .7s} #acc-bal.flash-dn{animation:balDn .7s}
 @keyframes balUp{0%{color:var(--green)}100%{}} @keyframes balDn{0%{color:var(--red)}100%{}}
-#snd-btn{background:none;border:1px solid var(--border);border-radius:8px;height:34px;width:38px;cursor:pointer;font-size:15px}
+#snd-btn{background:none;border:1px solid var(--border);border-radius:8px;height:34px;width:38px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.apc-row.closed{opacity:.45;cursor:default}
+.apc-row.closed:hover{background:none}
+.apc-pay.na{color:var(--dim);font-weight:600}
+.pre.dis{opacity:.35;pointer-events:none}
+.trade-btn:hover{filter:brightness(1.14)}
+.trade-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
 </style>
 </head>
 <body>
 
 <!-- ═══════════ AUTH ═══════════ -->
 <div id="auth">
-  <div class="auth-lang" onclick="toggleDD('lang-dd',this,event)"><span style="font-size:15px">🌐</span><span id="lang-cur-auth">English</span><span class="arr" style="font-size:10px">▼</span></div>
+  <div class="auth-lang" onclick="toggleDD('lang-dd',this,event)"><i class="ic" data-icon="globe"></i><span id="lang-cur-auth">English</span><span class="arr" style="font-size:10px">▼</span></div>
   <div class="auth-card">
-    <div class="logo"><div class="logo-mark"><svg viewBox="0 0 32 32" width="19" height="19" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="14.5" r="8" stroke="#fff" stroke-width="2.6"/><path d="M20 20l6.5 6.5" stroke="#fff" stroke-width="2.6"/><path d="M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5" stroke="#4ade80" stroke-width="2.2"/></svg></div><span>QUANT<b>FX</b></span></div>
+    <div class="logo"><img src="logo.png" alt="QUANTFX"></div>
     <div class="auth-tabs">
       <div class="auth-tab active" id="at-login" onclick="authTab('login')">Вход</div>
       <div class="auth-tab" id="at-reg" onclick="authTab('reg')">Регистрация</div>
@@ -421,24 +516,24 @@ input,select{outline:none}
       <label>Эл. почта</label><input class="inp" id="rg-email" type="email" placeholder="you@example.com" required autocomplete="off">
       <label>Пароль</label><input class="inp" id="rg-pass" type="password" placeholder="минимум 6 символов" required minlength="6" autocomplete="new-password">
       <label>Повторите пароль</label><input class="inp" id="rg-pass2" type="password" required autocomplete="new-password">
-      <label class="chk-row"><input type="checkbox" id="rg-agree" required> Мне есть 18 лет, я принимаю условия соглашения</label>
+      <label class="chk-row"><input type="checkbox" id="rg-agree" required> <span>Мне есть 18 лет, я принимаю <a href="/terms.html" target="_blank" rel="noopener" onclick="event.stopPropagation()">условия соглашения</a></span></label>
       <div class="auth-err" id="rg-err"></div>
       <button class="btn btn-green btn-block" style="height:44px">Создать аккаунт</button>
     </form>
     <div id="auth-blocked" style="display:none;margin:0 16px 12px;padding:12px;border:1px solid rgba(255,90,90,.4);border-radius:10px;background:rgba(255,60,60,.08)">
-      <div style="font-weight:700;margin-bottom:8px">⛔ Аккаунт заблокирован. Обратитесь в поддержку.</div>
+      <div style="font-weight:700;margin-bottom:8px">⛔ <span>Аккаунт заблокирован. Обратитесь в поддержку.</span></div>
       <button type="button" class="btn btn-primary btn-block" style="height:40px" onclick="openSupportChat(true)">Написать в поддержку</button>
     </div>
-    <div class="auth-foot">Демо-платформа. Все котировки синтетические,<br>реальные деньги не используются.</div>
+    <div class="auth-foot">Торговля бинарными опционами связана с высоким риском.<br>Не инвестируйте средства, потерю которых не готовы допустить.<br><a href="/terms.html" target="_blank" rel="noopener" style="color:var(--accent)">Условия соглашения</a></div>
   </div>
 </div>
 
 <!-- ═══════════ HEADER ═══════════ -->
 <div id="header">
-  <div class="logo" style="cursor:pointer" onclick="logoHome()" title="Quant FX"><div class="logo-mark"><svg viewBox="0 0 32 32" width="19" height="19" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="14.5" r="8" stroke="#fff" stroke-width="2.6"/><path d="M20 20l6.5 6.5" stroke="#fff" stroke-width="2.6"/><path d="M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5" stroke="#4ade80" stroke-width="2.2"/></svg></div><span>QUANT<b>FX</b></span></div>
+  <div class="logo" style="cursor:pointer" onclick="logoHome()" title="Quant FX"><img src="logo.png" class="logo-full" alt="QUANTFX"><img src="favicon.png" class="logo-q" alt="Q"></div>
   <div id="hdr-right">
     <div class="promo-pill" onclick="showView('finance','deposit')">
-      <span style="font-size:18px">🎁</span>
+      <img src="img/bonus-welcome.png" alt="Бонус" style="width:32px;height:32px;object-fit:contain">
       <div><b>Бонус +50%</b><small>по промокоду WELCOME</small></div>
     </div>
     <div id="acc-switcher" onclick="toggleDD('acc-dd',this,event)">
@@ -446,7 +541,7 @@ input,select{outline:none}
       <span class="acc-arrow">▼</span>
     </div>
     <button id="deposit-btn" onclick="showView('finance','deposit')"><i class="ic" data-icon="wallet"></i><span>ПОПОЛНИТЬ СЧЁТ</span></button>
-    <button id="snd-btn" onclick="toggleSound()" title="Звук">🔊</button>
+    <button id="snd-btn" onclick="toggleSound()" title="Звук"><i class="ic" data-icon="sound"></i></button>
     <div class="avatar" id="hdr-avatar" onclick="toggleDD('user-dd',this,event)">U</div>
   </div>
 </div>
@@ -454,12 +549,12 @@ input,select{outline:none}
 <!-- account dropdown -->
 <div class="dd" id="acc-dd">
   <div class="dd-acc active" id="dd-acc-demo" onclick="switchAccount('demo')">
-    <div class="ico demo">🎓</div>
+    <div class="ico demo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#8fbaff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L2 9l10 5 10-5-10-5z"/><path d="M6 11.3V16c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4.7"/><path d="M22 9v5"/></svg></div>
     <div><div class="nm">Демо-счёт</div><div class="bl" id="dd-bal-demo">$10,000.00</div></div>
     <span class="chk">✓</span>
   </div>
   <div class="dd-acc" id="dd-acc-real" onclick="switchAccount('real')">
-    <div class="ico real">💼</div>
+    <div class="ico real"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/><path d="M5 11.5v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg></div>
     <div><div class="nm">Реальный счёт</div><div class="bl" id="dd-bal-real">$0.00</div></div>
     <span class="chk">✓</span>
   </div>
@@ -479,7 +574,8 @@ input,select{outline:none}
   <div class="um-item" onclick="showView('finance','withdraw')"><i class="ic" data-icon="withdraw"></i>Вывод средств</div>
   <div class="um-item" onclick="showView('profile','security')"><i class="ic" data-icon="shield"></i>Безопасность</div>
   <div class="um-item" onclick="showView('profile','history')"><i class="ic" data-icon="history"></i>История торговли</div>
-  <div class="um-item" onclick="toggleDD('lang-dd',this,event)"><span style="width:16px;text-align:center">🌐</span>Язык<span id="lang-cur-user" style="margin-left:auto;color:var(--dim);font-size:11px"></span></div>
+  <div class="um-item" onclick="toggleLangInline(event)"><i class="ic" data-icon="globe"></i>Язык<span id="lang-cur-user" style="margin-left:auto;color:var(--dim);font-size:11px"></span><span style="font-size:9px;color:var(--dim)">▼</span></div>
+  <div id="lang-inline" style="display:none;border-top:1px solid var(--border);max-height:230px;overflow-y:auto"></div>
   <div class="um-item" onclick="logout()" style="border-top:1px solid var(--border);color:var(--red)"><i class="ic" data-icon="logout"></i>Выйти</div>
 </div>
 
@@ -497,7 +593,7 @@ input,select{outline:none}
     <div class="sb-item" id="sb-profile" onclick="showView('profile')"><i class="ic" data-icon="user"></i>Профиль</div>
     <div class="sb-item desk-only" id="sb-history" onclick="showView('profile','history')"><i class="ic" data-icon="history"></i>История</div>
     <div class="sb-spacer"></div>
-    <div class="sb-item desk-only" id="sb-help" onclick="openSupportChat()"><i class="ic" data-icon="help"></i>Помощь</div>
+    <div class="sb-item desk-only" id="sb-help" onclick="openSupportChat()"><i class="ic" data-icon="help"></i>Помощь<span class="badge" id="sb-help-badge"></span></div>
   </div>
 
   <div id="content">
@@ -512,7 +608,8 @@ input,select{outline:none}
         <div class="ct-sep"></div>
         <button class="ct-btn on" id="ct-tf-btn" onclick="toggleTfPopup(event)">M1</button>
         <button class="ct-btn" id="ind-btn" onclick="toggleIndPanel(event)" title="Индикаторы"><i class="ic" data-icon="ind"></i></button>
-        <button class="ct-btn" onclick="toggleTfPopup(event)" title="Настройки графика"><i class="ic" data-icon="gear"></i></button>
+        <button class="ct-btn" id="draw-btn" onclick="toggleDrawPopup(event)" title="Рисование"><i class="ic" data-icon="pencil"></i></button>
+        <button class="ct-btn mob-only" id="mob-trades-btn" onclick="openTradesModal()" title="Сделки"><i class="ic" data-icon="clock"></i></button>
       </div>
       <div id="fav-strip"></div>
       <div id="trade-row">
@@ -520,9 +617,17 @@ input,select{outline:none}
           <div id="chart-wrap">
             <canvas id="chart-canvas"></canvas>
             <div id="ohlc-overlay"></div>
+            <div id="draw-chips"></div>
+            <div id="draw-hint"><span id="draw-hint-tx"></span><button id="draw-hint-btn" onclick="cancelDrawTool()">Отменить рисование</button></div>
             <div id="chart-clock"></div>
           </div>
           <div id="sub-panels"></div>
+        </div>
+
+        <div id="sent-col" title="Настроение рынка">
+          <div id="sent-up">50%</div>
+          <div id="sent-track"><div id="sent-green"></div><div id="sent-mark"></div><div id="sent-red"></div></div>
+          <div id="sent-dn">50%</div>
         </div>
 
         <!-- TRADE PANEL -->
@@ -530,12 +635,14 @@ input,select{outline:none}
           <div class="tp-body">
             <div class="tp-row2">
               <div class="field">
+                <button class="stp" onclick="stepExpiry(-1)">−</button>
                 <div class="fmain"><div class="fl">Время</div><div class="fv" id="expiry-shown" onclick="openExpiryPopup(event)">00:01:00</div></div>
-                <button class="stp" onclick="stepExpiry(-1)">−</button><button class="stp" onclick="stepExpiry(1)">+</button>
+                <button class="stp" onclick="stepExpiry(1)">+</button>
               </div>
               <div class="field">
+                <button class="stp" onclick="stepAmount(-1)">−</button>
                 <div class="fmain"><div class="fl">Сумма</div><div class="fv" id="amount-shown" onclick="openAmountPopup(event)">$100</div></div>
-                <button class="stp" onclick="stepAmount(-1)">−</button><button class="stp" onclick="stepAmount(1)">+</button>
+                <button class="stp" onclick="stepAmount(1)">+</button>
               </div>
             </div>
             <div class="payout-box">
@@ -593,15 +700,16 @@ input,select{outline:none}
               <div class="card">
                 <div class="card-h">Банковские карты и электронные кошельки <span class="tag warn">Скоро</span></div>
                 <div class="methods" style="opacity:.45;pointer-events:none">
-                  <div class="method"><div class="ci" style="background:#1a1f71">VISA</div><b>Visa</b><small>недоступно</small></div>
-                  <div class="method"><div class="ci" style="background:#eb001b">MC</div><b>Mastercard</b><small>недоступно</small></div>
-                  <div class="method"><div class="ci" style="background:#0070ba">PP</div><b>PayPal</b><small>недоступно</small></div>
-                  <div class="method"><div class="ci" style="background:#7b2ff7">SK</div><b>Skrill</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci wht pad"><img src="img/fiat/visa.svg" alt="Visa"></div><b>Visa</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci wht pad"><img src="img/fiat/mastercard.svg" alt="Mastercard"></div><b>Mastercard</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci wht pad"><img src="img/fiat/paypal.svg" alt="PayPal"></div><b>PayPal</b><small>недоступно</small></div>
+                  <div class="method"><div class="ci" style="background:#7b2ff7"><img src="img/fiat/skrill.svg" alt="Skrill" style="width:84%;height:84%"></div><b>Skrill</b><small>недоступно</small></div>
                 </div>
               </div>
             </div>
+            <div id="dep-backdrop" onclick="closeDepSheet()"></div>
             <div class="card" id="dep-side">
-              <div class="card-h">Детали пополнения <span class="tag info" id="dep-method-tag">—</span></div>
+              <div class="card-h"><img id="dep-method-ico" src="img/coins/usdt.svg" alt="" style="width:26px;height:26px">Детали пополнения <span class="tag info" id="dep-method-tag">—</span><span class="mob-only tm-x" style="margin-left:auto" onclick="closeDepSheet()">✕</span></div>
               <div class="card-b">
                 <div class="frow" style="border:none"><div class="lab" style="width:auto">Сумма (USD)</div><div class="val"><input class="inp" id="dep-amount" type="number" value="100" min="10" oninput="updateDepDetails()"></div></div>
                 <div class="frow" style="border:none"><div class="lab" style="width:auto">Промокод</div><div class="val"><input class="inp" id="dep-promo" placeholder="Например, WELCOME" style="max-width:190px" autocomplete="off" onchange="checkPromo()"><span id="dep-promo-hint" style="font-size:11px"></span></div></div>
@@ -612,7 +720,11 @@ input,select{outline:none}
                 <div style="font-size:11px;color:var(--dim);margin:4px 0">К отправке: <b id="dep-crypto-amt" style="color:var(--text);font-family:'JetBrains Mono',monospace">—</b></div>
                 <div style="font-size:11px;color:var(--dim);margin:4px 0" id="dep-bonus-row" class="hidden">Бонус по промокоду: <b id="dep-bonus-amt" style="color:var(--green);font-family:'JetBrains Mono',monospace"></b></div>
                 <div class="addr"><span id="dep-addr">—</span><button onclick="copyAddr()">Копировать</button></div>
-                <button class="btn btn-green btn-block" style="height:44px" onclick="confirmDeposit()">Я оплатил — создать заявку</button>
+                <div id="dep-instr" style="font-size:12px;line-height:1.6;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:10px 12px;margin:10px 0;white-space:pre-line"></div>
+                <label class="btn btn-ghost btn-block" style="cursor:pointer;margin-bottom:6px">📷 <span>Прикрепить скриншот перевода</span><input type="file" id="dep-shot" accept="image/jpeg,image/png,image/webp,image/gif" hidden onchange="depShotChange(this)"></label>
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><img id="dep-shot-prev" alt="" style="display:none;max-height:64px;border-radius:8px;border:1px solid var(--border)"><span id="dep-shot-name" style="font-size:12px;color:var(--dim)"></span><button id="dep-shot-x" class="btn btn-ghost" style="display:none;padding:2px 8px" onclick="depShotClear()" title="Убрать">✕</button></div>
+                <div id="dep-shot-err" style="font-size:12px;color:var(--red);margin-bottom:6px"></div>
+                <button class="btn btn-green btn-block" id="dep-submit-btn" style="height:44px" onclick="confirmDeposit()">Я оплатил — создать заявку</button>
               </div>
             </div>
           </div>
@@ -656,7 +768,7 @@ input,select{outline:none}
               <div class="frow"><div class="lab">Фамилия <i>*</i></div><div class="val"><input class="inp" id="pf-last" placeholder="Не заполнено" autocomplete="off"></div></div>
               <div class="frow"><div class="lab">Эл. почта</div><div class="val"><span id="pf-email" style="color:var(--accent)">—</span><span class="tag warn" id="pf-email-tag">Не верифицирован</span><button class="btn btn-ghost" id="pf-email-btn" style="padding:4px 10px;font-size:11px" onclick="verifyEmail()">Подтвердить</button></div></div>
               <div class="frow"><div class="lab">Телефон</div><div class="val"><input class="inp" id="pf-phone" placeholder="+1 555 000 0000"></div></div>
-              <div class="frow"><div class="lab">Дата рождения <i>*</i></div><div class="val"><input class="inp" id="pf-dob" type="text" placeholder="ДД.ММ.ГГГГ" autocomplete="off"></div></div>
+              <div class="frow"><div class="lab">Дата рождения <i>*</i></div><div class="val"><div class="dob3" id="pf-dob-wrap"></div><input type="hidden" id="pf-dob"></div></div>
               <div class="frow"><div class="lab">Страна</div><div class="val"><select class="inp" id="pf-country"></select></div></div>
               <div class="frow"><div class="lab">Никнейм</div><div class="val"><input class="inp" id="pf-nick" placeholder="user" autocomplete="off"></div></div>
               <div class="frow"><div class="lab">Скрыть мой профиль</div><div class="val"><div class="switch" id="pf-hide" onclick="this.classList.toggle('on')"></div></div></div>
@@ -766,6 +878,11 @@ input,select{outline:none}
   <div class="grid3" id="ep-presets"></div>
 </div>
 
+<div class="pop" id="draw-popup">
+  <div class="ip-head"><span>Рисование</span><span class="apc-x" onclick="closeDrawPopup()">✕</span></div>
+  <div class="ip-body" id="draw-tools"></div>
+</div>
+
 <div class="pop" id="ind-panel">
   <div class="ip-head"><span>Индикаторы</span><span class="apc-x" onclick="closeIndPanel()">✕</span></div>
   <div class="ip-body">
@@ -786,13 +903,43 @@ input,select{outline:none}
   </div>
 </div>
 
+<div class="overlay" id="trades-overlay" onclick="if(event.target===this)closeTradesModal()">
+  <div class="modal" id="trades-modal" onclick="event.stopPropagation()">
+    <div class="tm-head">
+      <div class="trades-tabs" style="margin-top:0;border-bottom:none">
+        <div class="trades-tab active" id="mob-tab-open" onclick="switchTab('open')">Открытые<span class="cnt" id="mob-cnt-open"></span></div>
+        <div class="trades-tab" id="mob-tab-closed" onclick="switchTab('closed')">Закрытые</div>
+      </div>
+      <span class="tm-x" onclick="closeTradesModal()">✕</span>
+    </div>
+    <div class="trades-pane active" id="mob-pane-open"><div class="no-trades" id="mob-no-open-msg">Нет открытых сделок</div></div>
+    <div class="trades-pane" id="mob-pane-closed"><div class="no-trades" id="mob-no-closed-msg">Нет закрытых сделок</div></div>
+  </div>
+</div>
+
+
+
 <div id="chat-box">
   <div id="chat-head"><span id="chat-agent">Поддержка</span><span id="chat-status">Онлайн</span><span id="chat-close" onclick="closeSupportChat()">✕</span></div>
   <div id="chat-msgs"></div>
   <div id="chat-input-row">
     <input class="inp" id="chat-input" placeholder="Напишите сообщение..." autocomplete="off">
+    <button class="btn btn-primary" id="chat-attach" onclick="document.getElementById('chat-file').click()" title="Прикрепить файлы">📎</button>
+    <input type="file" id="chat-file" multiple hidden accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf" onchange="sendSupportFiles(this)">
     <button class="btn btn-primary" id="chat-send" onclick="sendSupportMsg()" title="Отправить">➤</button>
   </div>
+</div>
+<div id="att-modal">
+  <div id="att-box">
+    <div class="card-h">Вложения</div>
+    <div id="att-preview"></div>
+    <textarea class="inp" id="att-caption" placeholder="Подпись..."></textarea>
+    <div id="att-btns"><button class="btn btn-ghost" onclick="closeAttModal()">Отмена</button><button class="btn btn-primary" onclick="doAttSend()">Отправить</button></div>
+  </div>
+</div>
+<div id="lb-modal">
+  <button id="lb-x" onclick="closeLightbox()" title="Закрыть">✕</button>
+  <img id="lb-img" alt="">
 </div>
 <div id="toasts"></div>
 <script src="/i18n.js"></script>
@@ -818,7 +965,12 @@ tline:'<path d="M3 17l5-5 4 3 6-8"/><path d="M3 17l5-5 4 3 6-8v14H3Z" fill="curr
 tcandle:'<rect x="4" y="8" width="4" height="9" rx="1"/><path d="M6 5v3M6 17v2"/><rect x="14" y="6" width="4" height="11" rx="1"/><path d="M16 3v3M16 17v3"/>',
 tbar:'<path d="M6 4v16M4 8h2M6 15h2M16 4v16M14 10h2M16 17h2"/>',
 thollow:'<rect x="4" y="8" width="4" height="9" rx="1" fill="none"/><path d="M6 5v3M6 17v2"/><rect x="14" y="6" width="4" height="11" rx="1" fill="currentColor"/><path d="M16 3v3M16 17v3"/>',
-copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'
+pencil:'<path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+sound:'<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+mute:'<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6M17 9l6 6"/>',
+globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'
 };
 function renderIcons(root){
   (root||document).querySelectorAll('i.ic[data-icon]').forEach(el=>{
@@ -854,6 +1006,7 @@ let chatId=null, chatPoll=null;
 async function openSupportChat(force){ /* force: S1 — заблокированному тоже нужен чат */
   if(!U&&!force){ openAuth(); return; }
   document.getElementById('chat-box').style.display='flex';
+  document.getElementById('sb-help-badge').classList.remove('show');
   if(chatId==null){
     try{
       const r=await api('/support/chats');
@@ -865,6 +1018,28 @@ async function openSupportChat(force){ /* force: S1 — заблокирован
   if(!chatPoll) chatPoll=setInterval(loadSupportMsgs,3000);
 }
 function closeSupportChat(){ document.getElementById('chat-box').style.display='none'; if(chatPoll){ clearInterval(chatPoll); chatPoll=null; } }
+/* красная точка: непрочитанные от поддержки/рассылка */
+async function pollHelpBadge(){
+  if(!U) return;
+  try{ const r=await api('/support/unread');
+    document.getElementById('sb-help-badge').classList.toggle('show',(r.unread||0)>0);
+  }catch(e){}
+}
+setInterval(()=>{ if(U) pollHelpBadge(); },10000);
+function fmtSize(n){ n=Number(n)||0; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(1)+' MB'; }
+function renderMsgFiles(files){
+  return (files||[]).map(f=>{
+    if(/^image\/(jpeg|png|gif|webp)$/.test(f.m||''))
+      return `<img src="${esc(f.url)}" class="att-thumb" loading="lazy" onclick="openLightbox(this.src)">`;
+    return `<a href="${esc(f.url)}" class="att-file" download>📎 ${esc(f.o||'file')} <small>${fmtSize(f.s)}</small></a>`;
+  }).join('');
+}
+function chatFileErr(e){
+  toast(e.code==='bad_file'?t('Только JPG, PNG, GIF, WebP, SVG и PDF до 8 МБ')
+    :e.code==='too_many_files'?t('Максимум 5 файлов за раз')
+    :e.code==='file_too_big'?t('Файл слишком большой (макс. 8 МБ)')
+    :t('Ошибка: {m}',{m:e.message}),'err');
+}
 async function loadSupportMsgs(){
   if(chatId==null) return;
   try{
@@ -872,7 +1047,12 @@ async function loadSupportMsgs(){
     document.getElementById('chat-agent').textContent=(r.specialist||'')+' · '+t('Поддержка');
     document.getElementById('chat-status').textContent=t('Онлайн');
     const el=document.getElementById('chat-msgs');
-    el.innerHTML=r.messages.map(m=>'<div class="cm '+(m.sender==='user'?'me':'ag')+'"><div>'+esc(m.text)+'</div><small>'+fmtDT(m.created_at)+'</small></div>').join('');
+    el.innerHTML=r.messages.map(m=>{
+      const at=renderMsgFiles(m.files);
+      const tx=m.text?'<div>'+esc(m.text)+'</div>':'';
+      if(m.sender==='system') return '<div class="cm sys">'+esc(m.text||'')+'</div>';
+      return '<div class="cm '+(m.sender==='user'?'me':'ag')+'">'+(at?'<div class="att-grid">'+at+'</div>':'')+tx+'<small>'+fmtDT(m.created_at)+'</small></div>';
+    }).join('');
     el.scrollTop=el.scrollHeight;
   }catch(e){}
 }
@@ -881,16 +1061,65 @@ async function sendSupportMsg(){
   inp.value='';
   try{ await api('/support/chats/'+chatId+'/messages',{method:'POST',body:{text:v}}); loadSupportMsgs(); }catch(e){}
 }
+/* CHAT4: предотправочное окно вложений — превью + подпись, отправка только по кнопке */
+let attFiles=[];
+function sendSupportFiles(input){
+  if(chatId==null||!input.files||!input.files.length) { input.value=''; return; }
+  openAttModal([...input.files]);
+  input.value='';
+}
+function openAttModal(files){
+  attFiles=files||[];
+  if(!attFiles.length) return;
+  document.getElementById('att-caption').value=document.getElementById('chat-input').value;
+  const pv=document.getElementById('att-preview'); pv.innerHTML='';
+  attFiles.forEach(f=>{
+    if(/^image\/(jpeg|png|gif|webp)$/.test(f.type)){
+      const img=document.createElement('img'); img.src=URL.createObjectURL(f); pv.appendChild(img);
+    } else {
+      const a=document.createElement('span'); a.className='att-file'; a.textContent='📎 '+f.name+' ';
+      const sm=document.createElement('small'); sm.textContent=fmtSize(f.size); a.appendChild(sm); pv.appendChild(a);
+    }
+  });
+  document.getElementById('att-modal').classList.add('open');
+  applyLang();
+}
+function closeAttModal(){ document.getElementById('att-modal').classList.remove('open'); attFiles=[]; }
+async function doAttSend(){
+  if(!attFiles.length) { closeAttModal(); return; }
+  const fd=new FormData();
+  const cap=document.getElementById('att-caption').value.trim();
+  if(cap) fd.append('text',cap);
+  for(const f of attFiles) fd.append('files',f);
+  closeAttModal();
+  try{ await api('/support/chats/'+chatId+'/messages',{method:'POST',body:fd}); document.getElementById('chat-input').value=''; loadSupportMsgs(); }
+  catch(e){ chatFileErr(e); }
+}
+(function(){
+  const cv=document.getElementById('chat-msgs');
+  ['dragenter','dragover'].forEach(ev=>cv.addEventListener(ev,e=>{ e.preventDefault(); cv.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev=>cv.addEventListener(ev,e=>{ e.preventDefault(); cv.classList.remove('dragover'); }));
+  cv.addEventListener('drop',e=>{ if(chatId!=null&&e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) openAttModal([...e.dataTransfer.files]); });
+  document.getElementById('att-modal').addEventListener('click',e=>{ if(e.target.id==='att-modal') closeAttModal(); });
+  document.getElementById('lb-modal').addEventListener('click',e=>{ if(e.target.id==='lb-modal'||e.target.id==='lb-img') closeLightbox(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){
+    if(document.getElementById('lb-modal').classList.contains('open')) closeLightbox();
+    else if(document.getElementById('att-modal').classList.contains('open')) closeAttModal();
+  } });
+})();
+function openLightbox(src){ document.getElementById('lb-img').src=src; document.getElementById('lb-modal').classList.add('open'); }
+function closeLightbox(){ document.getElementById('lb-modal').classList.remove('open'); document.getElementById('lb-img').removeAttribute('src'); }
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='chat-input') sendSupportMsg(); });
 
 /* ── W: клиент сообщает серверу язык системы ── */
 function reportLang(){ if(U&&window.getLang) api('/lang',{method:'PUT',body:{lang:getLang()}}).catch(()=>{}); }
-window.onLangChanged=function(){ reportLang(); };
+window.onLangChanged=function(){ reportLang(); renderDrawChips(); renderDrawTools(); renderDepInstr(); };
 
 /* ── X: лента избранного над графиком ── */
 function renderFavStrip(){
   const el=document.getElementById('fav-strip'); if(!el) return;
-  const list=[...favorites];
+  if(window.innerWidth<=820){ el.style.display='none'; return; }
+  const list=[...favorites].filter(id=>!assetClosed(id)&&ASSETS[id]);
   const was=el.style.display;
   el.style.display=list.length?'flex':'none';
   el.innerHTML=list.map(id=>`<div class="fav-chip ${id===curAsset?'active':''}" data-id="${esc(id)}">
@@ -907,7 +1136,8 @@ function renderFavStrip(){
 let sndOn=null, AC=null; /* sndOn читаем лениво: LS_KEY объявлен ниже по файлу */
 function sndEnabled(){ if(sndOn==null){ try{ sndOn=localStorage.getItem(LS_KEY+'_snd')!=='0'; }catch(e){ sndOn=true; } } return sndOn; }
 function toggleSound(){ sndOn=!sndEnabled(); try{ localStorage.setItem(LS_KEY+'_snd',sndOn?'1':'0'); }catch(e){} updSndBtn(); }
-function updSndBtn(){ const b=document.getElementById('snd-btn'); if(b) b.textContent=sndEnabled()?'🔊':'🔇'; }
+function updSndBtn(){ const b=document.getElementById('snd-btn'); if(!b) return;
+  b.innerHTML='<i class="ic" data-icon="'+(sndEnabled()?'sound':'mute')+'"></i>'; renderIcons(b); }
 function beep(f0,f1,dur,type,vol){
   if(!sndEnabled()) return;
   try{
@@ -946,18 +1176,6 @@ function updateStreak(){
   let n=0; for(const tr of state.closed){ if(tr.won) n++; else break; }
   if(n>=2){ el.style.display='flex'; el.innerHTML='🔥 '+esc(t('Серия побед'))+': <b>'+n+'</b>'; }
   else el.style.display='none';
-}
-
-/* ── Y: пульс кнопок на тик ── */
-function pulseTicks(prevP,np){
-  const bu=document.getElementById('btn-up'), bd=document.getElementById('btn-down');
-  if(!bu||!bd||!prevP) return;
-  const cls=np>prevP?'tick-up':np<prevP?'tick-dn':'';
-  if(!cls) return;
-  bu.classList.remove('tick-up','tick-dn'); bd.classList.remove('tick-up','tick-dn');
-  void bu.offsetWidth;
-  bu.classList.add(cls); bd.classList.add(cls);
-  setTimeout(()=>{ bu.classList.remove(cls); bd.classList.remove(cls); },320);
 }
 
 /* ── Y: быстрые суммы ── */
@@ -1006,7 +1224,11 @@ const TFS={S5:5,S15:15,S30:30,M1:60,M5:300,M15:900,M30:1800,H1:3600};
 const TF_MAX={S5:1600,S15:1600,S30:1600,M1:2000,M5:1500,M15:1200,M30:900,H1:700};
 
 class TFAgg{
-  constructor(sec,max){ this.sec=sec; this.max=max; this.data=[]; this.cur=null; }
+  /* HIST: older[] — подгруженные чанки старше живого окна (пагинация ?before&limit);
+     _v/_cache — версионный кэш all(), чтобы рендер не конкатенировал тысячи свечей каждый кадр.
+     Вызывающие all()/candles() только читают и slice'ят результат — мутировать его нельзя. */
+  constructor(sec,max){ this.sec=sec; this.max=max; this.data=[]; this.cur=null; this.older=[]; this._v=0; this._cache=null; this._cacheV=-1; }
+  _bump(){ this._v++; }
   push(price,ts){
     const ct=Math.floor(ts/this.sec)*this.sec;
     if(!this.cur||this.cur.time!==ct){
@@ -1018,8 +1240,14 @@ class TFAgg{
       if(price<this.cur.low)this.cur.low=price;
       this.cur.close=price;
     }
+    this._bump();
   }
-  all(){ return this.cur? this.data.concat([this.cur]) : this.data.slice(); }
+  all(){
+    if(this._cache&&this._cacheV===this._v) return this._cache;
+    const base=this.older.length? this.older.concat(this.data) : this.data;
+    const out=this.cur? base.concat([this.cur]) : base.slice();
+    this._cache=out; this._cacheV=this._v; return out;
+  }
 }
 /* Контейнер актива: цены и свечи приходят с сервера, локальный генерации нет */
 class Asset{
@@ -1084,19 +1312,131 @@ const RAW=[
 const ASSET_CATALOG = RAW.map(r=>({id:r[0],cat:r[1],payout:r[2],dec:r[6]}));
 const ASSETS={};
 ASSET_CATALOG.forEach(a=>{ ASSETS[a.id]=new Asset(a.id,a.dec,a.cat,a.payout); });
+/* PLAT1: выплаты и лимиты с сервера (админ может менять) */
+let LIMITS={minTrade:1,maxTrade:100000,minDeposit:10,maxDeposit:1000000,minWithdrawal:10};
+async function refreshAssets(){
+  try{
+    const r=await (await fetch('/api/assets')).json();
+    for(const a of (r.assets||[])) if(ASSETS[a.id]){
+      if(+a.payout>0){ ASSETS[a.id].payout=+a.payout;
+        const c=ASSET_CATALOG.find(x=>x.id===a.id); if(c) c.payout=+a.payout; }
+      ASSETS[a.id].closed=!!a.closed; ASSETS[a.id].closesAt=a.closesAt||null;
+      const cc=ASSET_CATALOG.find(x=>x.id===a.id); if(cc){ cc.closed=!!a.closed; cc.closesAt=a.closesAt||null; }
+    }
+    if(r.warnMin) MH_WARN=+r.warnMin||15;
+    mhTick();
+    if(r.limits) LIMITS={...LIMITS,...r.limits};
+    const ai=document.getElementById('ap-input'); if(ai){ ai.min=LIMITS.minTrade; ai.max=LIMITS.maxTrade; }
+    const da=document.getElementById('dep-amount'); if(da) da.min=LIMITS.minDeposit;
+    const wa=document.getElementById('wd-amount'); if(wa){ wa.min=LIMITS.minWithdrawal; wa.placeholder=t('Минимум {m}',{m:'$'+LIMITS.minWithdrawal}); }
+    if(typeof tradeAmount!=='undefined') setAmount(Math.max(LIMITS.minTrade,Math.min(LIMITS.maxTrade,tradeAmount)));
+    updatePayoutBox(); updateToolbar(); renderFavStrip();
+    const ap=document.getElementById('asset-picker'); if(ap&&ap.classList.contains('open')) renderApcRows();
+  }catch(e){}
+}
+refreshAssets(); setInterval(refreshAssets,60000);
 function payoutOf(name){ return ASSETS[name]?ASSETS[name].payout:85; }
+/* ── рыночные часы ── */
+let MH_WARN=15, mhWarnedFor=0;
+function assetClosed(name){ return !!(ASSETS[name]&&ASSETS[name].closed); }
+function assetClosesAt(name){ return (ASSETS[name]&&ASSETS[name].closesAt)||null; }
+function maxExpiryFor(name){ const c=assetClosesAt(name); const m=c?Math.floor(c-Date.now()/1000)-60:14400; return Math.min(14400,m); } /* макс. экспирация 4 часа */
+function updTradeBtns(){
+  const dis=assetClosed(curAsset)||maxExpiryFor(curAsset)<5;
+  const bu=document.getElementById('btn-up'), bd=document.getElementById('btn-down');
+  if(bu) bu.disabled=dis; if(bd) bd.disabled=dis;
+}
 
+/* ── SENT: градусник настроения рынка ── */
+async function pollSentiment(){
+  if(curView!=='trade'||document.hidden) return;
+  try{
+    const r=await (await fetch('/api/sentiment?asset='+encodeURIComponent(curAsset))).json();
+    if(typeof r.up!=='number') return;
+    const up=Math.max(2,Math.min(98,Math.round(r.up)));
+    document.getElementById('sent-col').style.setProperty('--up',up+'%');
+    document.getElementById('sent-up').textContent=up+'%';
+    document.getElementById('sent-dn').textContent=(100-up)+'%';
+  }catch(e){}
+}
+setInterval(pollSentiment,4000);
+
+/* HIST: окна истории. Первое окно — как раньше (~1600 свечей с живого края),
+   старше — чанки по скроллу влево с предзапасом (PREFETCH), живой край рендера не трогаем.
+   Лимиты клиента: OLDER_CAP свечей старше живого окна на (актив,ТФ), MAX_WINDOWS глубоких окон (LRU). */
 const historyLoaded=new Set();
+const histMeta={}; /* key -> {oldest, hasMore, loading} */
+const histLRU=[];
+const HIST_FIRST=1600, HIST_CHUNK=1000, HIST_PREFETCH=900, HIST_OLDER_CAP=4400, HIST_MAX_WINDOWS=6;
+const histKey=(name,tf)=>name+'|'+tf;
+function histTouch(key){
+  const i=histLRU.indexOf(key); if(i>=0) histLRU.splice(i,1); histLRU.push(key);
+  while(histLRU.length>HIST_MAX_WINDOWS){
+    const ev=histLRU.shift(); if(ev===key){ histLRU.push(ev); break; }
+    const m=histMeta[ev]; if(!m) continue;
+    const p=ev.split('|'), a=ASSETS[p[0]];
+    if(a&&a.aggs[p[1]]){ a.aggs[p[1]].older=[]; a.aggs[p[1]]._bump(); }
+    const live=a&&a.aggs[p[1]]? a.aggs[p[1]].data : [];
+    m.oldest=live.length? live[0].time : m.oldest; m.hasMore=true; m.loading=false; /* окно вытеснено — догрузится по требованию */
+  }
+}
 async function loadHistory(name,tf){
-  const key=name+'|'+tf;
+  const key=histKey(name,tf);
   if(historyLoaded.has(key)) return;
-  const r=await api('/chart/'+encodeURIComponent(name)+'?tf='+tf);
+  const r=await api('/chart/'+encodeURIComponent(name)+'?tf='+tf+'&limit='+HIST_FIRST);
   const agg=ASSETS[name].aggs[tf];
   const cs=r.candles||[];
   agg.data=cs.slice(0,-1);
   agg.cur=cs.length? cs[cs.length-1] : null;
+  agg.older=[]; agg._bump();
+  histMeta[key]={ oldest: cs.length?cs[0].time:null, hasMore: !!r.hasMore, loading:false };
+  histTouch(key);
   historyLoaded.add(key);
   historyAsset=name; /* V1 */
+}
+/* HIST: догрузка чанка старше oldest, если видимое окно близко к левому краю.
+   Вью не дёргается: pan считаем от живого края, prepend слева её не двигает.
+   Вызывается из обработчиков панорамы/зума и страховочным интервалом — рендер не задет. */
+async function maybePrefetch(){
+  const key=histKey(curAsset,curTF);
+  const m=histMeta[key];
+  if(!m||!m.hasMore||m.loading||m.oldest==null) return;
+  let startIdx=0;
+  try{ startIdx=getVisible().startIdx; }catch(e){ return; }
+  if(startIdx>HIST_PREFETCH) return;
+  m.loading=true; histTouch(key);
+  try{
+    const r=await api('/chart/'+encodeURIComponent(curAsset)+'?tf='+curTF+'&before='+m.oldest+'&limit='+HIST_CHUNK);
+    if(histMeta[key]!==m) return; /* окно сброшено (смена эпохи) — чанк устарел */
+    const cs=r.candles||[];
+    const p=key.split('|'), a=ASSETS[p[0]], agg=a&&a.aggs[p[1]];
+    if(!agg) return;
+    if(cs.length){
+      agg.older=cs.concat(agg.older);
+      /* pan НЕ трогаем: вью привязана к правому (живому) краю через pan,
+         prepend/trim слева её не сдвигают — буфер просто растёт (startIdx += N) */
+      if(agg.older.length>HIST_OLDER_CAP){ /* лимит памяти: режем самое старое */
+        const drop=agg.older.length-HIST_OLDER_CAP;
+        agg.older.splice(0,drop);
+      }
+      if(p[0]===curAsset&&p[1]===curTF){ /* страховка от перелёта за левый край после трима */
+        try{ pan=clampPan(pan); }catch(e){}
+      }
+      agg._bump();
+      m.oldest=agg.older.length? agg.older[0].time : cs[0].time;
+    }
+    m.hasMore=!!r.hasMore&&cs.length>0;
+    if(m.hasMore&&p[0]===curAsset&&p[1]===curTF){
+      try{ if(getVisible().startIdx<=HIST_PREFETCH) setTimeout(maybePrefetch,80); }catch(e){} /* быстрый скролл — цепляем следующий чанк сразу */
+    }
+  }catch(e){ /* сеть/сервер: молча, повторим при следующем сдвиге */ }
+  finally{ m.loading=false; }
+}
+function histResetAll(){ /* V2: сервер перезапустился — весь кэш истории невалиден */
+  historyLoaded.clear();
+  for(const k in histMeta) delete histMeta[k];
+  histLRU.length=0;
+  for(const n in ASSETS) for(const tf in ASSETS[n].aggs){ const g=ASSETS[n].aggs[tf]; if(g.older.length){ g.older=[]; g._bump(); } }
 }
 
 
@@ -1174,12 +1514,13 @@ let activeTab='open', expandedOpenId=null, expandedClosedId=null;
 
 function switchTab(tab){
   activeTab=tab;
-  document.getElementById('tab-open').classList.toggle('active',tab==='open');
-  document.getElementById('tab-closed').classList.toggle('active',tab==='closed');
-  document.getElementById('pane-open').classList.toggle('active',tab==='open');
-  document.getElementById('pane-closed').classList.toggle('active',tab==='closed');
+  [['tab-open','open'],['tab-closed','closed'],['mob-tab-open','open'],['mob-tab-closed','closed'],
+   ['pane-open','open'],['pane-closed','closed'],['mob-pane-open','open'],['mob-pane-closed','closed']
+  ].forEach(([id,k])=>{ const e=document.getElementById(id); if(e) e.classList.toggle('active',tab===k); });
   if(tab==='closed') renderClosed();
 }
+function openTradesModal(){ document.getElementById('trades-overlay').classList.add('open'); renderOpen(); switchTab(activeTab||'open'); }
+function closeTradesModal(){ document.getElementById('trades-overlay').classList.remove('open'); }
 
 function updateBalance(){
   animBal(balance); /* Y3: count-up + вспышка */
@@ -1209,9 +1550,24 @@ function showFundsModal(){
 
 function closeFundsModal(){ document.getElementById('funds-overlay').classList.remove('open'); }
 
+function mhTick(){
+  if(assetClosed(curAsset)){
+    const otc=curAsset+' OTC';
+    const next=(ASSETS[otc]&&!ASSETS[otc].closed)?otc:(ASSET_CATALOG.find(a=>!a.closed)||{}).id;
+    if(next&&next!==curAsset){ toast(t('Актив закрыт, переключено на {a}',{a:next}),'info'); selectAsset(next); }
+    updTradeBtns(); return;
+  }
+  const nowS=Date.now()/1000, c=assetClosesAt(curAsset);
+  if(c&&c>nowS&&c-nowS<MH_WARN*60&&mhWarnedFor!==c){ mhWarnedFor=c; toast(t('Актив скоро станет недоступен'),'info'); }
+  const mx=maxExpiryFor(curAsset);
+  if(tradeExpiry>mx&&mx>=5) epSetFromSec(mx);
+  updTradeBtns();
+}
 let tradeBusy=false;
 async function openTrade(dir){
   if(!U){ openAuth(); return; }
+  if(assetClosed(curAsset)){ toast(t('Рынок закрыт'),'err'); return; }
+  if(tradeExpiry>maxExpiryFor(curAsset)){ toast(t('Экспирация позже закрытия рынка'),'err'); return; }
   if(tradeBusy) return;
   if(tradeAmount<1){ toast('Минимальная сумма — $1','err'); return; }
   if(balance<tradeAmount){ showFundsModal(); return; }
@@ -1224,6 +1580,8 @@ async function openTrade(dir){
     toast((dir==='UP'?'▲ ':'▼ ')+curAsset+' · '+money(tradeAmount)+' · '+hms(tradeExpiry),'info');
   }catch(e){
     if(e.status===402) showFundsModal();
+    else if(e.code==='market_closed'){ toast(t('Рынок закрыт'),'err'); refreshAssets(); }
+    else if(e.code==='expiry_beyond_close'){ toast(t('Экспирация позже закрытия рынка'),'err'); refreshAssets(); }
     else if(e.code==='blocked') forceLogout();
     else if(e.status===401) openAuth();
     else toast('Не удалось открыть сделку','err');
@@ -1248,7 +1606,7 @@ function applyTrades(r,withToasts){
   if(!suppressCloseToasts&&withToasts){
     for(const t of closed){
       if(!knownClosed.has(t.id)){
-        toast(t.tie?('= '+t.asset+' возврат '+money(t.amount)):(t.won?('+'+money(t.profit)+' · '+t.asset):('−'+money(t.amount)+' · '+t.asset)),
+        toast(t.tie?window.t('= {a} возврат {m}',{a:t.asset,m:money(t.amount)}):(t.won?window.t('+{m} · {a}',{m:money(t.profit),a:t.asset}):window.t('−{m} · {a}',{m:money(t.amount),a:t.asset})),
           t.tie?'info':(t.won?'win':'loss'));
         if(t.won){ sWin(); confetti(); } else if(!t.tie) sLose(); /* Y1/Y2 */
       }
@@ -1298,16 +1656,20 @@ function tradeDetailHTML(td,live){ /* FL: t() в рендере — без ми�
   <div class="di-row">
     <div><span class="di-label">${t('ЦЕНА ВХОДА')}</span>${a.fmt(td.entryPrice)}</div>
     <div style="text-align:center"><span class="di-label">${live?t('ТЕКУЩАЯ'):t('ЗАКРЫТИЕ')}</span>${a.fmt(cur)}</div>
-    <div style="text-align:right"><span class="di-label">${t('РАЗНИЦА')}</span><span style="color:${pts>=0?'var(--green)':'var(--red)'}">${pts>=0?'+':''}${pts} п.</span></div>
+    <div style="text-align:right"><span class="di-label">${t('РАЗНИЦА')}</span><span style="color:${pts>=0?'var(--green)':'var(--red)'}">${t('{n} п.',{n:((pts>=0?'+':'')+pts)})}</span></div>
   </div>`;
 }
 
 function renderOpen(){
-  const pane=document.getElementById('pane-open'), msg=document.getElementById('no-open-msg');
-  if(!pane) return;
+  renderOpenInto('pane-open','no-open-msg','cnt-open');
+  renderOpenInto('mob-pane-open','mob-no-open-msg','mob-cnt-open');
+}
+function renderOpenInto(pid,mid,cid){
+  const pane=document.getElementById(pid), msg=document.getElementById(mid);
+  if(!pane||!msg) return;
   pane.querySelectorAll('.ti,.ti-detail').forEach(e=>e.remove());
   const list=U?getTrades():[];
-  const cnt=document.getElementById('cnt-open'); if(cnt) cnt.textContent=list.length||'';
+  const cnt=document.getElementById(cid); if(cnt) cnt.textContent=list.length||'';
   if(!list.length){ msg.style.display='block'; return; }
   msg.style.display='none';
   const now=Date.now()/1000;
@@ -1333,8 +1695,12 @@ function renderOpen(){
 }
 
 function renderClosed(){
-  const pane=document.getElementById('pane-closed'), msg=document.getElementById('no-closed-msg');
-  if(!pane) return;
+  renderClosedInto('pane-closed','no-closed-msg');
+  renderClosedInto('mob-pane-closed','mob-no-closed-msg');
+}
+function renderClosedInto(pid,mid){
+  const pane=document.getElementById(pid), msg=document.getElementById(mid);
+  if(!pane||!msg) return;
   pane.querySelectorAll('.ti,.ti-detail,.ti-date-sep').forEach(e=>e.remove());
   const list=U?getHistory():[];
   if(!list.length){ msg.style.display='block'; return; }
@@ -1431,6 +1797,7 @@ function fmtAxisTime(ts){
   return pad2(d.getDate())+'.'+pad2(d.getMonth()+1);
 }
 
+let hoverDir=null; /* ховер кнопок Купить/Продать: дымка направления */
 function draw(){
   if(!CW||!CH) return;
   const cW=CW-PW, cH=CH-TH;
@@ -1527,6 +1894,23 @@ function draw(){
 
   if(activeInds.size) drawOverlayIndicators(dv,V.leftPad,py,cW,cH,V.startIdx);
 
+  /* ховер кнопок: дымка направления от текущей цены + стрелка (только десктоп) */
+  if(hoverDir&&!isMobile()){
+    const hp=atLive?lp:lastC.close, hy=Math.max(0,Math.min(cH,py(hp))), UP=hoverDir==='UP';
+    ctx.save();
+    ctx.fillStyle=UP?'rgba(34,197,94,.10)':'rgba(239,68,68,.10)';
+    if(UP) ctx.fillRect(0,0,cW,hy); else ctx.fillRect(0,hy,cW,cH-hy);
+    ctx.strokeStyle=UP?'rgba(34,197,94,.5)':'rgba(239,68,68,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,hy+.5); ctx.lineTo(cW,hy+.5); ctx.stroke();
+    const ay=UP?Math.max(16,hy-20):Math.min(cH-16,hy+20);
+    ctx.fillStyle=UP?'#22c55e':'#ef4444';
+    ctx.beginPath();
+    if(UP){ ctx.moveTo(cW-30,ay+9); ctx.lineTo(cW-14,ay+9); ctx.lineTo(cW-22,ay-7); }
+    else { ctx.moveTo(cW-30,ay-9); ctx.lineTo(cW-14,ay-9); ctx.lineTo(cW-22,ay+7); }
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
   /* ── TRADE MARKERS (time-accurate) ── */
   const nowSec=Date.now()/1000;
   const labelRows=[];
@@ -1572,7 +1956,7 @@ function draw(){
       roundRect(ctx,bx,ly,tw+12,20,5); ctx.fill(); ctx.stroke();
       ctx.fillStyle=col; ctx.textAlign='left'; ctx.fillText(txt,bx+6,ly+10);
       ctx.fillStyle='#5c6a86'; ctx.font='9px Inter';
-      ctx.fillText('закрытие',bx+6,ly+30>cH?ly+10:ly-6);
+      ctx.fillText(window.t('закрытие'),bx+6,ly+30>cH?ly+10:ly-6);
     }
     /* dot at entry */
     if(eX>=-4&&eX<=cW){
@@ -1611,6 +1995,12 @@ function draw(){
     ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='left';
     ctx.fillText(ASSETS[curAsset].fmt(cur),cW+5,y);
   }
+
+  /* drawings layer: share geometry with mouse handlers */
+  GEOM.ok=true; GEOM.lo=lo; GEOM.hi=hi; GEOM.cW=cW; GEOM.cH=cH; GEOM.tfSec=tfSec;
+  GEOM.py=py; GEOM.timeToX=timeToX; GEOM.xToTime=xToTime;
+  GEOM.yToPrice=y=>lo+(hi-lo)*(1-y/cH);
+  drawDrawings();
 
   /* crosshair */
   if(onChart&&mx>=0&&mx<cW&&my>=0&&my<cH){
@@ -1723,8 +2113,8 @@ function drawSubPanels(vis,leftPad,startIdx){
       for(let i=0;i<vis.length;i++){const v=vals[off+i];if(v==null)continue;const x=xOf(i),y=Y(v,mn,mx);
         if(y<0||y>h){st=false;continue} st?c.lineTo(x,y):(c.moveTo(x,y),st=true)} c.stroke();
       let last=null; for(let i=vis.length-1;i>=0;i--){if(vals[off+i]!=null){last=vals[off+i];break}}
-      if(last!=null){ let y=Math.max(9,Math.min(h-9,Y(last,mn,mx)));
-        while(chips.some(cy=>Math.abs(cy-y)<16)) y=Math.min(h-9,y+16); /* G9: бейджи друг над другом */
+      if(last!=null){ let y=Math.max(9,Math.min(h-9,Y(last,mn,mx))),g9=0;
+        while(chips.some(cy=>Math.abs(cy-y)<16)&&g9++<12) y=Math.min(h-9,y+16); /* G9: бейджи друг над другом (кап 12 — защита от вечного цикла) */
         chips.push(y);
         c.fillStyle=col; c.fillRect(cw,y-8,PW,16);
         c.fillStyle='#0a101c'; c.font='bold 9px JetBrains Mono'; c.textAlign='left'; c.textBaseline='middle';
@@ -1760,6 +2150,10 @@ function drawSubPanels(vis,leftPad,startIdx){
    8. DROPDOWNS / POPUPS
    ══════════════════════════════════════════════════════════════ */
 function closeAll(){ document.querySelectorAll('.pop.open,.dd.open').forEach(e=>e.classList.remove('open')); }
+function toggleLangInline(e){ if(e) e.stopPropagation();
+  const el=document.getElementById('lang-inline'); if(!el) return;
+  el.style.display=(el.style.display==='none')?'block':'none';
+}
 function toggleDD(id,anchor,e){
   if(e) e.stopPropagation();
   const dd=document.getElementById(id); const was=dd.classList.contains('open');
@@ -1776,14 +2170,21 @@ function placePop(pop,anchor,e){
   closeAll(); if(was) return false;
   const r=anchor.getBoundingClientRect();
   pop.classList.add('open');
-  pop.style.top=(r.bottom+6)+'px'; pop.style.left=r.left+'px';
-  const pr=pop.getBoundingClientRect();
-  if(pr.right>window.innerWidth-8) pop.style.left=Math.max(8,window.innerWidth-pr.width-8)+'px';
-  if(pr.bottom>window.innerHeight-8) pop.style.top=Math.max(8,r.top-pr.height-6)+'px';
+  if(isMobile()){ /* вверх от якоря, на всю ширину */
+    pop.style.left='8px'; pop.style.right='8px';
+    const pr=pop.getBoundingClientRect();
+    pop.style.top=Math.max(8,r.top-pr.height-6)+'px';
+  } else {
+    pop.style.right='';
+    pop.style.top=(r.bottom+6)+'px'; pop.style.left=r.left+'px';
+    const pr=pop.getBoundingClientRect();
+    if(pr.right>window.innerWidth-8) pop.style.left=Math.max(8,window.innerWidth-pr.width-8)+'px';
+    if(pr.bottom>window.innerHeight-8) pop.style.top=Math.max(8,r.top-pr.height-6)+'px';
+  }
   return true;
 }
 document.addEventListener('click',e=>{ if(e.target.closest('.pop,.dd')) return; closeAll(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeAll(); closeFundsModal(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeAll(); closeFundsModal(); closeTradesModal(); closeDepSheet(); cancelDrawTool(); } });
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -1826,6 +2227,7 @@ function switchRightPanel(p){
   updateSidebar(); saveViewState(); requestAnimationFrame(()=>{ resize(); resizeSubPanels(); draw(); });
 }
 function finTab(t){
+  closeDepSheet();
   ['deposit','withdraw','ops'].forEach(k=>{
     document.getElementById('ftab-'+k).classList.toggle('active',k===t);
     document.getElementById('fpane-'+k).classList.toggle('active',k===t);
@@ -1868,7 +2270,7 @@ function buildTfGrid(){
 }
 
 function selectTF(tf){
-  curTF=tf; pan=0; updateToolbar(); updateStatus(); savePrefs(); closeAll(); draw();
+  curTF=tf; pan=0; cancelDrawTool(); loadDrawings(); updateToolbar(); updateStatus(); savePrefs(); closeAll(); draw();
   loadHistory(curAsset,tf).then(()=>draw()).catch(()=>{});
 }
 function toggleTfPopup(e){ placePop(document.getElementById('tf-popup'),document.getElementById('ct-tf-btn'),e); }
@@ -1878,21 +2280,23 @@ function renderApcRows(){
   const el=document.getElementById('apc-rows'); el.innerHTML='';
   let list= apcCat==='favorites'? ASSET_CATALOG.filter(a=>favorites.has(a.id)) : ASSET_CATALOG.filter(a=>a.cat===apcCat);
   if(apcSearch) list=ASSET_CATALOG.filter(a=>a.id.toLowerCase().includes(apcSearch));
+  list=list.slice().sort((a,b)=>((a.closed?1:0)-(b.closed?1:0))||(payoutOf(b.id)-payoutOf(a.id)));
   if(!list.length){ el.innerHTML='<div class="sp-empty">Ничего не найдено</div>'; return; }
   list.forEach(a=>{
-    const r=document.createElement('div'); r.className='apc-row'+(a.id===curAsset?' active':'');
+    const r=document.createElement('div'); r.className='apc-row'+(a.id===curAsset?' active':'')+(a.closed?' closed':'');
     r.innerHTML=`<span class="apc-star ${favorites.has(a.id)?'fav':''}">★</span>
       <span class="apc-name">${getAssetIconHTML(a.id)}${a.id}</span>
-      <span class="apc-pay ${a.payout<60?'low':''}">+${a.payout}%</span>`;
+      `+(a.closed?'<span class="apc-pay na">N/A</span>':`<span class="apc-pay ${payoutOf(a.id)<60?'low':''}">+${payoutOf(a.id)}%</span>`);
     r.querySelector('.apc-star').onclick=ev=>{ ev.stopPropagation(); favorites.has(a.id)?favorites.delete(a.id):favorites.add(a.id); persistFavs(); renderApcRows(); renderFavStrip(); }; /* X */
-    r.onclick=()=>{ closeAll(); selectAsset(a.id); };
+    if(!a.closed) r.onclick=()=>{ closeAll(); selectAsset(a.id); };
     el.appendChild(r);
   });
   applyLang();
 }
 async function selectAsset(name){
   if(!ASSETS[name]||name===curAsset) return;
-  curAsset=name; pan=0;
+  if(assetClosed(name)){ toast(t('Рынок закрыт'),'err'); return; }
+  curAsset=name; pan=0; cancelDrawTool(); loadDrawings(); pollSentiment();
   renderFavStrip(); /* X: подсветка активного чипа */
   prevDisplayPrice=curDisplayPrice=ASSETS[name].price(); /* V1: сразу, чтобы во время загрузки живая цена нового актива не растягивала старые свечи */
   updateToolbar(); updatePayoutBox(); savePrefs();
@@ -1921,7 +2325,7 @@ function buildApc(){
 function openAssetPicker(e){
   const ok=placePop(document.getElementById('asset-picker'),document.getElementById('ct-asset'),e);
   if(!ok) return;
-  apcSearch=''; document.getElementById('apc-search').value=''; renderApcRows();
+  apcSearch=''; document.getElementById('apc-search').value=''; renderApcRows(); refreshAssets();
   if(!isMobile()) setTimeout(()=>document.getElementById('apc-search').focus(),30);
 }
 
@@ -1937,7 +2341,7 @@ function buildAmount(){
   document.getElementById('ap-input').addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(!isNaN(v)&&v>0) setAmount(v); });
 }
 function setAmount(v){
-  v=Math.max(1,Math.min(100000,Math.round(v*100)/100)); tradeAmount=v;
+  v=Math.max(LIMITS.minTrade,Math.min(LIMITS.maxTrade,Math.round(v*100)/100)); tradeAmount=v;
   document.getElementById('amount-shown').textContent='$'+(Number.isInteger(v)?v:v.toFixed(2));
   const inp=document.getElementById('ap-input'); if(document.activeElement!==inp) inp.value=v;
   document.querySelectorAll('#ap-presets .pre').forEach(b=>b.classList.toggle('active',+b.dataset.v===v));
@@ -1952,21 +2356,25 @@ const EP_SHOW=[5,15,30,60,180,300,900,1800,3600];
 const EP_LABELS={5:'S5',15:'S15',30:'S30',60:'M1',120:'M2',180:'M3',300:'M5',600:'M10',900:'M15',1800:'M30',3600:'H1',7200:'H2'};
 let epH=0,epM=1,epS=0;
 function epTotal(){ return epH*3600+epM*60+epS; }
-function epSetFromSec(s){ s=Math.max(5,Math.min(86399,Math.round(s))); epH=Math.floor(s/3600); epM=Math.floor(s%3600/60); epS=s%60; epSync(); }
+function epSetFromSec(s){ s=Math.max(5,Math.min(14400,Math.round(s))); epH=Math.floor(s/3600); epM=Math.floor(s%3600/60); epS=s%60; epSync(); }
 function epSync(){
+  const mx=maxExpiryFor(curAsset);
+  if(epTotal()>mx){ if(mx>=5) epSetFromSec(mx); else { tradeExpiry=Math.max(5,epTotal()); } }
   const t=Math.max(5,epTotal()); tradeExpiry=t;
   document.getElementById('ep-hh').textContent=pad2(epH);
   document.getElementById('ep-mm').textContent=pad2(epM);
   document.getElementById('ep-ss').textContent=pad2(epS);
   document.getElementById('expiry-shown').textContent=hms(t);
   document.querySelectorAll('#ep-presets .pre').forEach(b=>b.classList.toggle('active',+b.dataset.v===t));
+  { const mx2=maxExpiryFor(curAsset);
+    document.querySelectorAll('#ep-presets .pre').forEach(b=>b.classList.toggle('dis',+b.dataset.v>mx2)); }
   savePrefs();
 }
 function epStep(u,d){
-  if(u==='h') epH=Math.max(0,Math.min(23,epH+d));
+  if(u==='h') epH=Math.max(0,Math.min(4,epH+d));
   if(u==='m') epM=Math.max(0,Math.min(59,epM+d));
   if(u==='s'){ let n=epS+d; if(n<0&&epM>0){epM--;n=59;} else if(n>59){epM=Math.min(59,epM+1);n=0;} epS=Math.max(0,n); }
-  if(epTotal()<5){ epH=0;epM=0;epS=5; }
+  if(epTotal()<5){ epH=0;epM=0;epS=5; } if(epTotal()>14400){ epH=4;epM=0;epS=0; }
   epSync();
 }
 function stepExpiry(d){
@@ -2005,31 +2413,305 @@ function closeIndPanel(){ document.getElementById('ind-panel').classList.remove(
 let dragging=false,dragX0=0,pan0=0;
 canvas.addEventListener('mousemove',e=>{
   const r=canvas.getBoundingClientRect(); mx=e.clientX-r.left; my=e.clientY-r.top; onChart=true;
-  if(dragging){ pan=clampPan(pan0+Math.round((e.clientX-dragX0)/candleW)); }
+  if(drawDrag){ drawDragMove(mx,my); return; }
+  if(drawTool){ drawHover=null; return; }
+  if(dragging){ pan=clampPan(pan0+Math.round((e.clientX-dragX0)/candleW)); maybePrefetch(); return; }
+  drawHoverUpdate();
 });
-canvas.addEventListener('mouseleave',()=>{ onChart=false; overlay.style.display='none'; });
-canvas.addEventListener('mousedown',e=>{ dragging=true; dragX0=e.clientX; pan0=pan; });
-window.addEventListener('mouseup',()=>{ dragging=false; });
-canvas.addEventListener('dblclick',()=>{ pan=0; });
+canvas.addEventListener('mouseleave',()=>{ onChart=false; drawHover=null; overlay.style.display='none'; });
+canvas.addEventListener('mousedown',e=>{ drawMouseDown(e); });
+window.addEventListener('mouseup',()=>{ if(drawDrag){ drawDrag=null; saveDrawings(); renderDrawChips(); } dragging=false; });
+canvas.addEventListener('dblclick',e=>{ drawDblClick(e); });
 canvas.addEventListener('wheel',e=>{
   e.preventDefault();
   candleW=Math.max(4,Math.min(40,candleW*(e.deltaY<0?1.12:0.89))); /* I1 */
-  pan=clampPan(pan);
+  pan=clampPan(pan); maybePrefetch();
 },{passive:false});
-let pinch0=null,tX0=null,tPan0=0;
+let pinch0=null,tX0=null,tY0=null,tPan0=0,tScroll=null;
 canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  if(e.touches.length===2){ pinch0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); tX0=null; }
-  else if(e.touches.length===1){ tX0=e.touches[0].clientX; tPan0=pan; pinch0=null; }
-},{passive:false});
+  if(drawTool&&e.touches.length===1){ const t0=e.touches[0]; tapT={x:t0.clientX,y:t0.clientY,t:Date.now(),id:t0.identifier}; tX0=tY0=null; pinch0=null; tScroll=null; return; }
+  tapT=null; tScroll=null;
+  if(e.touches.length===2){ pinch0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); tX0=tY0=null; }
+  else if(e.touches.length===1){ tX0=e.touches[0].clientX; tY0=e.touches[0].clientY; tPan0=pan; pinch0=null; }
+},{passive:true});
 canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(e.touches.length===2&&pinch0){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  if(tapT){ const f=[...e.touches].find(x=>x.identifier===tapT.id); if(!f||Math.hypot(f.clientX-tapT.x,f.clientY-tapT.y)>12) tapT=null; }
+  if(e.touches.length===2&&pinch0){ e.preventDefault(); const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     candleW=Math.max(4,Math.min(40,candleW*(d/pinch0))); pinch0=d; pan=clampPan(pan); /* I1 */ }
-  else if(e.touches.length===1&&tX0!==null){ pan=clampPan(tPan0+Math.round((e.touches[0].clientX-tX0)/candleW)); }
+  else if(e.touches.length===1&&tX0!==null){
+    const dx=e.touches[0].clientX-tX0, dy=e.touches[0].clientY-tY0;
+    if(tScroll==null&&Math.abs(dx)+Math.abs(dy)>10) tScroll=Math.abs(dy)>Math.abs(dx)*1.2;
+    if(tScroll){ tX0=null; return; } /* вертикаль — скролл страницы, не мешаем */
+    e.preventDefault();
+    pan=clampPan(tPan0+Math.round(dx/candleW)); maybePrefetch();
+  }
 },{passive:false});
-canvas.addEventListener('touchend',()=>{ pinch0=null; tX0=null; },{passive:true});
+const _tEnd=()=>{ tScroll=null; tY0=null; };
+canvas.addEventListener('touchend',_tEnd,{passive:true}); canvas.addEventListener('touchcancel',_tEnd,{passive:true});
+canvas.addEventListener('touchend',()=>{ if(tapT&&Date.now()-tapT.t<500){ const r=canvas.getBoundingClientRect(); drawClickAt(tapT.x-r.left,tapT.y-r.top); } tapT=null; pinch0=null; tX0=null; },{passive:true});
 window.addEventListener('resize',()=>{ resize(); resizeSubPanels(); draw(); });
+
+
+/* ══════════════════════════════════════════════════════════════
+   13b. CHART DRAWINGS (трендовые, уровни, фигуры)
+   ══════════════════════════════════════════════════════════════ */
+const DRAW_TOOLS=[
+ {id:'h',name:'Горизонтальная линия'},
+ {id:'v',name:'Вертикальная линия'},
+ {id:'trend',name:'Трендовая линия'},
+ {id:'ray',name:'Луч'},
+ {id:'rect',name:'Прямоугольник'},
+ {id:'arrow',name:'Стрелка'}
+];
+const DRAW_ICONS={h:'─',v:'│',trend:'╱',ray:'↗',rect:'▭',arrow:'→'};
+const DRAW_COLOR='#2dd4bf';
+const GEOM={ok:false};
+let drawings=[], drawTool=null, drawDraft=null, drawHover=null, drawDrag=null, tapT=null;
+let drawSeq=1, lastDrawAt=0;
+
+function drawKey(){ return 'qx_draw_'+curAsset+'_'+curTF; }
+function saveDrawings(){ try{ localStorage.setItem(drawKey(),JSON.stringify(drawings.slice(-50))); }catch(e){} }
+function loadDrawings(){
+  try{ drawings=JSON.parse(localStorage.getItem(drawKey())||'[]'); }catch(e){ drawings=[]; }
+  if(!Array.isArray(drawings)) drawings=[];
+  const num=x=>typeof x==='number'&&isFinite(x);
+  drawings=drawings.filter(d=>d&&DRAW_TOOLS.some(o=>o.id===d.type)&&d.p1&&num(d.p1.t)&&num(d.p1.p)
+    &&(d.type==='h'||d.type==='v'||(d.p2&&num(d.p2.t)&&num(d.p2.p)))).slice(-50);
+  drawHover=null; drawDrag=null; renderDrawChips();
+}
+function evPos(e){ const r=canvas.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; }
+function evData(px,pyv){
+  if(!GEOM.ok) return null;
+  const x=Math.max(0,Math.min(GEOM.cW,px)), y=Math.max(0,Math.min(GEOM.cH,pyv));
+  return {t:GEOM.xToTime(x),p:GEOM.yToPrice(y)};
+}
+function snapTime(t){ return Math.round(t/GEOM.tfSec)*GEOM.tfSec; }
+
+/* ── popup / tools ── */
+function renderDrawTools(){
+  const el=document.getElementById('draw-tools'); if(!el) return;
+  el.innerHTML=DRAW_TOOLS.map(o=>`<div class="ip-item ${drawTool===o.id?'active':''}" onclick="startDrawTool('${o.id}')">`
+    +`<div><div class="n">${DRAW_ICONS[o.id]}&nbsp;&nbsp;${window.t(o.name)}</div></div>`
+    +`<span class="a">${drawTool===o.id?'✓':'+'}</span></div>`).join('');
+}
+function toggleDrawPopup(e){ if(placePop(document.getElementById('draw-popup'),document.getElementById('draw-btn'),e)) renderDrawTools(); }
+function closeDrawPopup(){ document.getElementById('draw-popup').classList.remove('open'); }
+function startDrawTool(id){
+  closeAll();
+  if(drawTool===id){ cancelDrawTool(); return; }
+  drawTool=id; drawDraft=null; drawHover=null;
+  document.getElementById('draw-btn').classList.add('active-tool');
+  showDrawHint(1); renderDrawTools();
+}
+function cancelDrawTool(){
+  if(!drawTool&&!drawDraft) return;
+  drawTool=null; drawDraft=null;
+  const h=document.getElementById('draw-hint'); if(h) h.style.display='none';
+  const b=document.getElementById('draw-btn'); if(b) b.classList.remove('active-tool');
+  renderDrawTools();
+}
+function showDrawHint(step){
+  document.getElementById('draw-hint-tx').textContent=window.t(step===1?'Нажмите на график, чтобы поставить точку':'Нажмите вторую точку');
+  document.getElementById('draw-hint-btn').textContent=window.t('Отменить рисование');
+  document.getElementById('draw-hint').style.display='flex';
+}
+
+/* ── CRUD + chips ── */
+function addDrawing(o){
+  o.id='d'+(drawSeq++)+'_'+Date.now().toString(36);
+  drawings.push(o); if(drawings.length>50) drawings=drawings.slice(-50);
+  lastDrawAt=Date.now(); saveDrawings(); renderDrawChips(); drawHover=o.id;
+}
+function deleteDrawing(id){
+  drawings=drawings.filter(d=>d.id!==id);
+  if(drawHover===id) drawHover=null;
+  saveDrawings(); renderDrawChips();
+}
+function hoverDraw(id){ drawHover=id; }
+function unhoverDraw(){ drawHover=null; }
+function renderDrawChips(){
+  const c=document.getElementById('draw-chips'); if(!c) return;
+  c.innerHTML=drawings.map(d=>{
+    const o=DRAW_TOOLS.find(x=>x.id===d.type);
+    const nm=o?window.t(o.name):d.type;
+    let val='';
+    try{
+      if(d.type==='h') val=' • '+ASSETS[curAsset].fmt(d.p1.p);
+      else if(d.type==='v') val=' • '+fmtAxisTime(d.p1.t);
+    }catch(e){}
+    return `<span class="draw-chip" onmouseenter="hoverDraw('${d.id}')" onmouseleave="unhoverDraw()"><i></i>${nm}${val}<b onclick="deleteDrawing('${d.id}')">✕</b></span>`;
+  }).join('');
+}
+
+/* ── creation ── */
+function drawClickAt(px,pyv){
+  if(!drawTool||!GEOM.ok) return;
+  if(px<0||pyv<0||px>GEOM.cW||pyv>GEOM.cH) return;
+  const D=evData(px,pyv); if(!D) return;
+  if(drawTool==='h'){ addDrawing({type:'h',p1:{t:0,p:D.p},p2:null}); cancelDrawTool(); return; }
+  if(drawTool==='v'){ addDrawing({type:'v',p1:{t:snapTime(D.t),p:0},p2:null}); cancelDrawTool(); return; }
+  if(!drawDraft){ drawDraft={type:drawTool,p1:{t:snapTime(D.t),p:D.p}}; showDrawHint(2); return; }
+  const p2={t:snapTime(D.t),p:D.p};
+  if(p2.t===drawDraft.p1.t&&p2.p===drawDraft.p1.p) return; /* вырожденная фигура — ждём другую точку */
+  addDrawing({type:drawDraft.type,p1:drawDraft.p1,p2});
+  drawDraft=null; cancelDrawTool();
+}
+
+/* ── hover / hit-test / drag ── */
+function ptSegDist(px,pyv,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy||1;
+  let tt=((px-ax)*dx+(pyv-ay)*dy)/L2; tt=Math.max(0,Math.min(1,tt));
+  return Math.hypot(px-(ax+dx*tt),pyv-(ay+dy*tt));
+}
+function drawHitTest(px,pyv){
+  if(!GEOM.ok) return null;
+  const {py,timeToX,cW,cH}=GEOM, TOL=7;
+  for(let i=drawings.length-1;i>=0;i--){
+    const d=drawings[i];
+    if(d.type==='h'){ if(px>=0&&px<=cW&&Math.abs(pyv-py(d.p1.p))<TOL) return {d,part:'move'}; }
+    else if(d.type==='v'){ const x=timeToX(d.p1.t); if(pyv>=0&&pyv<=cH&&Math.abs(px-x)<TOL) return {d,part:'move'}; }
+    else{
+      const x1=timeToX(d.p1.t),y1=py(d.p1.p),x2=timeToX(d.p2.t),y2=py(d.p2.p);
+      if(Math.hypot(px-x2,pyv-y2)<9) return {d,part:'p2'};
+      if(d.type==='rect'){
+        const rx=Math.min(x1,x2),ry=Math.min(y1,y2),rw=Math.abs(x2-x1),rh=Math.abs(y2-y1);
+        const nearB=Math.abs(px-rx)<TOL||Math.abs(px-(rx+rw))<TOL||Math.abs(pyv-ry)<TOL||Math.abs(pyv-(ry+rh))<TOL;
+        const inside=px>rx&&px<rx+rw&&pyv>ry&&pyv<ry+rh;
+        if(nearB||inside) return {d,part:null};
+      }else if(d.type==='ray'){
+        const dx=x2-x1,dy=y2-y1,L2=dx*dx+dy*dy||1;
+        const tt=((px-x1)*dx+(pyv-y1)*dy)/L2;
+        if(tt>-0.03&&Math.hypot(px-(x1+dx*tt),pyv-(y1+dy*tt))<TOL) return {d,part:null};
+      }else{
+        if(ptSegDist(px,pyv,x1,y1,x2,y2)<TOL) return {d,part:null};
+      }
+    }
+  }
+  return null;
+}
+function drawHoverUpdate(){
+  if(!GEOM.ok||mx<0||my<0||mx>=GEOM.cW||my>=GEOM.cH){ drawHover=null; canvas.style.cursor='crosshair'; return; }
+  const h=drawHitTest(mx,my);
+  drawHover=h?h.d.id:null;
+  canvas.style.cursor=!h?'crosshair':(h.part==='p2'?'move':(h.d.type==='h'?'ns-resize':(h.d.type==='v'?'ew-resize':'default')));
+}
+function drawMouseDown(e){
+  if(e.button!==0){ dragging=true; dragX0=e.clientX; pan0=pan; return; }
+  if(drawTool){ const p=evPos(e); drawClickAt(p.x,p.y); return; }
+  const p=evPos(e);
+  const h=(GEOM.ok&&p.x>=0&&p.y>=0&&p.x<=GEOM.cW&&p.y<=GEOM.cH)?drawHitTest(p.x,p.y):null;
+  if(h&&h.part){ drawDrag={id:h.d.id,part:h.part}; drawHover=h.d.id; e.preventDefault(); return; }
+  dragging=true; dragX0=e.clientX; pan0=pan;
+}
+function drawDblClick(e){
+  if(drawTool||Date.now()-lastDrawAt<600) return;
+  const p=evPos(e), h=drawHitTest(p.x,p.y);
+  if(h){ deleteDrawing(h.d.id); return; }
+  pan=0;
+}
+function drawDragMove(px,pyv){
+  const dd=drawDrag; if(!dd) return;
+  const d=drawings.find(x=>x.id===dd.id); if(!d) return;
+  const D=evData(px,pyv); if(!D) return;
+  if(d.type==='h') d.p1.p=D.p;
+  else if(d.type==='v') d.p1.t=snapTime(D.t);
+  else d.p2={t:snapTime(D.t),p:D.p};
+  renderDrawChips();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Delete'&&drawHover&&!drawTool&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')) deleteDrawing(drawHover);
+});
+
+/* ── render ── */
+function drawHandles(hs){
+  for(const h of hs){
+    const x=h[0],y=h[1],k=h[2];
+    if(x<-20||x>GEOM.cW+20||y<-20||y>GEOM.cH+20) continue;
+    ctx.beginPath(); ctx.arc(x,y,k==='dot'?2.5:4.5,0,6.284);
+    if(k==='anchor'){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.stroke(); }
+    else{ ctx.fillStyle=k==='p2'?'#fff':DRAW_COLOR; ctx.fill();
+      if(k==='p2'){ ctx.strokeStyle=DRAW_COLOR; ctx.lineWidth=1.6; ctx.stroke(); } }
+  }
+}
+function drawArrowHead(x,y,ang){
+  const s2=9;
+  ctx.save(); ctx.fillStyle=DRAW_COLOR;
+  ctx.beginPath(); ctx.moveTo(x,y);
+  ctx.lineTo(x-s2*Math.cos(ang-.42),y-s2*Math.sin(ang-.42));
+  ctx.lineTo(x-s2*Math.cos(ang+.42),y-s2*Math.sin(ang+.42));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function drawRayLine(x1,y1,x2,y2,edge){
+  let dx=x2-x1,dy=y2-y1;
+  if(!dx&&!dy) dx=1;
+  ctx.beginPath(); ctx.moveTo(x1,y1);
+  if(Math.abs(dx)<0.5){ ctx.lineTo(x1,dy>=0?GEOM.cH+30:-30); }
+  else{ const ex=dx>=0?edge:-30, tt=(ex-x1)/dx; ctx.lineTo(ex,y1+dy*tt); }
+  ctx.stroke();
+}
+function drawDrawings(){
+  if(!GEOM.ok) return;
+  const {py,timeToX,cW,cH}=GEOM, X=t=>timeToX(t);
+  for(const d of drawings){
+    const hov=(d.id===drawHover);
+    ctx.save();
+    ctx.strokeStyle=DRAW_COLOR; ctx.fillStyle=DRAW_COLOR; ctx.lineWidth=hov?2:1.4;
+    if(d.type==='h'){
+      const y=py(d.p1.p);
+      if(y>=-30&&y<=cH+30){
+        ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(cW,y+.5); ctx.stroke();
+        ctx.fillStyle=DRAW_COLOR; ctx.fillRect(cW,y-9,PW,18);
+        ctx.fillStyle='#0a101c'; ctx.font='bold 10px JetBrains Mono'; ctx.textAlign='left';
+        ctx.fillText(ASSETS[curAsset].fmt(d.p1.p),cW+5,y);
+      }
+    }else if(d.type==='v'){
+      const x=X(d.p1.t);
+      if(x>=-30&&x<=cW+30){
+        ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,cH); ctx.stroke();
+        const lbl=fmtAxisTime(Math.floor(d.p1.t/GEOM.tfSec)*GEOM.tfSec);
+        ctx.font='10px JetBrains Mono'; const lw=ctx.measureText(lbl).width+12;
+        const bx=Math.min(cW-lw,Math.max(0,x-lw/2));
+        ctx.fillStyle=DRAW_COLOR; ctx.fillRect(bx,cH,lw,18);
+        ctx.fillStyle='#0a101c'; ctx.textAlign='center'; ctx.fillText(lbl,bx+lw/2,cH+9);
+      }
+    }else if(d.type==='trend'||d.type==='arrow'){
+      const x1=X(d.p1.t),y1=py(d.p1.p),x2=X(d.p2.t),y2=py(d.p2.p);
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      if(d.type==='arrow') drawArrowHead(x2,y2,Math.atan2(y2-y1,x2-x1));
+      if(hov) drawHandles([[x1,y1,'anchor'],[x2,y2,'p2']]);
+    }else if(d.type==='ray'){
+      drawRayLine(X(d.p1.t),py(d.p1.p),X(d.p2.t),py(d.p2.p),cW+30);
+      if(hov) drawHandles([[X(d.p1.t),py(d.p1.p),'anchor'],[X(d.p2.t),py(d.p2.p),'p2']]);
+    }else if(d.type==='rect'){
+      const x1=X(d.p1.t),y1=py(d.p1.p),x2=X(d.p2.t),y2=py(d.p2.p);
+      const rx=Math.min(x1,x2),ry=Math.min(y1,y2),rw=Math.abs(x2-x1),rh=Math.abs(y2-y1);
+      ctx.globalAlpha=.12; ctx.fillRect(rx,ry,rw,rh); ctx.globalAlpha=1;
+      ctx.strokeRect(rx+.5,ry+.5,Math.max(1,rw-1),Math.max(1,rh-1));
+      if(hov) drawHandles([[x1,y1,'anchor'],[x2,y2,'p2'],[x1,y2,'dot'],[x2,y1,'dot']]);
+    }
+    ctx.restore();
+  }
+  /* draft preview */
+  if(onChart&&mx>=0&&mx<cW&&my>=0&&my<cH){
+    if(drawDraft){
+      const x1=timeToX(drawDraft.p1.t),y1=py(drawDraft.p1.p);
+      ctx.save(); ctx.strokeStyle=DRAW_COLOR; ctx.globalAlpha=.85; ctx.lineWidth=1.3; ctx.setLineDash([5,4]);
+      if(drawDraft.type==='rect'){
+        const rx=Math.min(x1,mx),ry=Math.min(y1,my);
+        ctx.strokeRect(rx+.5,ry+.5,Math.max(1,Math.abs(mx-x1)-1),Math.max(1,Math.abs(my-y1)-1));
+      }else if(drawDraft.type==='ray'){ drawRayLine(x1,y1,mx,my,cW+30); }
+      else{ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(mx,my); ctx.stroke(); }
+      ctx.restore();
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x1,y1,4,0,6.284); ctx.fill();
+      ctx.strokeStyle=DRAW_COLOR; ctx.lineWidth=1.6; ctx.stroke();
+    }else if(drawTool==='h'||drawTool==='v'){
+      ctx.save(); ctx.strokeStyle=DRAW_COLOR; ctx.globalAlpha=.7; ctx.lineWidth=1.2; ctx.setLineDash([5,4]);
+      ctx.beginPath();
+      if(drawTool==='h'){ ctx.moveTo(0,my+.5); ctx.lineTo(cW,my+.5); } else { ctx.moveTo(mx+.5,0); ctx.lineTo(mx+.5,cH); }
+      ctx.stroke(); ctx.restore();
+    }
+  }
+}
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -2123,13 +2805,15 @@ const METHODS=[
 function renderMethods(){
   const el=document.getElementById('methods');
   el.innerHTML=METHODS.map(m=>`<div class="method ${m.id===depMethod?'active':''}" onclick="selectMethod('${m.id}')">
-    <div class="ci" style="background:${m.col}">${m.sym.slice(0,1)}</div><b>${m.name}</b><small>${m.sym} · ${m.net}</small></div>`).join('');
+    <div class="ci"><img src="img/coins/${m.sym.toLowerCase()}.svg" alt="${m.sym}" loading="lazy"></div><b>${m.name}</b><small>${m.sym} · ${m.net}</small></div>`).join('');
   const sel=document.getElementById('wd-method');
   sel.innerHTML=METHODS.map(m=>`<option value="${m.id}">${m.name} (${m.sym} · ${m.net})</option>`).join('');
   updateDepDetails();
 }
 
-function selectMethod(id){ depMethod=id; renderMethods(); }
+function selectMethod(id){ depMethod=id; renderMethods(); if(isMobile()) openDepSheet(); }
+function openDepSheet(){ document.getElementById('dep-side').classList.add('open'); document.getElementById('dep-backdrop').classList.add('open'); }
+function closeDepSheet(){ const s=document.getElementById('dep-side'); if(s) s.classList.remove('open'); const b=document.getElementById('dep-backdrop'); if(b) b.classList.remove('open'); }
 
 function setDepAmt(v){ document.getElementById('dep-amount').value=v; document.querySelectorAll('#fpane-deposit .pre').forEach(b=>b.classList.toggle('active',b.textContent.replace(/\D/g,'')==String(v))); updateDepDetails(); }
 
@@ -2139,9 +2823,11 @@ let appliedPromo=null; /* {code,pct} */
 function updateDepDetails(){
   const m=METHODS.find(x=>x.id===depMethod); const usd=parseFloat(document.getElementById('dep-amount').value)||0;
   document.getElementById('dep-method-tag').textContent=m.sym+' · '+m.net;
+  document.getElementById('dep-method-ico').src='img/coins/'+m.sym.toLowerCase()+'.svg';
   const amt=usd/m.rate;
   document.getElementById('dep-crypto-amt').textContent=(amt>=1?amt.toFixed(4):amt.toFixed(6))+' '+m.sym;
   document.getElementById('dep-addr').textContent=m.addr;
+  renderDepInstr();
   const row=document.getElementById('dep-bonus-row');
   if(row){
     if(appliedPromo&&usd>0){
@@ -2158,26 +2844,71 @@ async function checkPromo(){
   try{
     const r=await api('/finance/promo/check?code='+encodeURIComponent(code));
     appliedPromo={code:r.code,pct:r.bonusPct};
-    hint.textContent='✓ +'+r.bonusPct+'% к депозиту'; hint.style.color='var(--green)';
+    hint.textContent=t('✓ +{p}% к депозиту',{p:r.bonusPct}); hint.style.color='var(--green)';
   }catch(e){
     appliedPromo=null;
     hint.textContent='✗ код не найден'; hint.style.color='var(--red)';
   }
   updateDepDetails();
 }
+loadDepInstr();
+let depShotFile=null, DEP_INSTR={};
+async function loadDepInstr(){
+  try{
+    const r=await (await fetch('/api/finance/deposit-instructions')).json();
+    if(r.instructions) DEP_INSTR=r.instructions;
+  }catch(e){}
+  renderDepInstr();
+}
+function renderDepInstr(){
+  const el=document.getElementById('dep-instr'); if(!el) return;
+  const lang=(window.getLang&&getLang())||'ru';
+  const tx=DEP_INSTR[lang]||DEP_INSTR.en||DEP_INSTR.ru||'';
+  el.textContent=tx; el.style.display=tx?'block':'none';
+}
+function depShotChange(inp){
+  const f=inp.files&&inp.files[0];
+  const err=document.getElementById('dep-shot-err'); err.textContent='';
+  if(!f){ depShotClear(); return; }
+  if(!/^image\/(jpeg|png|webp|gif)$/.test(f.type)){ err.textContent=t('Нужен файл-картинка (JPG/PNG/WebP/GIF)'); inp.value=''; return; }
+  if(f.size>5*1024*1024){ err.textContent=t('Файл больше 5 МБ'); inp.value=''; return; }
+  depShotFile=f;
+  document.getElementById('dep-shot-name').textContent='📎 '+f.name;
+  document.getElementById('dep-shot-x').style.display='';
+  const pv=document.getElementById('dep-shot-prev'); pv.src=URL.createObjectURL(f); pv.style.display='block';
+}
+function depShotClear(){
+  depShotFile=null;
+  document.getElementById('dep-shot').value='';
+  document.getElementById('dep-shot-name').textContent='';
+  document.getElementById('dep-shot-x').style.display='none';
+  const pv=document.getElementById('dep-shot-prev'); pv.style.display='none'; pv.src='';
+}
 async function confirmDeposit(){
   if(!U) return openAuth();
   const usd=parseFloat(document.getElementById('dep-amount').value)||0;
-  if(usd<10){ toast('Минимальная сумма пополнения — $10','err'); return; }
+  if(usd<LIMITS.minDeposit){ toast(t('Минимальная сумма пополнения — {m}',{m:'$'+LIMITS.minDeposit}),'err'); return; }
+  const err=document.getElementById('dep-shot-err');
+  if(!depShotFile){ err.textContent=t('Прикрепите скриншот перевода'); document.getElementById('dep-shot').focus(); return; }
+  err.textContent='';
+  const btn=document.getElementById('dep-submit-btn');
+  btn.disabled=true; const oldTx=btn.textContent; btn.textContent=t('Создаём заявку…');
   try{
-    await api('/finance/deposits',{method:'POST',body:{method:depMethod,amount:usd,promo:appliedPromo?appliedPromo.code:''}});
-    toast('Заявка на '+money(usd)+' создана и ожидает подтверждения','info');
-    await loadOps(); renderFinance();
+    const fd=new FormData();
+    fd.append('method',depMethod); fd.append('amount',usd);
+    fd.append('promo',appliedPromo?appliedPromo.code:'');
+    fd.append('screenshot',depShotFile);
+    await api('/finance/deposits',{method:'POST',body:fd});
+    toast(t('Заявка на {m} создана и ожидает подтверждения',{m:money(usd)}),'info');
+    depShotClear();
+    await loadOps(); renderFinance(); finTab('ops');
   }catch(e){
-    if(e.code==='invalid_promo'){ toast('Промокод не найден или отключён','err'); appliedPromo=null; const h=document.getElementById('dep-promo-hint'); h.textContent=''; updateDepDetails(); }
+    if(e.code==='invalid_promo'){ toast('Промокод не найден или отключён','err'); appliedPromo=null; const h=document.getElementById('dep-promo-hint'); if(h) h.textContent=''; updateDepDetails(); }
     else if(e.code==='blocked') forceLogout();
     else if(e.status===401) openAuth();
-    else toast('Не удалось создать заявку','err');
+    else toast(t('Не удалось создать заявку ({c})',{c:e.code||t('ошибка')}),'err');
+  }finally{
+    btn.disabled=false; btn.textContent=oldTx;
   }
 }
 async function submitWithdraw(){
@@ -2185,7 +2916,7 @@ async function submitWithdraw(){
   const usd=parseFloat(document.getElementById('wd-amount').value)||0;
   const addr=document.getElementById('wd-addr').value.trim();
   const method=document.getElementById('wd-method').value;
-  if(usd<10){ toast('Минимальная сумма вывода — $10','err'); return; }
+  if(usd<LIMITS.minWithdrawal){ toast(t('Минимальная сумма вывода — {m}',{m:'$'+LIMITS.minWithdrawal}),'err'); return; }
   if(addr.length<10){ toast('Укажите адрес кошелька','err'); return; }
   if(usd>U.balances.real){ toast('Недостаточно средств на реальном счёте','err'); return; }
   if(usd>U.balances.real-(U.bonusLocked||0)){ toast('Бонус недоступен для вывода до выполнения условий','err'); return; }
@@ -2196,7 +2927,7 @@ async function submitWithdraw(){
     updateBalance();
     document.getElementById('wd-amount').value=''; document.getElementById('wd-addr').value='';
     await loadOps(); renderFinance();
-    toast('Заявка на вывод '+money(usd)+' создана','info');
+    toast(t('Заявка на вывод {m} создана',{m:money(usd)}),'info');
   }catch(e){
     if(e.status===402) toast(e.code==='bonus_locked'?'Бонус недоступен для вывода до выполнения условий':'Недостаточно средств на реальном счёте','err');
     else if(e.code==='blocked') forceLogout();
@@ -2256,12 +2987,12 @@ function renderProfile(){
   if(!U) return;
   const p=U.profile;
   document.getElementById('pf-first').value=p.first||''; document.getElementById('pf-last').value=p.last||'';
-  document.getElementById('pf-phone').value=p.phone||''; document.getElementById('pf-dob').value=p.dob||'';
+  document.getElementById('pf-phone').value=p.phone||''; dobFill('pf-dob',p.dob||'');
   document.getElementById('pf-nick').value=p.nick||''; document.getElementById('pf-hide').classList.toggle('on',!!p.hide);
   const cs=document.getElementById('pf-country'); if(!cs.options.length) cs.innerHTML=COUNTRIES.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join(''); cs.value=p.country||'RU';
   /* PF: после верификации (ok/pending) имя/фамилия/дата/страна намертво, телефон и ник — можно */
   const pfLocked=U.verifyStatus==='ok'||U.verifyStatus==='pending';
-  ['pf-first','pf-last','pf-dob','pf-country'].forEach(id=>{ const el=document.getElementById(id); el.disabled=pfLocked; el.style.opacity=pfLocked?'.55':''; });
+  ['pf-first','pf-last','pf-dob-d','pf-dob-m','pf-dob-y','pf-country'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.disabled=pfLocked; el.style.opacity=pfLocked?'.55':''; } });
   document.getElementById('pf-email').textContent=U.email;
   const et=document.getElementById('pf-email-tag'), eb=document.getElementById('pf-email-btn');
   et.textContent=U.emailVerified?'Подтверждён':'Не верифицирован'; et.className='tag '+(U.emailVerified?'ok':'warn'); eb.style.display=U.emailVerified?'none':'';
@@ -2304,6 +3035,30 @@ let kycStep='data', kycDocType='passport', kycOk={}, kycDocs=[], kycSelfie=null,
 const KYC_DOCTYPES=[['id','ID-карта'],['passport','Паспорт'],['residence','Вид на жительство']];
 function kycReset(){ kycStep='data'; kycOk={}; kycDocs=[]; kycSelfie=null; kycDraft={}; }
 /* Q2: строго ДД.ММ.ГГГГ, реальная дата, возраст 18–100 */
+function buildDobSel(pfx){
+  const w=document.getElementById(pfx+'-wrap'); if(!w||w.dataset.done) return; w.dataset.done='1';
+  const y0=new Date().getFullYear();
+  let d='<option value="">DD</option>',m='<option value="">MM</option>',y='<option value="">YYYY</option>';
+  for(let i=1;i<=31;i++) d+=`<option value="${i}">${i}</option>`;
+  for(let i=1;i<=12;i++) m+=`<option value="${i}">${String(i).padStart(2,'0')}</option>`;
+  for(let Y=y0-18;Y>=y0-100;Y--) y+=`<option value="${Y}">${Y}</option>`;
+  w.innerHTML=`<select class="inp" id="${pfx}-d" onchange="dobChanged('${pfx}')">${d}</select>`
+    +`<select class="inp" id="${pfx}-m" onchange="dobChanged('${pfx}')">${m}</select>`
+    +`<select class="inp" id="${pfx}-y" onchange="dobChanged('${pfx}')">${y}</select>`;
+}
+function dobChanged(pfx){
+  const gv=id=>{ const e=document.getElementById(id); return e?e.value:''; };
+  const d=gv(pfx+'-d'),m=gv(pfx+'-m'),y=gv(pfx+'-y');
+  const h=document.getElementById(pfx);
+  if(h){ h.value=(d&&m&&y)?String(d).padStart(2,'0')+'.'+String(m).padStart(2,'0')+'.'+y:''; if(pfx==='kyc-dob') kycType('dob',h); }
+}
+function dobFill(pfx,val){
+  buildDobSel(pfx);
+  const mt=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(val||'');
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v; };
+  set(pfx+'-d',mt?String(+mt[1]):''); set(pfx+'-m',mt?String(+mt[2]):''); set(pfx+'-y',mt?mt[3]:'');
+  const h=document.getElementById(pfx); if(h) h.value=mt?val:'';
+}
 function validDob(s){
   const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s||''); if(!m) return false;
   const d=+m[1], mo=+m[2], y=+m[3];
@@ -2342,9 +3097,12 @@ function renderKyc(){
       <div class="note blue">${t('Шаг 1/4. Проверьте ваши личные данные.')}</div>
       ${row('first',t('Имя'),dv('first'),t('Не заполнено'))}
       ${row('last',t('Фамилия'),dv('last'),t('Не заполнено'))}
-      ${row('dob',t('Дата рождения'),dv('dob'),t('ДД.ММ.ГГГГ'))}
+      <div class="frow"><div class="lab">${t('Дата рождения')}</div><div class="val" style="gap:8px">
+      <div class="dob3" id="kyc-dob-wrap"></div><input type="hidden" id="kyc-dob" value="${esc(dv('dob')||'')}">
+      <button class="btn ${kycOk['dob']?'btn-green':'btn-ghost'}" style="padding:0 12px;height:38px" onclick="kycConfirm('dob')" title="${t('Подтвердить поле')}">✓</button></div></div>
       <div class="frow"><div class="lab">${t('Страна выдачи документа')}</div><div class="val"><select class="inp" id="kyc-country">${COUNTRIES.map(c=>`<option value="${c[0]}" ${c[0]===(p.country||'RU')?'selected':''}>${c[1]}</option>`).join('')}</select></div></div>
       <button class="btn btn-primary btn-block" style="height:42px" onclick="kycDataNext()">${t('Подтвердить')}</button>`;
+    buildDobSel('kyc-dob'); dobFill('kyc-dob',dv('dob')||'');
     return;
   }
   if(kycStep==='intro'){
@@ -2513,9 +3271,10 @@ async function doRegister(e){
   const err=document.getElementById('rg-err');
   if(p1.length<6){ err.textContent='Пароль — минимум 6 символов'; return; }
   if(p1!==p2){ err.textContent='Пароли не совпадают'; return; }
+  if(!document.getElementById('rg-agree').checked){ err.textContent=t('Необходимо согласие с условиями соглашения'); return; }
   err.textContent='';
   try{
-    await api('/auth/register',{method:'POST',body:{email:em,pass:p1}});
+    await api('/auth/register',{method:'POST',body:{email:em,pass:p1,agree:true}});
     const r=await api('/me');
     carryLangToUser(r.user.id, true); /* выбор гостя переносится в новый аккаунт */
     location.reload(); /* G4 */
@@ -2523,6 +3282,7 @@ async function doRegister(e){
     console.error('register error', err2);
     err.textContent= err2.code==='exists' ? t('Пользователь с такой почтой уже существует')
       : err2.code==='bad_email' ? t('Некорректная почта')
+      : err2.code==='agree_required' ? t('Необходимо согласие с условиями соглашения')
       : err2.code==='reserved_name' ? t('Это имя зарезервировано системой')
       : t('Ошибка регистрации');
   }
@@ -2534,6 +3294,7 @@ function setUserState(u){
   expandedOpenId=expandedClosedId=null;
   updateUserUI(); updateBalance(); renderOpen(); renderClosed();
   reportLang(); updateStreak(); /* W/Y4 */
+  pollHelpBadge(); /* красная точка чата */
   closeAuth();
   /* R1: возвращаем пользователя туда, где он был до F5/перезахода */
   const vp=loadViewPref();
@@ -2584,13 +3345,13 @@ function connectQuotes(){
   quotesSrc.onmessage=e=>{
     let m; try{ m=JSON.parse(e.data); }catch(err){ return; }
     if(m.epoch!=null){ /* V2: сервер перезапустился — кэш свечей невалиден */
-      if(quoteEpoch!=null&&m.epoch!==quoteEpoch){ historyLoaded.clear(); loadHistory(curAsset,curTF).then(()=>{ updateStatus(); draw(); }).catch(()=>{}); }
+      if(quoteEpoch!=null&&m.epoch!==quoteEpoch){ histResetAll(); loadHistory(curAsset,curTF).then(()=>{ updateStatus(); draw(); }).catch(()=>{}); }
       quoteEpoch=m.epoch;
     }
     const prices=m.prices||{}, ts=m.ts||Date.now()/1000;
     const prevP=ASSETS[curAsset]? ASSETS[curAsset].price():0;
     for(const n in prices){ const a=ASSETS[n]; if(a) a.setPrice(prices[n],ts); }
-    pulseTicks(prevP,ASSETS[curAsset].price()); /* Y6 */
+
     prevDisplayPrice=curDisplayPrice;
     curDisplayPrice=ASSETS[curAsset].price();
     lastTickTime=performance.now();
@@ -2606,10 +3367,13 @@ function rafLoop(){
 }
 
 (async function init(){
-  renderIcons();
+  renderIcons(); renderDrawTools();
   buildTfGrid(); buildApc(); buildAmount(); buildExpiry(); renderMethods();
-  loadPrefs(); loadFavs();
-  buildAmtChips(); updSndBtn(); renderFavStrip(); tickOnline(); setInterval(tickOnline,5000); /* Y5/Y2/X/Y7 */
+  loadPrefs(); loadFavs(); loadDrawings();
+  buildAmtChips(); buildDobSel('pf-dob'); updSndBtn(); renderFavStrip(); tickOnline(); setInterval(tickOnline,5000); /* Y5/Y2/X/Y7 */
+  [['btn-up','UP'],['btn-down','DOWN']].forEach(([id,dir])=>{ const b=document.getElementById(id);
+    b.addEventListener('mouseenter',()=>{ hoverDir=dir; }); b.addEventListener('mouseleave',()=>{ hoverDir=null; });
+    b.addEventListener('focus',()=>{ hoverDir=dir; }); b.addEventListener('blur',()=>{ hoverDir=null; }); });
   setAmount(tradeAmount); epSetFromSec(tradeExpiry);
   try{ await loadHistory(curAsset,curTF); }catch(e){}
   prevDisplayPrice=curDisplayPrice=ASSETS[curAsset].price();
@@ -2619,6 +3383,7 @@ function rafLoop(){
     const r=await api('/me'); if(window.i18nBindUser) i18nBindUser(r.user.id); setUserState(r.user);
   }catch(e){ updateBalance(); if(e&&e.code==='blocked') showBlockedAuth(); else openAuth(); } /* S1 */
   draw(); requestAnimationFrame(rafLoop); startSignals();
+  setInterval(()=>{ try{ maybePrefetch(); }catch(e){} },600); /* HIST: страховка предзагрузки чанков */
   document.getElementById('funds-overlay').addEventListener('click',e=>{ if(e.target.id==='funds-overlay') closeFundsModal(); });
 })();
 

@@ -43,7 +43,7 @@ function admin(req, res, next) {
   const u = adminFromReq(req);
   if (!u) return res.status(401).json({ error: 'unauthorized' });
   if (u.blocked) return res.status(403).json({ error: 'blocked' });
-  if (u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (u.role !== 'admin' && u.role !== 'moder') return res.status(403).json({ error: 'forbidden' }); /* STAFF1: персонал тоже входит в админку */
   req.user = u;
   next();
 }

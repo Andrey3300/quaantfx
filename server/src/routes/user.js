@@ -8,6 +8,8 @@ const db = require('../db');
 const { UPLOADS } = require('../db');
 const { auth, authSupport } = require('../auth'); /* S1 */
 const { ASSETS } = require('../engine');
+const { getSettings } = require('../settings'); /* PLAT1: лимиты сделок */
+const { chatFilesMw, collectChatFiles, discardUpload, parseFiles, sendChatFile } = require('../chatfiles'); /* CHAT2 */
 
 const router = express.Router();
 const now = () => Date.now() / 1000;
@@ -162,9 +164,19 @@ router.post('/trades', auth, (req, res) => {
   if (!asset) return res.status(400).json({ error: 'bad_asset' });
   if (b.dir !== 'UP' && b.dir !== 'DOWN') return res.status(400).json({ error: 'bad_dir' });
   const amount = Number(b.amount);
-  if (!(amount >= 1 && amount <= 100000)) return res.status(400).json({ error: 'bad_amount' });
+  const tlim = getSettings();
+  if (!(amount >= tlim.minTrade && amount <= tlim.maxTrade)) return res.status(400).json({ error: 'bad_amount', min: tlim.minTrade, max: tlim.maxTrade });
   const expiry = Math.round(Number(b.expiry));
-  if (!(expiry >= 5 && expiry <= 86399)) return res.status(400).json({ error: 'bad_expiry' });
+  if (!(expiry >= 5 && expiry <= 14400)) /* макс. 4 часа */ return res.status(400).json({ error: 'bad_expiry' });
+  { /* рыночные часы: закрытый актив / экспирация за закрытием */
+    const { isClosable:isCl, marketState:ms } = require('../market-hours');
+    if (isCl(b.asset, asset.cat)) {
+      const st = ms(getSettings().marketHours, now());
+      if (st.closed) return res.status(403).json({ error: 'market_closed' });
+      if (st.closesAt && now() + expiry > st.closesAt - 60)
+        return res.status(400).json({ error: 'expiry_beyond_close', closesAt: st.closesAt });
+    }
+  }
 
   const col = account === 'demo' ? 'demo_balance' : 'real_balance';
   const u = db.prepare(`SELECT ${col} AS bal FROM users WHERE id=?`).get(req.user.id);
@@ -197,10 +209,14 @@ router.put('/lang', auth, (req, res) => {
 const SUPPORT_AGENTS = ['John', 'Kevin', 'Sarah', 'Emma', 'Michael'];
 router.get('/support/chats', authSupport, (req, res) => {
   const rows = db.prepare(`SELECT c.*,
-    (SELECT m.text FROM chat_messages m WHERE m.chat_id=c.id ORDER BY m.id DESC LIMIT 1) AS last_msg,
-    (SELECT m.created_at FROM chat_messages m WHERE m.chat_id=c.id ORDER BY m.id DESC LIMIT 1) AS last_at
+    (SELECT m.text FROM chat_messages m WHERE m.chat_id=c.id AND m.deleted=0 ORDER BY m.id DESC LIMIT 1) AS last_msg,
+    (SELECT m.created_at FROM chat_messages m WHERE m.chat_id=c.id AND m.deleted=0 ORDER BY m.id DESC LIMIT 1) AS last_at
     FROM chats c WHERE c.user_id=? ORDER BY c.id DESC`).all(req.user.id);
   res.json({ chats: rows });
+});
+router.get('/support/unread', authSupport, (req, res) => {
+  const r = db.prepare('SELECT COALESCE(SUM(user_unread),0) n FROM chats WHERE user_id=?').get(req.user.id);
+  res.json({ unread: Number(r.n) || 0 });
 });
 router.post('/support/chats', authSupport, (req, res) => {
   const specialist = SUPPORT_AGENTS[Math.floor(Math.random() * SUPPORT_AGENTS.length)];
@@ -211,15 +227,38 @@ router.post('/support/chats', authSupport, (req, res) => {
 router.get('/support/chats/:id/messages', authSupport, (req, res) => {
   const c = db.prepare('SELECT * FROM chats WHERE id=? AND user_id=?').get(req.params.id, req.user.id);
   if (!c) return res.status(404).json({ error: 'not_found' });
-  res.json({ specialist: c.specialist, messages: db.prepare('SELECT id, sender, text, created_at FROM chat_messages WHERE chat_id=? ORDER BY id').all(c.id) });
+  db.prepare('UPDATE chats SET user_unread=0 WHERE id=?').run(c.id); /* юзер прочитал */
+  res.json({
+    specialist: c.specialist, status: c.status,
+    messages: db.prepare('SELECT id, sender, text, created_at, files FROM chat_messages WHERE chat_id=? AND deleted=0 ORDER BY id')
+      .all(c.id).map(m => ({
+        id: m.id, sender: m.sender, text: m.text, created_at: m.created_at,
+        files: parseFiles(m.files).map((f, i) => ({ m: f.m, s: f.s, o: f.o, url: `/api/support/chats/${c.id}/files/${m.id}/${i}` }))
+      }))
+  }); /* CHAT1: удалённые юзеру не отдаём, правки — только новый текст */
 });
-router.post('/support/chats/:id/messages', authSupport, (req, res) => {
+router.post('/support/chats/:id/messages', authSupport, chatFilesMw, (req, res) => {
+  const c = db.prepare('SELECT id FROM chats WHERE id=? AND user_id=?').get(req.params.id, req.user.id);
+  if (!c) { discardUpload(req); return res.status(404).json({ error: 'not_found' }); }
   const text = String((req.body && req.body.text) || '').trim().slice(0, 2000);
-  if (!text) return res.status(400).json({ error: 'empty' });
+  let files = [];
+  try { files = collectChatFiles(req); }
+  catch (e) { return res.status(400).json({ error: e.code || 'bad_file' }); }
+  if (!text && !files.length) return res.status(400).json({ error: 'empty' });
+  const r = db.prepare('INSERT INTO chat_messages (chat_id, sender, text, created_at, files) VALUES (?,?,?,?,?)')
+    .run(c.id, 'user', text, now(), JSON.stringify(files));
+  db.prepare(`UPDATE chats SET status='open', admin_unread = admin_unread + 1 WHERE id=?`).run(c.id); /* CHAT1+CHAT7: красная точка; закрытый переоткрывается */
+  res.json({ id: Number(r.lastInsertRowid) });
+});
+/* CHAT2: файл из сообщения (только свой чат; из удалённого сообщения — 404) */
+router.get('/support/chats/:id/files/:mid/:idx', authSupport, (req, res) => {
   const c = db.prepare('SELECT id FROM chats WHERE id=? AND user_id=?').get(req.params.id, req.user.id);
   if (!c) return res.status(404).json({ error: 'not_found' });
-  const r = db.prepare('INSERT INTO chat_messages (chat_id, sender, text, created_at) VALUES (?,?,?,?)').run(c.id, 'user', text, now());
-  res.json({ id: Number(r.lastInsertRowid) });
+  const m = db.prepare('SELECT files, deleted FROM chat_messages WHERE id=? AND chat_id=?').get(req.params.mid, c.id);
+  if (!m || m.deleted) return res.status(404).end();
+  const f = parseFiles(m.files)[Number(req.params.idx)];
+  if (!f) return res.status(404).end();
+  sendChatFile(res, c.id, f.n, f);
 });
 
 module.exports = router;

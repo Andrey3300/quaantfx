@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Условия соглашения — QUANT FX</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root{--bg:#0a101c;--bg2:#101a2e;--border:#1e2a45;--text:#e8edf5;--dim:#8b98b5;--accent:#3b82f6;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.65;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:28px 20px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:.5px}
+.logo b{color:var(--green)}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#166534,#22c55e);display:flex;align-items:center;justify-content:center}
+.lang{display:flex;gap:6px}
+.lang button{background:var(--bg2);border:1px solid var(--border);color:var(--dim);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700}
+.lang button.on{color:#fff;border-color:var(--accent);background:rgba(59,130,246,.15)}
+.back{display:inline-block;margin-bottom:16px;color:var(--accent);text-decoration:none;font-size:14px}
+.back:hover{text-decoration:underline}
+h1{font-size:26px;margin-bottom:6px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:22px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.card h2{font-size:16px;margin-bottom:8px;color:#fff}
+.card p,.card li{font-size:14px;color:#c6d0e2}
+.card ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.warn{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.06)}
+.warn h2{color:#fbbf24}
+.contacts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.c-item{background:rgba(59,130,246,.07);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px}
+.c-item small{display:block;color:var(--dim);font-size:11px;margin-bottom:2px}
+.c-item a{color:var(--accent);text-decoration:none;word-break:break-all}
+.c-item a:hover{text-decoration:underline}
+.foot{margin-top:24px;color:var(--dim);font-size:12px;text-align:center}
+[lang-block]{display:none}
+[lang-block].on{display:block}
+@media(max-width:560px){.contacts{grid-template-columns:1fr}h1{font-size:22px}.wrap{padding:20px 14px 48px}.card{padding:15px 14px}.card p,.card li{font-size:13.5px}}
+@media(max-width:400px){.top{gap:10px}.logo img{height:28px!important}.lang{width:100%}.lang button{flex:1}h1{font-size:20px}.sub{font-size:12px}.c-item{font-size:12.5px}}
+p,li,.c-item{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo"><img src="logo.png" alt="QUANTFX" style="height:34px;width:auto"></div>
+    <div class="lang"><button id="lb-ru" onclick="setL('ru')">Русский</button><button id="lb-en" onclick="setL('en')">English</button></div>
+  </div>
+  <a class="back" id="back" href="/">← Назад к платформе</a>
+
+  <div lang-block="ru">
+    <h1>Условия соглашения</h1>
+    <div class="sub">Пользовательское соглашение платформы QUANT FX</div>
+    <div class="card warn"><h2>⚠ Предупреждение о рисках</h2><p>Торговля бинарными опционами сопряжена с высоким уровнем риска и может привести к потере всех вложенных средств. Не инвестируйте средства, потерю которых не готовы допустить. Настоящий документ не является инвестиционной рекомендацией.</p></div>
+    <div class="card"><h2>1. Общие положения</h2><p>Настоящее соглашение регулирует использование торговой платформы QUANT FX (далее — «Платформа»). Регистрируясь и отмечая чекбокс согласия, вы подтверждаете, что прочитали соглашение и принимаете его полностью. Оператор вправе изменять условия, актуальная версия всегда публикуется на этой странице.</p></div>
+    <div class="card"><h2>2. Возраст и дееспособность</h2><p>Платформа доступна только лицам старше 18 лет. Регистрируясь, вы подтверждаете, что вам есть 18 лет и вы обладаете полной дееспособностью.</p></div>
+    <div class="card"><h2>3. Счета</h2><ul><li>Каждому пользователю доступны демонстрационный и реальный счета.</li><li>Демо-счёт предназначен для обучения и тестирования стратегий; средства на нём виртуальные.</li><li>Операции на реальном счёте влекут движение реальных денежных средств.</li></ul></div>
+    <div class="card"><h2>4. Котировки и исполнение сделок</h2><ul><li>Платформа предоставляет внебиржевые (OTC) котировки по валютным парам, криптовалютам, акциям и индексам.</li><li>Результат сделки определяется сравнением цены входа и цены экспирации по котировке Платформы.</li><li>Процент выплаты фиксируется в момент открытия сделки и не меняется до экспирации.</li><li>В случае технического сбоя поставки котировок сделка может быть отменена с возвратом суммы на счёт.</li></ul></div>
+    <div class="card"><h2>5. Пополнение и вывод средств</h2><ul><li>Пополнение доступно способами, указанными в разделе «Финансы».</li><li>Вывод осуществляется тем же способом, которым было пополнение, в срок до 5 рабочих дней.</li><li>Минимальные суммы пополнения и вывода указаны в интерфейсе Платформы.</li><li>Оператор вправе запросить верификацию личности перед обработкой вывода.</li></ul></div>
+    <div class="card"><h2>6. Верификация (KYC)</h2><p>Для подтверждения личности Оператор вправе запросить документы: удостоверение личности и подтверждение адреса. Данные используются исключительно для проверки личности и хранятся в соответствии с разделом «Конфиденциальность». Отказ от верификации может ограничить вывод средств.</p></div>
+    <div class="card"><h2>7. Ограничения</h2><p>Запрещены: регистрация нескольких аккаунтов одним лицом, использование уязвимостей Платформы, отмывание денежных средств, передача аккаунта третьим лицам. Нарушение влечёт блокировку аккаунта.</p></div>
+    <div class="card"><h2>8. Конфиденциальность</h2><p>Мы храним только данные, необходимые для работы сервиса (почта, хэш пароля, настройки, история операций). Данные не передаются третьим лицам, кроме случаев, требуемых законом. Вы можете запросить удаление аккаунта через контакты ниже.</p></div>
+    <div class="card"><h2>9. Ответственность</h2><p>Платформа предоставляется «как есть». Оператор не гарантирует бесперебойную работу и не несёт ответственности за торговые решения пользователя и за убытки, связанные с рыночным риском.</p></div>
+    <div class="card"><h2>10. Контакты</h2><div class="contacts" id="c-ru"></div></div>
+  </div>
+
+  <div lang-block="en">
+    <h1>Terms of Agreement</h1>
+    <div class="sub">QUANT FX platform user agreement</div>
+    <div class="card warn"><h2>⚠ Risk warning</h2><p>Binary options trading involves a high level of risk and may result in the loss of all invested funds. Never invest funds whose loss you cannot afford. This document is not investment advice.</p></div>
+    <div class="card"><h2>1. General</h2><p>This agreement governs the use of the QUANT FX trading platform (the “Platform”). By registering and ticking the consent checkbox, you confirm that you have read and fully accept this agreement. The operator may amend these terms; the current version is always published on this page.</p></div>
+    <div class="card"><h2>2. Age and capacity</h2><p>The Platform is available only to persons over 18. By registering, you confirm that you are 18 or older and have full legal capacity.</p></div>
+    <div class="card"><h2>3. Accounts</h2><ul><li>Each user has access to demo and real accounts.</li><li>The demo account is for learning and strategy testing; its funds are virtual.</li><li>Operations on the real account involve movement of real funds.</li></ul></div>
+    <div class="card"><h2>4. Quotes and trade execution</h2><ul><li>The Platform provides over-the-counter (OTC) quotes for currency pairs, cryptocurrencies, stocks and indices.</li><li>A trade outcome is determined by comparing the entry price with the expiry price per the Platform quote.</li><li>The payout percent is fixed when the trade is opened and does not change until expiry.</li><li>In case of a quote-feed failure, a trade may be cancelled with the stake refunded.</li></ul></div>
+    <div class="card"><h2>5. Deposits and withdrawals</h2><ul><li>Deposits are available via the methods listed in the “Finance” section.</li><li>Withdrawals are processed via the same method used for the deposit, within up to 5 business days.</li><li>Minimum deposit and withdrawal amounts are shown in the Platform interface.</li><li>The operator may request identity verification before processing a withdrawal.</li></ul></div>
+    <div class="card"><h2>6. Verification (KYC)</h2><p>To confirm your identity, the operator may request documents: an ID and proof of address. Data is used solely for identity verification and stored per the “Privacy” section. Refusal to verify may restrict withdrawals.</p></div>
+    <div class="card"><h2>7. Restrictions</h2><p>Prohibited: multiple accounts per person, exploiting Platform vulnerabilities, money laundering, transferring your account to third parties. Violations lead to account blocking.</p></div>
+    <div class="card"><h2>8. Privacy</h2><p>We store only the data needed to run the service (email, password hash, settings, operation history). Data is not shared with third parties except where required by law. You may request account deletion via the contacts below.</p></div>
+    <div class="card"><h2>9. Liability</h2><p>The Platform is provided “as is”. The operator does not guarantee uninterrupted operation and is not liable for the user's trading decisions or for losses related to market risk.</p></div>
+    <div class="card"><h2>10. Contacts</h2><div class="contacts" id="c-en"></div></div>
+  </div>
+  <div class="foot">© QUANT FX</div>
+</div>
+<script>
+var L='en';
+try{ L=(localStorage.getItem('synthotc_lang_terms')||'en'); }catch(e){ L='en'; }
+if(L!=='ru'&&L!=='en') L='en';
+function setL(l){ L=l; try{ localStorage.setItem('synthotc_lang_terms',l); }catch(e){}
+  document.querySelectorAll('[lang-block]').forEach(function(b){ b.classList.toggle('on',b.getAttribute('lang-block')===l); });
+  document.getElementById('lb-ru').classList.toggle('on',l==='ru');
+  document.getElementById('lb-en').classList.toggle('on',l==='en');
+  document.documentElement.lang=l;
+  document.getElementById('back').textContent = l==='ru' ? '← Назад к платформе' : '← Back to platform';
+  document.title = l==='ru' ? 'Условия соглашения — QUANT FX' : 'Terms of Agreement — QUANT FX';
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function linkify(k,v){
+  v=String(v==null?'':v);
+  if(!v) return '—';
+  if(k==='email') return '<a href="mailto:'+esc(v)+'">'+esc(v)+'</a>';
+  if(k==='telegram'&&/^https?:\/\//i.test(v)) return '<a href="'+esc(v)+'" target="_blank" rel="noopener">'+esc(v)+'</a>';
+  if(k==='phone') return '<a href="tel:'+esc(v.replace(/[^+\d]/g,''))+'">'+esc(v)+'</a>';
+  return esc(v);
+}
+function renderC(c){
+  var rows=[['email',L==='ru'?'Эл. почта':'Email'],['telegram','Telegram'],['phone',L==='ru'?'Телефон':'Phone'],
+    ['company',L==='ru'?'Компания':'Company'],['address',L==='ru'?'Адрес':'Address'],['hours',L==='ru'?'Часы поддержки':'Support hours']];
+  var h=rows.map(function(r){ return '<div class="c-item"><small>'+r[1]+'</small>'+linkify(r[0],c[r[0]])+'</div>'; }).join('');
+  document.getElementById('c-ru').innerHTML=h; document.getElementById('c-en').innerHTML=h;
+}
+setL(L);
+fetch('/api/contacts').then(function(r){ return r.json(); }).then(function(d){ if(d&&d.contacts) renderC(d.contacts); })
+  .catch(function(){ renderC({email:'support@example.com',telegram:'https://t.me/example_support',phone:'+0 (000) 000-00-00',company:'Example Company Ltd',address:'123 Example Street, Example City',hours:'24/7'}); });
+</script>
+</body>
+</html>

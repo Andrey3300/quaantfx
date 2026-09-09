@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quant FX — Админ</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b82f6'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='19' font-weight='bold' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0b1322;--bg2:#111b2e;--bg3:#182540;--border:#22314f;--border2:#2b3d61;--text:#e8eef8;--dim:#8593ad;--green:#22c55e;--red:#ef4444;--accent:#3b82f6;--gold:#f5b921}
@@ -73,16 +73,133 @@ a{color:var(--accent)}
 .chat-li b{font-size:12px;display:block}
 .chat-li small{color:var(--dim);font-size:10px}
 .chat-li .prev{color:var(--dim);font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-li.closed{opacity:.55}
+.chat-li .tgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chat-li .tg{font-size:10px;background:rgba(59,130,246,.16);border:1px solid rgba(59,130,246,.35);color:#9ec2ff;border-radius:6px;padding:1px 7px}
+.chat-li .st-closed{font-size:10px;background:rgba(92,106,134,.2);color:#8593ad;border-radius:6px;padding:1px 7px}
+.cm.sys{align-self:center;background:rgba(92,106,134,.16);color:var(--dim);font-size:11px;text-align:center;max-width:95%}
+#tag-menu{border-bottom:1px solid var(--border);padding:8px 12px;background:var(--bg2)}
+#tag-menu .tm-tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;background:var(--bg3)}
+#tag-menu .tm-tag.on{border-color:var(--accent);background:rgba(59,130,246,.15)}
+#tag-menu .tm-tag .mini{background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;padding:0 2px}
+#chat-sub{font-size:11px;color:var(--dim);font-weight:400;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .cm{max-width:85%;padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.45;word-break:break-word;background:var(--bg3)}
 .cm small{display:block;margin-bottom:4px;font-size:9px;opacity:.55}
 .cm.me{align-self:flex-end;background:rgba(59,130,246,.25)}
+.chat-li{position:relative}
+.chat-li .dot{position:absolute;top:12px;right:12px;min-width:18px;height:18px;border-radius:9px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 8px rgba(239,68,68,.7)}
+.chat-li.has-unread{background:rgba(239,68,68,.05)}
+.cm .orig{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);border-radius:6px;padding:4px 7px;margin-bottom:6px;font-size:11px;color:#fca5a5}
+.cm.deleted{opacity:.85;border:1px dashed rgba(239,68,68,.5);background:rgba(239,68,68,.08)}
+.cm.deleted .txt{color:#fca5a5;text-decoration:line-through}
+.cm .edited-tag{font-size:9px;color:var(--dim);margin-left:6px;font-style:italic}
+.cm .msg-actions{margin-top:5px;display:flex;gap:6px}
+.cm .msg-actions button{background:none;border:1px solid var(--border);border-radius:6px;color:var(--dim);font-size:10px;padding:1px 8px;cursor:pointer}
+.cm .msg-actions button:hover{color:var(--text);border-color:var(--accent)}
+.att-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.att-thumb{width:110px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;cursor:zoom-in}
+.cm.deleted .att-thumb{opacity:.5;filter:grayscale(1)}
+.att-file{display:inline-block;background:rgba(59,130,246,.12);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text);text-decoration:none}
+.att-file small{color:var(--dim)}
+#quick-panel{overflow:hidden}
+#quick-body{flex:1;display:flex;min-height:0;overflow:hidden}
+#q-cats{width:128px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+#q-cats-list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
+.q-cat{padding:9px 10px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text)}
+.q-cat:hover{background:rgba(59,130,246,.08)}
+.q-cat.sel{background:rgba(59,130,246,.18);font-weight:700}
+.q-cat .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-cat .icobtn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;padding:0 2px;display:none}
+.q-cat:hover .icobtn,.q-cat.sel .icobtn{display:inline}
+.q-cat .icobtn:hover{color:var(--text)}
+#q-cats-foot{padding:10px;border-top:1px solid var(--border)}
+#q-cats-foot .btn{font-size:11px;padding:6px 4px;white-space:normal;line-height:1.3}
+#q-tpl{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+#q-tpl-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px}
+#q-tpl-list{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.q-item{border-bottom:1px solid var(--border);padding-bottom:12px}
+.q-item .tx{white-space:pre-wrap;word-break:break-word;font-size:13px;margin:4px 0 8px}
+.q-item img.qthumb{width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:4px 0;cursor:zoom-in}
+.q-item .row{display:flex;align-items:center;gap:6px}
+.q-use{background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.4);color:#7fb0ff;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer}
+.q-use:hover{background:rgba(59,130,246,.3)}
+.q-item .dots{position:relative}
+.q-item .dots>button{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;font-weight:700;padding:2px 8px}
+.q-item .menu{display:none;position:absolute;top:26px;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:5;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.q-item .menu.open{display:block}
+.q-item .menu button{display:block;width:100%;background:none;border:none;color:var(--text);font-size:12px;padding:9px 12px;cursor:pointer;text-align:left}
+.q-item .menu button:hover{background:rgba(59,130,246,.12)}
+.q-item .menu button.danger{color:#f87171}
+#qedit-modal{display:none;position:fixed;inset:0;z-index:2100;background:rgba(0,0,0,.65);align-items:center;justify-content:center}
+#qedit-modal.open{display:flex}
+#qedit-box{width:min(480px,94vw);max-height:88vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:14px}
+#qedit-text{width:calc(100% - 32px);margin:0 16px 8px;min-height:90px;resize:vertical}
+#qedit-files{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 8px}
+#qedit-files img{width:110px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+#qedit-btns{display:flex;gap:8px;justify-content:flex-end;padding:0 16px 14px;flex-wrap:wrap}
+#lb-modal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px}
+#lb-modal.open{display:flex}
+#lb-img{max-width:min(1100px,94vw);max-height:90vh;border-radius:10px;box-shadow:0 12px 60px rgba(0,0,0,.7);object-fit:contain}
+#lb-x{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.1);border:1px solid var(--border);color:#fff;font-size:18px;border-radius:10px;width:40px;height:40px;cursor:pointer}
+#lb-x:hover{background:rgba(255,255,255,.22)}
+#qmodal{display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px}
+#qmodal.open{display:flex}
+#qm-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:min(720px,96vw);height:min(600px,90vh);display:flex;flex-direction:column;overflow:hidden}
+.qm-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--bg3)}
+.qm-row:hover{border-color:var(--accent)}
+.qm-row b{flex:1;font-size:14px}
+.qm-nav{background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;padding:2px 8px;border-radius:8px}
+.qm-nav:hover{background:rgba(59,130,246,.15)}
+.mob-back{display:none}
+@media (max-width:1020px){
+.chats-row{flex-direction:column;height:auto!important;min-height:0}
+.chats-row>.card{width:100%!important;max-width:100%;max-height:none!important;min-width:0!important}
+#chat-view{min-height:320px;max-height:60vh}
+#quick-panel{max-height:440px!important}
+#q-cats{width:118px}
+.q-cat{font-size:12px;padding:8px}
+#q-tpl-list{padding:10px}
+#chat-input-row{flex-wrap:wrap}
+#chat-input-row .btn-acc{flex:1;white-space:nowrap}
+.mob-back{display:inline-block!important}
+#tab-chats[data-mob="list"] #conv-pane,#tab-chats[data-mob="list"] #quick-panel{display:none!important}
+#tab-chats[data-mob="chat"] #chats-pane,#tab-chats[data-mob="chat"] #quick-panel{display:none!important}
+#tab-chats[data-mob="tpl"] #chats-pane,#tab-chats[data-mob="tpl"] #conv-pane{display:none!important}
+#tab-chats[data-mob] #chats-pane{height:calc(100dvh - 210px);min-height:380px}
+#tab-chats[data-mob] #conv-pane{height:calc(100dvh - 210px);min-height:420px}
+#tab-chats[data-mob] #quick-panel{height:calc(100dvh - 210px)!important;min-height:420px}
+#tab-chats[data-mob="chat"] #chat-view{min-height:0;max-height:none}
+#quick-body[data-qtpl="cats"] #q-tpl{display:none}
+#quick-body[data-qtpl="tpl"] #q-cats{display:none}
+#quick-body[data-qtpl="cats"] #q-cats{width:100%;border-right:none}
+body{overflow-x:hidden}
+#qmodal{padding:0;touch-action:pan-y}
+#qm-box{width:100%;height:100dvh;max-height:100dvh;border-radius:0;border-left:none;border-right:none}
+#qedit-modal{padding:0;touch-action:pan-y}
+#qedit-box{width:100%;height:100dvh;max-height:100dvh;border-radius:0}
+}
+#quick-pending{display:none;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--dim)}
+#quick-pending .chip{background:rgba(59,130,246,.15);border:1px solid var(--accent);border-radius:8px;padding:3px 8px;font-size:11px;color:var(--text)}
+#quick-pending button{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px}
+#att-modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);align-items:center;justify-content:center}
+#att-modal.open{display:flex}
+#att-box{width:min(460px,92vw);max-height:86vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:14px}
+#att-preview{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+#att-preview img{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+#att-preview .att-file{font-size:11px}
+#att-caption{width:calc(100% - 32px);margin:0 16px 8px;min-height:56px;resize:vertical}
+#att-btns{display:flex;gap:8px;justify-content:flex-end;padding:0 16px 14px}
+#chat-view.dragover{outline:2px dashed var(--accent);outline-offset:-4px}
 @media (max-width:760px){#layout{flex-direction:column}#nav{width:100%;flex-direction:row;overflow-x:auto}}
+#adm-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;z-index:5000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#staff-perms td{padding:5px 8px;font-size:13px}
+#staff-perms input[type=radio]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <div class="logo"><div class="logo-mark"><svg viewBox="0 0 32 32" width="19" height="19" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="14.5" r="8" stroke="#fff" stroke-width="2.6"/><path d="M20 20l6.5 6.5" stroke="#fff" stroke-width="2.6"/><path d="M10.5 16l2.8-3.2 2.2 2.2 3.8-4.5" stroke="#4ade80" stroke-width="2.2"/></svg></div>QUANT<b>FX</b> <span class="tag-admin">ADMIN</span></div>
+  <div class="logo"><img src="logo.png" alt="QUANTFX" style="height:30px;width:auto"> <span class="tag-admin">ADMIN</span></div>
   <span id="whoami"></span>
   <button id="lang-btn" onclick="toggleAdminLang(event)" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--dim);padding:6px 10px;cursor:pointer">🌐 <span id="lang-cur-admin">English</span></button>
   <button id="logout-btn" onclick="logout()">Выйти</button>
@@ -108,6 +225,11 @@ a{color:var(--accent)}
     <button class="nav-i" data-tab="promos" onclick="tab('promos')">Промокоды</button>
     <button class="nav-i" data-tab="wallets" onclick="tab('wallets')">Кошельки</button>
     <button class="nav-i" data-tab="chats" onclick="tab('chats')">Чаты <span class="cnt" id="cnt-chats"></span></button>
+    <button class="nav-i" data-tab="contacts" onclick="tab('contacts')">Контакты</button>
+    <button class="nav-i" data-tab="settings" onclick="tab('settings')">Настройки</button>
+    <button class="nav-i" data-tab="bcast" onclick="tab('bcast')">Рассылка</button>
+    <button class="nav-i" data-tab="team" onclick="tab('team')">Команда</button>
+    <button class="nav-i" data-tab="audit" onclick="tab('audit')">Журнал</button>
   </div>
   <div id="main">
     <div id="tab-dash">
@@ -133,12 +255,12 @@ a{color:var(--accent)}
         <div class="card-h">Все сделки
           <div class="toolbar">
             <select class="inp" id="trades-status"><option value="">все статусы</option><option value="open">открытые</option><option value="closed">закрытые</option></select>
-            <input class="inp" id="trades-user" placeholder="user_id" style="width:90px">
+            <input class="inp" id="trades-user" placeholder="ID / email" style="width:150px">
             <button class="btn btn-ghost" onclick="loadTrades()">Обновить</button>
           </div>
         </div>
         <div style="overflow-x:auto"><table class="tbl"><thead><tr>
-          <th>ID</th><th>EMAIL</th><th>СЧЁТ</th><th>АКТИВ</th><th>НАПР.</th><th>СУММА</th><th>ВХОД</th><th>ОТКРЫТА</th><th>ЗАКРЫТИЕ</th><th>СТАТУС</th><th>ПРОФИТ</th>
+          <th>ID</th><th>EMAIL</th><th>СЧЁТ</th><th>АКТИВ</th><th>НАПР.</th><th>СУММА</th><th>ВХОД</th><th>ОТКРЫТА</th><th>ЗАКРЫТИЕ</th><th>СТАТУС</th><th>ПРОФИТ</th><th></th>
         </tr></thead><tbody id="trades-body"></tbody></table></div>
       </div>
     </div>
@@ -148,6 +270,7 @@ a{color:var(--accent)}
         <div class="card-h">Заявки на пополнение
           <div class="toolbar">
             <select class="inp" id="dep-status"><option value="pending">в обработке</option><option value="done">выполненные</option><option value="rejected">отклонённые</option><option value="">все</option></select>
+            <input class="inp" id="dep-user" placeholder="ID / email" style="width:150px">
             <button class="btn btn-ghost" onclick="loadDeposits()">Обновить</button>
           </div>
         </div>
@@ -162,6 +285,7 @@ a{color:var(--accent)}
         <div class="card-h">Заявки на вывод
           <div class="toolbar">
             <select class="inp" id="wd-status"><option value="pending">в обработке</option><option value="done">выполненные</option><option value="rejected">отклонённые</option><option value="">все</option></select>
+            <input class="inp" id="wd-user" placeholder="ID / email" style="width:150px">
             <button class="btn btn-ghost" onclick="loadWithdrawals()">Обновить</button>
           </div>
         </div>
@@ -171,7 +295,7 @@ a{color:var(--accent)}
       </div>
       <div class="card">
         <div class="card-h">Причины отклонения вывода
-          <div class="toolbar"><button class="btn btn-ghost" onclick="savePresets()">Сохранить</button><span id="presets-msg" style="font-size:12px"></span></div>
+          <div class="toolbar"><button class="btn btn-ghost" id="presets-save-btn" onclick="savePresets()">Сохранить</button><span id="presets-msg" style="font-size:12px"></span></div>
         </div>
         <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px" id="presets-box"></div>
       </div>
@@ -182,6 +306,7 @@ a{color:var(--accent)}
         <div class="card-h">Запросы
           <div class="toolbar">
             <select class="inp" id="vr-status"><option value="pending">в обработке</option><option value="ok">подтверждённые</option><option value="rejected">отклонённые</option><option value="">все</option></select>
+            <input class="inp" id="vr-user" placeholder="ID / email" style="width:150px">
             <button class="btn btn-ghost" onclick="loadVerifications()">Обновить</button>
           </div>
         </div>
@@ -198,7 +323,7 @@ a{color:var(--accent)}
           <input class="inp" id="promo-code" placeholder="КОД (латиница/цифры)" style="width:180px;text-transform:uppercase">
           <input class="inp" id="promo-pct" type="number" placeholder="% бонуса" style="width:110px" min="1" max="1000">
           <input class="inp" id="promo-mult" type="number" placeholder="Вейджер ×" style="width:110px" min="1" max="1000" value="20">
-          <button class="btn btn-acc" onclick="createPromo()">Создать</button>
+          <button class="btn btn-acc" id="promo-create-btn" onclick="createPromo()">Создать</button>
           <span id="promo-msg" style="font-size:12px"></span>
         </div>
       </div>
@@ -210,7 +335,12 @@ a{color:var(--accent)}
     <div id="tab-wallets" style="display:none">
       <h1>Кошельки</h1>
       <div class="card">
-        <div class="card-h">Адреса кошельков <div class="toolbar"><button class="btn btn-ghost" onclick="loadWallets()">Обновить</button></div></div>
+        <div class="card-h">Адреса кошельков <div class="toolbar"><button class="btn btn-ghost" id="instr-btn" onclick="toggleInstr()">Инструкция</button><button class="btn btn-ghost" onclick="loadWallets()">Обновить</button></div></div>
+        <div id="instr-panel" style="display:none;padding:12px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:12px;color:var(--dim);margin-bottom:8px">Текст инструкции на экране пополнения — по языкам системы</div>
+          <div id="instr-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px"></div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn btn-acc" onclick="saveInstr()">Сохранить инструкцию</button><span id="instr-msg" style="font-size:12px"></span></div>
+        </div>
         <div style="overflow-x:auto"><table class="tbl"><thead><tr>
           <th>МЕТОД</th><th>АДРЕС</th><th></th>
         </tr></thead><tbody id="wallets-body"></tbody></table></div>
@@ -222,23 +352,216 @@ a{color:var(--accent)}
         </tr></thead><tbody id="wallet-log-body"></tbody></table></div>
       </div>
     </div>
-    <div id="tab-chats" style="display:none">
-      <h1>Чаты</h1>
-      <div style="display:flex;gap:14px;min-height:440px;flex-wrap:wrap">
-        <div class="card" style="width:300px;flex-shrink:0;margin:0;display:flex;flex-direction:column;max-height:560px">
-          <div class="card-h">Запросы</div>
-          <div id="chat-list" style="overflow-y:auto;flex:1"></div>
+    <div id="tab-contacts" style="display:none">
+      <h1>Контакты</h1>
+      <div class="card">
+        <div class="card-h">Контакты на странице условий <span class="tag info">/terms.html</span><div class="toolbar"><button class="btn btn-ghost" onclick="loadContacts()">Обновить</button></div></div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;max-width:560px">
+          <label style="font-size:12px;color:var(--dim)">Эл. почта<input class="inp" id="ct-email" style="margin-top:4px"></label>
+          <label style="font-size:12px;color:var(--dim)">Telegram<input class="inp" id="ct-telegram" placeholder="https://t.me/..." style="margin-top:4px"></label>
+          <label style="font-size:12px;color:var(--dim)">Телефон<input class="inp" id="ct-phone" style="margin-top:4px"></label>
+          <label style="font-size:12px;color:var(--dim)">Компания<input class="inp" id="ct-company" style="margin-top:4px"></label>
+          <label style="font-size:12px;color:var(--dim)">Адрес<input class="inp" id="ct-address" style="margin-top:4px"></label>
+          <label style="font-size:12px;color:var(--dim)">Часы поддержки<input class="inp" id="ct-hours" placeholder="24/7" style="margin-top:4px"></label>
+          <div><button class="btn btn-acc" id="contacts-save-btn" onclick="saveContacts()">Сохранить</button> <span id="contacts-msg" style="font-size:12px"></span></div>
         </div>
-        <div class="card" style="flex:1;min-width:320px;margin:0;display:flex;flex-direction:column;max-height:560px">
-          <div class="card-h" id="chat-title">—</div>
-          <div id="chat-view" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px"></div>
-          <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)">
-            <input class="inp" id="chat-reply" placeholder="Ответить..." style="flex:1">
-            <button class="btn btn-acc" onclick="sendAdminReply()">Отправить</button>
+      </div>
+    </div>
+    <div id="tab-settings" style="display:none">
+      <h1>Настройки платформы</h1>
+      <div class="card">
+        <div class="card-h">Лимиты и вейджер
+          <div class="toolbar"><button class="btn btn-acc" onclick="saveSettings()">Сохранить</button><span id="settings-msg" style="font-size:12px"></span></div>
+        </div>
+        <div style="padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+          <label style="font-size:12px;color:var(--dim)">Мин. депозит<div><input class="inp" id="set-minDeposit" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Макс. депозит<div><input class="inp" id="set-maxDeposit" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Мин. вывод<div><input class="inp" id="set-minWithdrawal" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Макс. вывод<div><input class="inp" id="set-maxWithdrawal" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Мин. сделка<div><input class="inp" id="set-minTrade" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Макс. сделка<div><input class="inp" id="set-maxTrade" type="number" style="width:100%"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Вейджер по умолчанию (x)<div><input class="inp" id="set-defaultWager" type="number" style="width:100%"></div></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">Выплаты по активам
+          <div class="toolbar"><select class="inp" id="pay-asset" style="max-width:220px"></select><input class="inp" id="pay-pct" type="number" min="1" max="1000" placeholder="%" style="width:80px"><button class="btn btn-ghost" onclick="payAdd()">Добавить</button></div>
+        </div>
+        <div id="pay-list" style="padding:8px 16px 14px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Рыночные часы <span style="font-size:11px;color:var(--dim)">обычные форекс-пары закрываются, OTC/крипта/сырьё/индексы всегда открыты · время UTC+0 (Гринвич, без летнего сдвига)</span></div>
+        <div style="padding:12px 16px;display:flex;gap:14px;flex-wrap:wrap;align-items:end">
+          <label style="font-size:12px;color:var(--dim);display:flex;gap:6px;align-items:center;padding-bottom:8px"><input type="checkbox" id="set-mh-enabled"> Включено</label>
+          <label style="font-size:12px;color:var(--dim)">Закрытие в пятницу<div><input class="inp" id="set-mh-friClose" type="time" value="22:00" style="width:120px"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Открытие в воскресенье<div><input class="inp" id="set-mh-sunOpen" type="time" value="22:00" style="width:120px"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Ночная пауза с <span style="font-size:10px">(пусто — нет)</span><div><input class="inp" id="set-mh-nightStart" type="time" style="width:120px"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Ночная пауза до<div><input class="inp" id="set-mh-nightEnd" type="time" style="width:120px"></div></label>
+          <label style="font-size:12px;color:var(--dim)">Предупреждение за (мин)<div><input class="inp" id="set-mh-warnMin" type="number" min="1" max="120" value="15" style="width:90px"></div></label>
+          <div style="font-size:12px;color:var(--dim);padding-bottom:8px">Сейчас: <b id="mh-now" style="color:var(--text);font-family:monospace">—</b> UTC</div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-bcast" style="display:none">
+      <h1>Рассылка</h1>
+      <div class="card">
+        <div class="card-h">Получатели</div>
+        <div style="padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <label style="font-size:12px;color:var(--dim)">Страна<div><input class="inp" id="bc-country" placeholder="RU — пусто = все" style="width:150px"></div></label>
+          <label style="font-size:12px;color:var(--dim)">KYC<div><select class="inp" id="bc-kyc"><option value="">любой</option><option value="none">нет</option><option value="pending">на проверке</option><option value="ok">подтверждён</option><option value="rejected">отклонён</option></select></div></label>
+          <label style="font-size:12px;color:var(--dim);display:flex;gap:6px;align-items:center;padding-bottom:8px"><input type="checkbox" id="bc-dep"> с депозитом</label>
+          <button class="btn btn-ghost" onclick="bcCount()">Показать количество</button>
+          <b id="bc-count" style="padding-bottom:8px"></b>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">Сообщение</div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <textarea class="inp" id="bc-text" rows="4" placeholder="Текст сообщения..." style="resize:vertical"></textarea>
+          <div><button class="btn btn-acc" onclick="bcSend()">Разослать</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-team" style="display:none">
+      <h1>Команда</h1>
+      <div class="card">
+        <div class="card-h"><span id="staff-form-title">Новый сотрудник</span></div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;max-width:620px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input class="inp" id="staff-email" placeholder="Email" style="flex:1;min-width:200px">
+            <input class="inp" id="staff-pass" placeholder="Пароль (мин. 6)" style="flex:1;min-width:140px">
+            <button class="btn btn-ghost" onclick="staffGenPass()" title="Сгенерировать">🎲</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input class="inp" id="staff-nick" placeholder="Имя (подпись в чатах)" style="flex:1;min-width:200px">
+            <select class="inp" id="staff-role" onchange="staffRoleUI()"><option value="moder">Модератор (по правам)</option><option value="admin">Суперадмин (всё)</option></select>
+          </div>
+          <div id="staff-presets" style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--dim)">Шаблон:</span>
+            <button class="btn btn-ghost" onclick="staffPreset('observer')">Наблюдатель</button>
+            <button class="btn btn-ghost" onclick="staffPreset('chatmod')">Модератор чатов</button>
+            <button class="btn btn-ghost" onclick="staffPreset('finance')">Финансист</button>
+          </div>
+          <div style="overflow-x:auto"><table class="tbl" id="staff-perms"><thead><tr><th>РАЗДЕЛ</th><th>НЕТ</th><th>СМОТРЕТЬ</th><th>ДЕЛАТЬ</th></tr></thead><tbody id="staff-perms-body"></tbody></table></div>
+          <div><button class="btn btn-acc" id="staff-save-btn" onclick="saveStaff()">Сохранить</button>
+          <button class="btn btn-ghost" id="staff-cancel-btn" onclick="staffCancel()" style="display:none">Отмена</button>
+          <span id="staff-msg" style="font-size:12px"></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">Аккаунты <div class="toolbar"><button class="btn btn-ghost" onclick="loadStaff()">Обновить</button></div></div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr>
+          <th>EMAIL</th><th>ИМЯ</th><th>РОЛЬ</th><th>ПРАВА</th><th>СТАТУС</th><th>СОЗДАН</th><th></th>
+        </tr></thead><tbody id="staff-body"></tbody></table></div>
+      </div>
+    </div>
+    <div id="tab-audit" style="display:none">
+      <h1>Журнал действий</h1>
+      <div class="card">
+        <div class="card-h">События
+          <div class="toolbar">
+            <select class="inp" id="audit-f" onchange="loadAudit()">
+              <option value="">все</option><option value="staff">команда</option><option value="user">блокировки</option>
+              <option value="deposit">депозиты</option><option value="withdrawal">выводы</option><option value="verify">KYC</option>
+              <option value="wallet">кошельки</option><option value="promo">промо</option><option value="chatmsg">удаления в чатах</option>
+              <option value="quick">шаблоны</option>
+            </select>
+            <button class="btn btn-ghost" onclick="loadAudit()">Обновить</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr>
+          <th>ВРЕМЯ</th><th>КТО</th><th>ДЕЙСТВИЕ</th><th>ОБЪЕКТ</th><th>ДЕТАЛИ</th>
+        </tr></thead><tbody id="audit-body"></tbody></table></div>
+      </div>
+    </div>
+    <div id="tab-chats" style="display:none" data-mob="list">
+      <h1>Чаты</h1>
+      <div class="chats-row" style="display:flex;gap:14px;height:calc(100vh - 170px);min-height:480px">
+        <div class="card" id="chats-pane" style="width:260px;flex-shrink:0;margin:0;display:flex;flex-direction:column;min-height:0">
+          <div class="card-h">Запросы</div>
+          <div style="padding:8px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--border)">
+            <input class="inp" id="chats-search" placeholder="ID / email / текст" oninput="loadChats()">
+            <div style="display:flex;gap:6px">
+              <select class="inp" id="chats-status" onchange="loadChats()" style="flex:1;min-width:0"><option value="">все</option><option value="open">открытые</option><option value="closed">закрытые</option></select>
+              <select class="inp" id="chats-tag" onchange="loadChats()" style="flex:1;min-width:0"><option value="">все теги</option></select>
+            </div>
+          </div>
+          <div id="chat-list" style="overflow-y:auto;flex:1;min-height:0"></div>
+        </div>
+        <div class="card" id="conv-pane" style="flex:1;min-width:280px;margin:0;display:flex;flex-direction:column;min-height:0">
+          <div class="card-h" style="flex-wrap:wrap;gap:6px"><button class="btn btn-ghost mob-back" onclick="mobChats('list')" title="Назад" style="padding:2px 10px">←</button><div style="flex:1;min-width:200px"><div id="chat-title">—</div><div id="chat-sub"></div></div><button class="btn btn-ghost" id="chat-close-btn" onclick="closeChatToggle()" style="display:none;padding:2px 10px">Закрыть</button><button class="btn btn-ghost" onclick="toggleTagMenu()" title="Теги" style="padding:2px 10px">🏷</button><button class="btn btn-ghost" onclick="toggleQuick()" title="Шаблоны" style="padding:2px 10px">⚡</button></div>
+          <div id="tag-menu" style="display:none">
+            <div id="tag-menu-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+            <div style="display:flex;gap:6px;margin-top:8px"><input class="inp" id="tag-new" placeholder="Новый тег" style="flex:1;min-width:0"><button class="btn btn-acc" onclick="tagCreate()" style="padding:4px 14px">＋</button></div>
+          </div>
+          <div id="chat-view" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:0"></div>
+          <div id="quick-pending"><span>Шаблон:</span><span class="chip" id="quick-pending-tx"></span><button onclick="clearPendingQuick()" title="Убрать">✕</button></div>
+          <div id="chat-input-row" style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-top:1px solid var(--border)">
+            <textarea class="inp" id="chat-reply" placeholder="Ответить... (Enter — отправить, Shift+Enter — новая строка)" rows="4" style="width:100%;box-sizing:border-box;resize:vertical;min-height:70px;max-height:220px"></textarea>
+            <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+              <button class="btn btn-ghost" onclick="qmOpen()" title="Шаблоны">📝 Шаблоны</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('chat-file').click()" title="Прикрепить файлы">📎 Прикрепить</button>
+              <input type="file" id="chat-file" multiple hidden accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf" onchange="sendAdminFiles(this)">
+              <button class="btn btn-acc" onclick="sendAdminReply()" style="padding:6px 28px">Отправить</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="quick-panel" style="width:370px;flex-shrink:0;margin:0;display:flex;flex-direction:column;min-height:0">
+          <div class="card-h"><button class="btn btn-ghost mob-back" onclick="mobChats('chat')" title="Назад" style="padding:2px 10px">←</button><span style="flex:1">Шаблоны</span></div>
+          <div id="quick-body" data-qtpl="cats">
+            <div id="q-cats">
+              <div id="q-cats-list"></div>
+              <div id="q-cats-foot"><button class="btn btn-ghost btn-block" id="q-addcat-btn" onclick="addQuickGroup()">＋ Добавить категорию</button></div>
+            </div>
+            <div id="q-tpl">
+              <div id="q-tpl-head"><button class="qm-nav mob-back" onclick="mobQTpl('cats')" title="Назад">←</button><span id="q-tpl-name" style="flex:1">—</span><button class="btn btn-acc" id="q-addtpl-btn" onclick="openQEdit(null)" title="Новый шаблон" style="padding:4px 14px">＋</button></div>
+              <div id="q-tpl-list"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+<div id="att-modal">
+  <div id="att-box">
+    <div class="card-h">Вложения</div>
+    <div id="att-preview"></div>
+    <textarea class="inp" id="att-caption" placeholder="Подпись..."></textarea>
+    <div id="att-btns"><button class="btn btn-ghost" onclick="closeAttModal()">Отмена</button><button class="btn btn-acc" onclick="doAttSend()">Отправить</button></div>
+  </div>
+</div>
+
+<div id="lb-modal">
+  <button id="lb-x" onclick="closeLightbox()" title="Закрыть">✕</button>
+  <img id="lb-img" alt="">
+</div>
+
+<div id="qmodal" onclick="if(event.target===this)qmClose()">
+  <div id="qm-box">
+    <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <button class="qm-nav" id="qm-back" onclick="qmBack()" title="Назад">←</button>
+      <b id="qm-title" style="flex:1;font-size:15px">Категории</b>
+      <button class="qm-nav" onclick="qmClose()" title="Закрыть">✕</button>
+    </div>
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border)"><input class="inp" id="qm-search" placeholder="Поиск..." oninput="qmRender()" style="width:100%;box-sizing:border-box"></div>
+    <div id="qm-list" style="flex:1;overflow-y:auto;padding:10px 12px"></div>
+  </div>
+</div>
+
+<div id="qedit-modal">
+  <div id="qedit-box">
+    <div class="card-h"><span id="qedit-title" style="flex:1">Новый шаблон</span><button class="btn btn-ghost" onclick="closeQEdit()" style="padding:2px 10px">✕</button></div>
+    <div style="padding:12px 16px 0;font-size:12px;color:var(--dim)">Текст шаблона</div>
+    <div style="padding:8px 16px 0"><textarea class="inp" id="qedit-text" style="width:100%"></textarea></div>
+    <div style="padding:8px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="document.getElementById('qedit-file').click()">📎 Прикрепить картинки</button>
+      <input type="file" id="qedit-file" multiple hidden accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf" onchange="qeditPick(this)">
+      <button class="btn btn-ghost" id="qedit-clear" onclick="qeditToggleClear()" style="display:none">🗑 Убрать картинки</button>
+    </div>
+    <div id="qedit-files"></div>
+    <div id="qedit-btns"><button class="btn btn-ghost" onclick="closeQEdit()">Отмена</button><button class="btn btn-acc" onclick="saveQEdit()">Сохранить</button></div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -276,21 +599,32 @@ document.addEventListener('click',e=>{ if(!e.target.closest('#lang-dd,#lang-btn'
 window.onLangChanged=function(){ const e=document.getElementById('lang-cur-admin'); if(e) e.textContent=(I18N_LANGS.find(l=>l[0]===getLang())||[])[1]||getLang(); document.getElementById('lang-dd').classList.remove('open'); };
 async function api(path, opts={}){
   const init={method:opts.method||'GET', credentials:'same-origin'};
-  if(opts.body!==undefined){ init.headers={'Content-Type':'application/json'}; init.body=JSON.stringify(opts.body); }
+  if(opts.body!==undefined){
+    if(opts.body instanceof FormData){ init.body=opts.body; }
+    else { init.headers={'Content-Type':'application/json'}; init.body=JSON.stringify(opts.body); }
+  }
   const res=await fetch('/api'+path, init);
   let data={}; try{ data=await res.json(); }catch(e){}
-  if(!res.ok){ const e=new Error(data.error||('http_'+res.status)); e.status=res.status; e.code=data.error; throw e; }
+  if(!res.ok){ const e=new Error(data.error||('http_'+res.status)); e.status=res.status; e.code=data.error;
+    if(res.status===403&&data.error==='forbidden') e.message=t('Нет прав для этого действия');
+    throw e; }
   return data;
 }
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'$'+(n<0?'-':'')+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 const dt=ts=>{ const L={ru:'ru-RU',en:'en-GB',fr:'fr-FR',de:'de-DE',pt:'pt-PT',es:'es-ES',it:'it-IT',hi:'hi-IN'}[(window.getLang&&getLang())||'en']||'en-GB'; try{ return new Date(ts*1000).toLocaleString(L,{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){ return new Date(ts*1000).toLocaleString(); } };
 let ME=null, curTab='dash';
+let toastT=null;
+function toast(msg){ let el=document.getElementById('adm-toast');
+  if(!el){ el=document.createElement('div'); el.id='adm-toast'; document.body.appendChild(el); }
+  el.textContent=msg; el.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>el.style.display='none',2500); }
+const TAB_SEC={dash:'dash',users:'users',trades:'trades',deposits:'deposits',withdrawals:'withdrawals',verify:'verify',promos:'promos',wallets:'wallets',chats:'chats',contacts:'contacts'};
+function can(sec,lvl){ if(!ME) return false; if(ME.role==='admin') return true; return (Number((ME.perms||{})[sec])||0)>=lvl; }
 
 async function boot(){
   try{
     const r=await api('/admin/me');
-    if(r.user.role!=='admin'){ showLogin(); return; }
+    if(r.user.role!=='admin'&&r.user.role!=='moder'){ showLogin(); return; }
     ME=r.user; start();
   }catch(e){ showLogin(); }
 }
@@ -303,7 +637,7 @@ async function doLogin(){
   try{
     await api('/auth/login',{method:'POST',body:{email:document.getElementById('li-email').value.trim(),pass:document.getElementById('li-pass').value,admin:true}});
     const r=await api('/admin/me');
-    if(r.user.role!=='admin'){ await api('/auth/logout',{method:'POST',body:{admin:true}}); err.textContent='Это не админский аккаунт'; return; }
+    if(r.user.role!=='admin'&&r.user.role!=='moder'){ await api('/auth/logout',{method:'POST',body:{admin:true}}); err.textContent='Это не админский аккаунт'; return; }
     ME=r.user; start();
   }catch(e){ err.textContent= e.code==='blocked'?'Аккаунт заблокирован': e.code==='not_admin'?'Это не админский аккаунт':t('Неверная почта или пароль'); }
 }
@@ -314,13 +648,43 @@ function start(){
   document.getElementById('whoami').textContent=ME.email;
   if(window.i18nBindUser) i18nBindUser(ME.id);
   const lc=document.getElementById('lang-cur-admin'); if(lc&&window.I18N_LANGS) lc.textContent=(I18N_LANGS.find(l=>l[0]===getLang())||I18N_LANGS[0])[1];
-  tab('dash');
+  applyPerms();
+  const order=['dash','chats','users','trades','deposits','withdrawals','verify','promos','wallets','contacts'];
+  const fallback=ME.role==='admin'?'dash':(order.find(k=>can(k,1))||'dash');
+  let want=fallback;
+  try{
+    const t0=localStorage.getItem('qx_admin_tab');
+    const known=['dash','users','trades','deposits','withdrawals','verify','promos','wallets','chats','contacts','team','audit','settings','bcast'];
+    if(t0&&known.includes(t0)){
+      const okRole=ME.role==='admin'||!['team','audit','settings','bcast'].includes(t0);
+      const okSec=!TAB_SEC[t0]||can(TAB_SEC[t0],1);
+      if(okRole&&okSec) want=t0;
+    }
+  }catch(e){}
+  tab(want);
   setInterval(refreshBadges, 15000); refreshBadges();
 }
+function applyPerms(){
+  document.querySelectorAll('.nav-i').forEach(b=>{
+    const tb=b.dataset.tab;
+    b.style.display=(['team','audit','settings','bcast'].includes(tb))?(ME.role==='admin'?'':'none'):(can(TAB_SEC[tb],1)?'':'none');
+  });
+  const vis=(id,ok)=>{ const el=document.getElementById(id); if(el) el.style.display=ok?'':'none'; };
+  vis('presets-save-btn',can('withdrawals',2));
+  vis('promo-create-btn',can('promos',2));
+  vis('contacts-save-btn',can('contacts',2));
+  vis('instr-btn',can('wallets',2));
+  vis('chat-input-row',can('chats',2));
+  vis('q-addcat-btn',can('chats',2));
+  vis('q-addtpl-btn',can('chats',2));
+}
 function tab(t){
+  if((['team','audit','settings','bcast'].includes(t))&&ME&&ME.role!=='admin'){ toast(window.t('Нет прав для этого действия')); return; }
+  if(TAB_SEC[t]&&!can(TAB_SEC[t],1)){ toast(window.t('Нет прав для этого действия')); return; }
   curTab=t;
+  try{ localStorage.setItem('qx_admin_tab',t); }catch(e){}
   document.querySelectorAll('.nav-i').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
-  ['dash','users','trades','deposits','withdrawals','verify','promos','wallets','chats'].forEach(k=>{
+  ['dash','users','trades','deposits','withdrawals','verify','promos','wallets','chats','contacts','team','audit','settings','bcast'].forEach(k=>{
     document.getElementById('tab-'+k).style.display= k===t?'block':'none';
   });
   if(t==='dash') loadDash();
@@ -331,25 +695,32 @@ function tab(t){
   if(t==='verify') loadVerifications();
   if(t==='promos') loadPromos();
   if(t==='wallets') loadWallets();
-  if(t==='chats') loadChats();
+  if(t==='chats'){ loadChats(); startChatPoll(); loadQuick(); } else stopChatPoll();
+  if(t==='contacts') loadContacts();
+  if(t==='team') loadStaff();
+  if(t==='audit') loadAudit();
+  if(t==='settings') loadSettings();
+  if(t==='bcast') bcCount();
 }
 async function refreshBadges(){
   try{
     const s=await api('/admin/stats');
     const set=(id,n)=>{ const el=document.getElementById(id); el.textContent=n; el.classList.toggle('show',n>0); };
     set('cnt-deposits',s.pendingDeposits); set('cnt-withdrawals',s.pendingWithdrawals); set('cnt-verify',s.pendingVerifications);
-    try{ const ch=await api('/admin/chats'); set('cnt-chats',(ch.chats||[]).length); }catch(e){}
+    try{ const ch=await api('/admin/chats'); set('cnt-chats',(ch.chats||[]).reduce((s,c)=>s+(c.unread||0),0)); }catch(e){} /* CHAT1: бейдж = непрочитанные */
     if(curTab==='dash') renderStats(s);
-  }catch(e){ if(e.status===401||e.status===403) location.reload(); }
+  }catch(e){ if(e.status===401) location.reload(); }
 }
 
 /* ── дашборд ── */
 async function loadDash(){
-  const s=await api('/admin/stats'); renderStats(s);
-  const d=await api('/admin/deposits?status=pending');
-  document.getElementById('dash-deposits').innerHTML= d.deposits.length? '<div style="overflow-x:auto"><table class="tbl"><tbody>'+d.deposits.slice(0,5).map(depRow).join('')+'</tbody></table></div>' : '<div class="empty">Нет заявок в обработке</div>';
-  const v=await api('/admin/verifications?status=pending');
-  document.getElementById('dash-verify').innerHTML= v.verifications.length? '<div style="overflow-x:auto"><table class="tbl"><tbody>'+v.verifications.slice(0,5).map(vrRow).join('')+'</tbody></table></div>' : '<div class="empty">Нет запросов в обработке</div>';
+  try{ const s=await api('/admin/stats'); renderStats(s); }catch(e){}
+  try{ const d=await api('/admin/deposits?status=pending');
+    document.getElementById('dash-deposits').innerHTML= d.deposits.length? '<div style="overflow-x:auto"><table class="tbl"><tbody>'+d.deposits.slice(0,5).map(depRow).join('')+'</tbody></table></div>' : '<div class="empty">Нет заявок в обработке</div>';
+  }catch(e){ document.getElementById('dash-deposits').innerHTML='<div class="empty">—</div>'; }
+  try{ const v=await api('/admin/verifications?status=pending');
+    document.getElementById('dash-verify').innerHTML= v.verifications.length? '<div style="overflow-x:auto"><table class="tbl"><tbody>'+v.verifications.slice(0,5).map(vrRow).join('')+'</tbody></table></div>' : '<div class="empty">Нет запросов в обработке</div>';
+  }catch(e){ document.getElementById('dash-verify').innerHTML='<div class="empty">—</div>'; }
   applyLang();
 }
 function renderStats(s){
@@ -373,7 +744,7 @@ async function loadUsers(){
     <td class="mono">${money(u.demo)}</td><td class="mono">${money(u.real)}</td>
     <td>${kycTag(u.verifyStatus)}</td><td>${dt(u.created)}</td>
     <td>${u.blocked?'<span class="tag err">заблокирован</span>':'<span class="tag ok">активен</span>'}</td>
-    <td>${u.role==='admin'?'':(u.blocked?`<button class="btn btn-ok" onclick="userAction(${u.id},'unblock')">Разблокировать</button>`:`<button class="btn btn-no" onclick="userAction(${u.id},'block')">Заблокировать</button>`)}</td>
+    <td>${!can('users',2)?'':(u.blocked?`<button class="btn btn-ok" onclick="userAction(${u.id},'unblock')">Разблокировать</button>`:`<button class="btn btn-no" onclick="userAction(${u.id},'block')">Заблокировать</button>`)}</td>
   </tr>`).join('') || '<tr><td colspan="9" class="empty">Никого не найдено</td></tr>';
   applyLang();
 }
@@ -390,33 +761,114 @@ async function userAction(id,act){
 async function loadTrades(){
   const st=document.getElementById('trades-status').value;
   const uid=document.getElementById('trades-user').value.trim();
-  const p=new URLSearchParams(); if(st)p.set('status',st); if(uid)p.set('user_id',uid);
+  const p=new URLSearchParams(); if(st)p.set('status',st); if(uid)p.set('user',uid);
   const r=await api('/admin/trades?'+p.toString());
   document.getElementById('trades-body').innerHTML= r.trades.map(t=>`<tr>
     <td class="mono">${t.id}</td><td>${esc(t.email)}</td><td>${t.account}</td><td>${esc(t.asset)}</td>
     <td class="${t.dir==='UP'?'up':'dn'}">${t.dir==='UP'?'▲ UP':'▼ DOWN'}</td><td class="mono">${money(t.amount)}</td>
     <td class="mono">${t.entry_price}</td><td>${dt(t.entry_time)}</td><td>${dt(t.close_time)}</td>
-    <td>${t.status==='open'?'<span class="tag info">открыта</span>':(t.tie?'<span class="tag warn">возврат</span>':(t.won?'<span class="tag ok">выигрыш</span>':'<span class="tag err">проигрыш</span>'))}</td>
+    <td>${t.status==='cancelled'?'<span class="tag">отменена</span>':t.status==='open'?'<span class="tag info">открыта</span>':(t.tie?'<span class="tag warn">возврат</span>':(t.won?'<span class="tag ok">выигрыш</span>':'<span class="tag err">проигрыш</span>'))}</td>
     <td class="mono" style="color:${(t.profit||0)>=0?'var(--green)':'var(--red)'}">${t.profit==null?'—':((t.profit>=0?'+':'')+money(t.profit))}</td>
-  </tr>`).join('') || '<tr><td colspan="11" class="empty">Сделок нет</td></tr>';
+    <td>${(t.status!=='cancelled'&&can('trades',2))?`<button class="btn btn-no" onclick="cancelTrade(${t.id})">Отменить</button>`:''}</td>
+  </tr>`).join('') || '<tr><td colspan="12" class="empty">Сделок нет</td></tr>';
   applyLang();
+}
+
+async function cancelTrade(id){
+  if(!confirm(t('Отменить сделку #{id}? Стейк вернётся на счёт.',{id}))) return;
+  try{ const r=await api('/admin/trades/'+id+'/cancel',{method:'POST'}); toast(t('Возврат: {m}',{m:'$'+r.refund})); loadTrades(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+
+/* ── PLAT1: настройки ── */
+let PAYS={}, ASSET_BASE={};
+async function loadSettings(){
+  try{
+    const r=await api('/admin/settings'), s=r.settings||{};
+    ['minDeposit','maxDeposit','minWithdrawal','maxWithdrawal','minTrade','maxTrade','defaultWager'].forEach(k=>{
+      document.getElementById('set-'+k).value=s[k]??'';
+    });
+    PAYS={...(s.payouts||{})};
+    { const m=s.marketHours||{};
+      document.getElementById('set-mh-enabled').checked=!!m.enabled;
+      document.getElementById('set-mh-friClose').value=m.friClose||'22:00';
+      document.getElementById('set-mh-sunOpen').value=m.sunOpen||'22:00';
+      document.getElementById('set-mh-nightStart').value=m.nightStart||'';
+      document.getElementById('set-mh-nightEnd').value=m.nightEnd||'';
+      document.getElementById('set-mh-warnMin').value=m.warnMin??15; }
+    const a=await (await fetch('/api/assets')).json();
+    ASSET_BASE={};
+    if(r.base) ASSET_BASE=r.base;
+    document.getElementById('pay-asset').innerHTML=(a.assets||[]).map(x=>{ const b=ASSET_BASE[x.id]??x.payout; return `<option value="${esc(x.id)}">${esc(x.id)} (${b}%)</option>`; }).join('');
+    renderPays();
+  }catch(e){}
+}
+function renderPays(){
+  const ids=Object.keys(PAYS);
+  document.getElementById('pay-list').innerHTML=ids.map(id=>`<div style="display:flex;gap:8px;align-items:center;font-size:13px"><b>${esc(id)}</b><span style="color:var(--dim)">${ASSET_BASE[id]??'?'}% →</span><b class="mono" style="color:var(--green)">${PAYS[id]}%</b><button class="btn btn-ghost" style="padding:0 8px" onclick="payDel('${esc(id).replace(/'/g,"&#39;")}')">✕</button></div>`).join('')||'<span style="font-size:12px;color:var(--dim)">Переопределений нет — используются базовые выплаты</span>';
+}
+function payAdd(){
+  const id=document.getElementById('pay-asset').value, pct=Number(document.getElementById('pay-pct').value);
+  if(!id||!(pct>=1&&pct<=1000)){ alert(t('Ошибка: {m}',{m:'1..1000'})); return; }
+  PAYS[id]=pct; document.getElementById('pay-pct').value=''; renderPays();
+}
+function payDel(id){ delete PAYS[id]; renderPays(); }
+async function saveSettings(){
+  const g=k=>Number(document.getElementById('set-'+k).value);
+  const s={minDeposit:g('minDeposit'),maxDeposit:g('maxDeposit'),minWithdrawal:g('minWithdrawal'),maxWithdrawal:g('maxWithdrawal'),minTrade:g('minTrade'),maxTrade:g('maxTrade'),defaultWager:g('defaultWager'),payouts:PAYS,marketHours:{enabled:document.getElementById('set-mh-enabled').checked,
+    friClose:document.getElementById('set-mh-friClose').value,sunOpen:document.getElementById('set-mh-sunOpen').value,
+    nightStart:document.getElementById('set-mh-nightStart').value,nightEnd:document.getElementById('set-mh-nightEnd').value,
+    warnMin:Number(document.getElementById('set-mh-warnMin').value)}};
+  const msg=document.getElementById('settings-msg'); msg.textContent='';
+  try{ await api('/admin/settings',{method:'POST',body:{settings:s}}); msg.textContent='✓ сохранено'; setTimeout(()=>msg.textContent='',2000); loadSettings(); }
+  catch(e){ msg.textContent=t('Ошибка: {m}',{m:e.message||e.code||''}); }
+}
+
+setInterval(()=>{ try{ const e=document.getElementById('mh-now'); if(e) e.textContent=new Date().toISOString().slice(11,16); }catch(_){} },1000);
+/* ── PLAT1: рассылка ── */
+let BC_N=0;
+function bcFilters(){
+  return { country:document.getElementById('bc-country').value.trim(), kyc:document.getElementById('bc-kyc').value, hasDeposit:document.getElementById('bc-dep').checked?'1':'' };
+}
+async function bcCount(){
+  try{
+    const f=bcFilters(), p=new URLSearchParams();
+    if(f.country)p.set('country',f.country); if(f.kyc)p.set('kyc',f.kyc); if(f.hasDeposit)p.set('hasDeposit','1');
+    const r=await api('/admin/broadcast/count?'+p.toString());
+    BC_N=r.count||0;
+    document.getElementById('bc-count').textContent=t('Получателей: {n}',{n:BC_N});
+  }catch(e){}
+}
+async function bcSend(){
+  const tx=document.getElementById('bc-text').value.trim();
+  if(!tx){ alert(t('Введите текст')); return; }
+  await bcCount();
+  if(!BC_N){ alert(t('Нет получателей')); return; }
+  if(!confirm(t('Разослать сообщение {n} получателям?',{n:BC_N}))) return;
+  try{
+    const f=bcFilters();
+    const r=await api('/admin/broadcast',{method:'POST',body:{text:tx,filters:{country:f.country,kyc:f.kyc,hasDeposit:f.hasDeposit}}});
+    toast(t('Отправлено: {n}',{n:r.sent})); document.getElementById('bc-text').value='';
+  }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
 }
 
 /* ── депозиты ── */
 async function loadDeposits(){
   const st=document.getElementById('dep-status').value;
-  const r=await api('/admin/deposits'+(st?'?status='+st:''));
+  const q=document.getElementById('dep-user').value.trim();
+  const p=new URLSearchParams(); if(st)p.set('status',st); if(q)p.set('user',q);
+  const r=await api('/admin/deposits?'+p.toString());
   document.getElementById('deposits-body').innerHTML= r.deposits.map(depRow).join('') || '<tr><td colspan="9" class="empty">Заявок нет</td></tr>';
   applyLang();
 }
 function depRow(d){
   return `<tr>
     <td class="mono">${d.id}</td><td>${esc(d.email)}</td><td>${esc(d.method)}</td>
-    <td class="mono">${money(d.amount)}</td>
+    <td class="mono">${money(d.amount)}${d.screenshot?` <a href="/api/admin/deposits/${d.id}/screenshot" target="_blank" title="Скриншот оплаты" style="text-decoration:none">📷</a>`:''}</td>
     <td>${d.promo_code?'<span class="tag info">'+esc(d.promo_code)+'</span>':'—'}</td>
     <td class="mono">${d.bonus?'+'+money(d.bonus):'—'}</td><td>${dt(d.created_at)}</td>
     <td>${statusTag(d.status)}</td>
-    <td>${d.status==='pending'?`<button class="btn btn-ok" onclick="decide('deposits',${d.id},'approve')">Зачислить</button> <button class="btn btn-no" onclick="decide('deposits',${d.id},'reject')">Отклонить</button>`:''}</td>
+    <td>${(d.status==='pending'&&can('deposits',2))?`<button class="btn btn-ok" onclick="decide('deposits',${d.id},'approve')">Зачислить</button> <button class="btn btn-no" onclick="decide('deposits',${d.id},'reject')">Отклонить</button>`:''}</td>
   </tr>`;
 }
 
@@ -429,14 +881,16 @@ function copyAddr(btn){ /* полный адрес + копия, работае�
 }
 async function loadWithdrawals(){
   const st=document.getElementById('wd-status').value;
-  const r=await api('/admin/withdrawals'+(st?'?status='+st:''));
+  const q=document.getElementById('wd-user').value.trim();
+  const p=new URLSearchParams(); if(st)p.set('status',st); if(q)p.set('user',q);
+  const r=await api('/admin/withdrawals?'+p.toString());
   document.getElementById('withdrawals-body').innerHTML= r.withdrawals.map(w=>`<tr>
     <td class="mono">${w.id}</td><td>${esc(w.email)}</td><td>${esc(w.method)}</td>
     <td class="mono">${money(w.amount)}</td>
     <td class="mono">${w.bal_snap!=null?money(w.bal_snap):'—'}</td><td class="mono">${(w.bonus_snap||0)?money(w.bonus_snap):'—'}</td>
     <td class="mono" style="word-break:break-all;max-width:260px">${esc(w.addr)} <button class="btn btn-ghost" style="padding:0 7px;font-size:12px" data-addr="${esc(w.addr)}" onclick="copyAddr(this)" title="${t('Копировать')}">⧉</button></td>
     <td>${dt(w.created_at)}</td><td>${statusTag(w.status)}</td>
-    <td>${w.status==='pending'?`<button class="btn btn-ok" onclick="decide('withdrawals',${w.id},'approve')">Выплачено</button> <button class="btn btn-no" onclick="decide('withdrawals',${w.id},'reject','${String(w.user_lang||'').replace(/[^a-z]/g,'')}')">Отклонить + возврат</button>`:''}</td>
+    <td>${(w.status==='pending'&&can('withdrawals',2))?`<button class="btn btn-ok" onclick="decide('withdrawals',${w.id},'approve')">Выплачено</button> <button class="btn btn-no" onclick="decide('withdrawals',${w.id},'reject','${String(w.user_lang||'').replace(/[^a-z]/g,'')}')">Отклонить + возврат</button>`:''}</td>
   </tr>`).join('') || '<tr><td colspan="10" class="empty">Заявок нет</td></tr>';
   applyLang();
 }
@@ -459,7 +913,9 @@ async function decide(kind,id,act,userLang){
 /* ── верификация ── */
 async function loadVerifications(){
   const st=document.getElementById('vr-status').value;
-  const r=await api('/admin/verifications'+(st?'?status='+st:''));
+  const q=document.getElementById('vr-user').value.trim();
+  const p=new URLSearchParams(); if(st)p.set('status',st); if(q)p.set('user',q);
+  const r=await api('/admin/verifications?'+p.toString());
   document.getElementById('verify-body').innerHTML= r.verifications.map(vrRow).join('') || '<tr><td colspan="10" class="empty">Запросов нет</td></tr>';
   applyLang();
 }
@@ -472,7 +928,7 @@ function vrRow(v){
     <td>${v.docType?esc(DT[v.docType]||v.docType):'—'}</td>
     <td>${files||'—'}</td><td>${dt(v.created_at)}</td>
     <td>${v.status==='ok'?'<span class="tag ok">подтверждён</span>':v.status==='pending'?'<span class="tag warn">на проверке</span>':'<span class="tag err">отклонено</span>'}</td>
-    <td>${v.status==='pending'?`<button class="btn btn-ok" onclick="vrDecide(${v.id},'approve')">Подтвердить</button> <button class="btn btn-no" onclick="vrDecide(${v.id},'reject')">Отклонить</button>`:''}</td>
+    <td>${(v.status==='pending'&&can('verify',2))?`<button class="btn btn-ok" onclick="vrDecide(${v.id},'approve')">Подтвердить</button> <button class="btn btn-no" onclick="vrDecide(${v.id},'reject')">Отклонить</button>`:''}</td>
   </tr>`;
 }
 async function vrDecide(id,act){
@@ -492,7 +948,7 @@ async function loadPromos(){
     <td class="mono" style="font-weight:700">${esc(p.code)}</td>
     <td class="mono">+${p.bonus_pct}%</td><td class="mono">×${p.wager_mult||20}</td><td class="mono">${p.uses}</td><td>${dt(p.created_at)}</td>
     <td>${p.active?'<span class="tag ok">активен</span>':'<span class="tag err">выключен</span>'}</td>
-    <td><button class="btn btn-ghost" onclick="togglePromo(${p.id})">${p.active?'Выключить':'Включить'}</button></td>
+    <td style="white-space:nowrap">${can('promos',2)?`<button class="btn btn-ghost" onclick="togglePromo(${p.id})">${p.active?'Выключить':'Включить'}</button> <button class="btn btn-ghost" style="color:var(--red)" onclick="deletePromo(${p.id},'${p.code}')">Удалить</button>`:''}</td>
   </tr>`).join('') || '<tr><td colspan="7" class="empty">Промокодов нет</td></tr>';
   applyLang();
 }
@@ -505,9 +961,10 @@ async function createPromo(){
     msg.textContent='✓ создано'; msg.style.color='var(--green)';
     document.getElementById('promo-code').value=''; document.getElementById('promo-pct').value='';
     loadPromos();
-  }catch(e){ msg.textContent='✗ '+(e.code==='exists'?'уже существует':e.code==='bad_code'?'код: 3-32 символа A-Z/0-9/-/_':'неверный процент'); msg.style.color='var(--red)'; }
+  }catch(e){ msg.textContent='✗ '+(e.code==='exists'?t('уже существует'):e.code==='bad_code'?t('код: 3-32 символа A-Z/0-9/-/_'):t('неверный процент')); msg.style.color='var(--red)'; }
 }
 async function togglePromo(id){ try{ await api(`/admin/promos/${id}/toggle`,{method:'POST'}); loadPromos(); }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); } }
+async function deletePromo(id,code){ if(!confirm(t('Удалить промокод {c}?',{c:code}))) return; try{ await api(`/admin/promos/${id}`,{method:'DELETE'}); loadPromos(); }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); } }
 
 /* ── кошельки (G5) ── */
 async function loadWallets(){
@@ -515,7 +972,7 @@ async function loadWallets(){
   document.getElementById('wallets-body').innerHTML= r.wallets.map(w=>`<tr>
     <td><b>${esc(w.name)}</b> <span class="tag info">${esc(w.sym)} · ${esc(w.net)}</span></td>
     <td><input class="inp mono" id="wal-${w.id}" value="${esc(w.addr)}" style="min-width:280px"></td>
-    <td><button class="btn btn-acc" onclick="saveWallet('${w.id}')">Сохранить</button></td>
+    <td>${can('wallets',2)?`<button class="btn btn-acc" onclick="saveWallet('${w.id}')">Сохранить</button>`:''}</td>
   </tr>`).join('');
   document.getElementById('wallet-log-body').innerHTML= r.log.map(l=>`<tr>
     <td>${dt(l.changed_at)}</td><td><span class="tag info">${esc(l.method_id)}</span></td>
@@ -525,6 +982,27 @@ async function loadWallets(){
   </tr>`).join('') || '<tr><td colspan="5" class="empty">Изменений пока нет</td></tr>';
   applyLang();
 }
+let INSTR_LANGS=['ru','en','fr','de','pt','es','it','hi'];
+function toggleInstr(){
+  const p=document.getElementById('instr-panel');
+  const show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  if(show) loadInstr();
+}
+async function loadInstr(){
+  try{
+    const r=await api('/admin/deposit-instructions');
+    if(r.langs&&r.langs.length) INSTR_LANGS=r.langs;
+    document.getElementById('instr-fields').innerHTML=INSTR_LANGS.map(l=>`<label style="font-size:12px;color:var(--dim)">${l.toUpperCase()}<textarea class="inp" id="instr-${l}" rows="5" style="width:100%;box-sizing:border-box;resize:vertical;margin-top:4px">${esc((r.instructions&&r.instructions[l])||'')}</textarea></label>`).join('');
+  }catch(e){}
+}
+async function saveInstr(){
+  const msg=document.getElementById('instr-msg'); msg.textContent='';
+  const obj={};
+  INSTR_LANGS.forEach(l=>{ obj[l]=document.getElementById('instr-'+l).value; });
+  try{ await api('/admin/deposit-instructions',{method:'PUT',body:{instructions:obj}}); msg.textContent='✓ сохранено'; setTimeout(()=>msg.textContent='',2000); }
+  catch(e){ msg.textContent=t('Ошибка: {m}',{m:e.message||''}); }
+}
 async function saveWallet(id){
   const addr=document.getElementById('wal-'+id).value.trim();
   const guard=prompt(t('Пароль подтверждения:')); if(guard===null) return;
@@ -532,30 +1010,535 @@ async function saveWallet(id){
   catch(e){ alert(e.code==='bad_guard'? t('Неверный пароль подтверждения') : t('Ошибка: {m}',{m:e.message})); }
 }
 
-/* ── чаты поддержки (J2) ── */
-let adminChatId=null;
-async function loadChats(){
-  const r=await api('/admin/chats');
-  document.getElementById('chat-list').innerHTML= (r.chats||[]).map(c=>`<div class="chat-li ${c.id===adminChatId?'active':''}" onclick="openAdminChat(${c.id})">
-    <b>${esc(c.email||('ID '+c.user_id))}</b><small>${esc(c.specialist)} · ${dt(c.last_at||c.created_at)}</small>
-    <div class="prev">${esc((c.last_msg||'').slice(0,70))}</div></div>`).join('') || '<div class="empty">Нет обращений</div>';
-  applyLang();
-}
-async function openAdminChat(id){
-  adminChatId=id; loadChats();
+/* ── контакты для /terms.html ── */
+const CONTACT_FIELDS=['email','telegram','phone','company','address','hours'];
+async function loadContacts(){
   try{
-    const r=await api('/admin/chats/'+id+'/messages');
-    document.getElementById('chat-title').textContent=(r.chat.email||'')+' · '+r.chat.specialist;
-    const v=document.getElementById('chat-view');
-    v.innerHTML=(r.messages||[]).map(m=>`<div class="cm ${m.sender==='user'?'ag':'me'}"><small>${m.sender==='user'?esc(r.chat.email||''):esc(r.chat.specialist)} · ${dt(m.created_at)}</small><div>${esc(m.text)}</div></div>`).join('')||'<div class="empty">—</div>';
-    v.scrollTop=v.scrollHeight;
+    const r=await api('/admin/contacts');
+    CONTACT_FIELDS.forEach(k=>{ document.getElementById('ct-'+k).value=(r.contacts&&r.contacts[k])||''; });
+    applyLang();
   }catch(e){}
 }
-async function sendAdminReply(){
-  const inp=document.getElementById('chat-reply'); const v=inp.value.trim(); if(!v||adminChatId==null) return; inp.value='';
-  try{ await api('/admin/chats/'+adminChatId+'/messages',{method:'POST',body:{text:v}}); openAdminChat(adminChatId); }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+async function saveContacts(){
+  const msg=document.getElementById('contacts-msg'); msg.textContent='';
+  const body={};
+  CONTACT_FIELDS.forEach(k=>{ body[k]=document.getElementById('ct-'+k).value.trim(); });
+  try{
+    await api('/admin/contacts',{method:'PUT',body});
+    msg.textContent=t('Контакты сохранены'); msg.style.color='var(--green)';
+  }catch(e){ msg.textContent=t('Ошибка: {m}',{m:e.code||e.message}); msg.style.color='var(--red)'; }
 }
-document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='chat-reply') sendAdminReply(); });
+
+/* ── STAFF1: команда ── */
+const STAFF_SEC=[['dash','Дашборд'],['users','Пользователи'],['trades','Сделки'],['deposits','Депозиты'],['withdrawals','Выводы'],['verify','Верификация'],['promos','Промокоды'],['wallets','Кошельки'],['chats','Чаты'],['contacts','Контакты']];
+const SEC_NM={}; STAFF_SEC.forEach(([k,n])=>SEC_NM[k]=n);
+let staffEditId=null;
+function staffPermsBuild(){
+  document.getElementById('staff-perms-body').innerHTML=STAFF_SEC.map(([k,nm])=>
+    `<tr><td>${nm}</td>${[0,1,2].map(v=>`<td style="text-align:center"><input type="radio" name="sp-${k}" value="${v}"${v===0?' checked':''}></td>`).join('')}</tr>`).join('');
+}
+function staffPermsGet(){ const o={}; STAFF_SEC.forEach(([k])=>{ const r=document.querySelector(`input[name=sp-${k}]:checked`); const v=r?Number(r.value):0; if(v===1||v===2) o[k]=v; }); return o; }
+function staffPermsSet(p){ p=p||{}; STAFF_SEC.forEach(([k])=>{ const v=(p[k]===2)?2:(p[k]===1?1:0);
+  const r=document.querySelector(`input[name=sp-${k}][value="${v}"]`); if(r) r.checked=true; }); }
+function staffPreset(kind){
+  const all1={}; STAFF_SEC.forEach(([k])=>all1[k]=1);
+  if(kind==='observer') staffPermsSet(all1);
+  else if(kind==='chatmod') staffPermsSet({...all1,chats:2});
+  else if(kind==='finance') staffPermsSet({...all1,deposits:2,withdrawals:2,verify:2});
+}
+function staffGenPass(){ const abc='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  let s=''; for(let i=0;i<10;i++) s+=abc[Math.floor(Math.random()*abc.length)];
+  document.getElementById('staff-pass').value=s; }
+function staffRoleUI(){
+  const selfMode=staffEditId===ME.id;
+  const isAdm=document.getElementById('staff-role').value==='admin';
+  document.getElementById('staff-perms').style.display=(isAdm||selfMode)?'none':'';
+  document.getElementById('staff-presets').style.display=(isAdm||selfMode)?'none':'flex';
+}
+function staffSummary(p){
+  if(p==='all') return '<span class="tag ok">всё</span>';
+  const keys=Object.keys(p||{});
+  const w=keys.filter(k=>p[k]===2).map(k=>SEC_NM[k]).join(', ');
+  return `<span class="tag info">👁 ${keys.length}</span>`+(w?` <span class="tag warn">✏️ ${esc(w)}</span>`:'');
+}
+async function loadStaff(){
+  staffPermsBuild();
+  const r=await api('/admin/staff');
+  document.getElementById('staff-body').innerHTML=r.staff.map(u=>`<tr>
+    <td>${esc(u.email)}${u.id===ME.id?' <span class="tag info">это вы</span>':''}</td>
+    <td>${esc(u.nick||'—')}</td>
+    <td>${u.role==='admin'?'<span class="tag ok">суперадмин</span>':'модератор'}</td>
+    <td>${staffSummary(u.perms)}</td>
+    <td>${u.blocked?'<span class="tag err">заблокирован</span>':'<span class="tag ok">активен</span>'}</td>
+    <td>${dt(u.created)}</td>
+    <td style="white-space:nowrap">${u.id===ME.id
+      ?`<button class="btn btn-ghost" onclick="staffEdit(${u.id})">Профиль</button>`
+      :`<button class="btn btn-ghost" onclick="staffEdit(${u.id})">Права</button>
+        <button class="btn btn-ghost" onclick="staffBlock(${u.id},${u.blocked?0:1})">${u.blocked?'Разблокировать':'Блокировать'}</button>
+        <button class="btn btn-no" onclick="staffDel(${u.id})">Удалить</button>`}</td>
+  </tr>`).join('')||'<tr><td colspan="7" class="empty">Пусто</td></tr>';
+  applyLang();
+}
+async function staffEdit(id){
+  const r=await api('/admin/staff');
+  const u=r.staff.find(x=>x.id===id); if(!u) return;
+  staffEditId=id;
+  document.getElementById('staff-form-title').textContent=id===ME.id?t('Мой профиль'):t('Права: {e}',{e:u.email});
+  document.getElementById('staff-email').value=u.email;
+  document.getElementById('staff-email').disabled=true;
+  document.getElementById('staff-pass').value='';
+  document.getElementById('staff-pass').placeholder=t('Новый пароль (пусто — не менять)');
+  document.getElementById('staff-nick').value=u.nick||'';
+  document.getElementById('staff-role').value=u.role;
+  document.getElementById('staff-role').disabled=(id===ME.id);
+  staffPermsSet(u.perms==='all'?{}:u.perms);
+  document.getElementById('staff-cancel-btn').style.display='';
+  document.getElementById('staff-msg').textContent='';
+  staffRoleUI();
+  document.getElementById('tab-team').scrollIntoView();
+}
+function staffCancel(){
+  staffEditId=null;
+  document.getElementById('staff-form-title').textContent='Новый сотрудник';
+  document.getElementById('staff-email').value=''; document.getElementById('staff-email').disabled=false;
+  document.getElementById('staff-pass').value=''; document.getElementById('staff-pass').placeholder=t('Пароль (мин. 6)');
+  document.getElementById('staff-nick').value='';
+  document.getElementById('staff-role').value='moder'; document.getElementById('staff-role').disabled=false;
+  staffPermsSet({}); document.getElementById('staff-cancel-btn').style.display='none';
+  document.getElementById('staff-msg').textContent=''; staffRoleUI();
+}
+async function saveStaff(){
+  const msg=document.getElementById('staff-msg'); msg.textContent='';
+  const role=document.getElementById('staff-role').value;
+  const body={ nick:document.getElementById('staff-nick').value.trim() };
+  const pw=document.getElementById('staff-pass').value;
+  if(pw) body.pass=pw;
+  if(staffEditId==null){
+    body.email=document.getElementById('staff-email').value.trim();
+    body.role=role;
+    if(role==='moder') body.perms=staffPermsGet();
+    try{ await api('/admin/staff',{method:'POST',body}); msg.textContent='✓ создан'; msg.style.color='var(--green)'; staffCancel(); loadStaff(); }
+    catch(e){ msg.textContent='✗ '+(e.code==='exists'?t('такой email уже есть'):e.code==='bad_email'?t('неверный email'):e.code==='bad_pass'?t('пароль мин. 6 символов'):e.code==='no_perms'?t('выберите хотя бы один раздел'):e.message); msg.style.color='var(--red)'; }
+  }else{
+    if(staffEditId!==ME.id){ body.role=role; if(role==='moder') body.perms=staffPermsGet(); }
+    try{ await api('/admin/staff/'+staffEditId,{method:'PUT',body}); msg.textContent='✓ сохранено'; msg.style.color='var(--green)'; staffCancel(); loadStaff(); }
+    catch(e){ msg.textContent='✗ '+(e.code==='bad_pass'?t('пароль мин. 6 символов'):e.code==='no_perms'?t('выберите хотя бы один раздел'):e.code==='last_admin'?t('нельзя: последний суперадмин'):e.message); msg.style.color='var(--red)'; }
+  }
+}
+async function staffBlock(id,block){
+  try{ await api(`/admin/staff/${id}/${block?'block':'unblock'}`,{method:'POST'}); loadStaff(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.code==='last_admin'?'нельзя: последний суперадмин':e.message})); }
+}
+async function staffDel(id){
+  if(!confirm(t('Удалить аккаунт сотрудника? Доступ закроется сразу.'))) return;
+  try{ await api('/admin/staff/'+id,{method:'DELETE'}); if(staffEditId===id) staffCancel(); loadStaff(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.code==='last_admin'?'нельзя: последний суперадмин':e.message})); }
+}
+
+/* ── STAFF1: журнал ── */
+const AUDIT_NM={'staff.create':'создан сотрудник','staff.update':'права сотрудника','staff.block':'сотрудник заблокирован','staff.unblock':'сотрудник разблокирован','staff.delete':'сотрудник удалён',
+ 'user.block':'юзер заблокирован','user.unblock':'юзер разблокирован','deposit.approve':'депозит зачислен','deposit.reject':'депозит отклонён',
+ 'withdrawal.approve':'вывод выплачен','withdrawal.reject':'вывод отклонён','verify.approve':'KYC подтверждён','verify.reject':'KYC отклонён',
+ 'wallet.update':'кошелёк изменён','promo.create':'промокод создан','promo.toggle':'промокод вкл/выкл','promo.delete':'промокод удалён','presets.update':'причины отказа изменены',
+ 'chatmsg.delete':'сообщение удалено','quickgroup.delete':'группа шаблонов удалена','quickitem.delete':'шаблон удалён'};
+async function loadAudit(){
+  const a=document.getElementById('audit-f').value;
+  const r=await api('/admin/audit?limit=200'+(a?'&action='+encodeURIComponent(a):''));
+  document.getElementById('audit-body').innerHTML=r.log.map(l=>`<tr>
+    <td style="white-space:nowrap">${dt(l.created_at)}</td><td>${esc(l.actor_email||('id '+l.actor_id))}</td>
+    <td>${esc(AUDIT_NM[l.action]||l.action)}</td><td class="mono">${esc(l.target||'—')}</td><td>${esc(l.detail||'—')}</td>
+  </tr>`).join('')||'<tr><td colspan="5" class="empty">Событий нет</td></tr>';
+  applyLang();
+}
+
+/* ── чаты поддержки (J2) ── */
+let adminChatId=null, adminChatStatus='open', chatPollTimer=null;
+let CHAT_TAGS={};
+const TAGC=[['rgba(59,130,246,.16)','rgba(59,130,246,.4)','#9ec2ff'],['rgba(34,197,94,.15)','rgba(34,197,94,.4)','#86efac'],['rgba(234,179,8,.15)','rgba(234,179,8,.45)','#fde047'],['rgba(239,68,68,.15)','rgba(239,68,68,.45)','#fca5a5'],['rgba(241,245,249,.14)','rgba(241,245,249,.4)','#f1f5f9'],['rgba(168,85,247,.16)','rgba(168,85,247,.4)','#d8b4fe']];
+function tagStyle(t){ const c=TAGC[((t&&t.color!=null?t.color:t.id)||0)%6]||TAGC[0]; return `background:${c[0]};border-color:${c[1]};color:${c[2]}`; }
+async function loadChats(){
+  const p=new URLSearchParams();
+  const q=(document.getElementById('chats-search')||{value:''}).value.trim();
+  const st=(document.getElementById('chats-status')||{value:''}).value;
+  const tg=(document.getElementById('chats-tag')||{value:''}).value;
+  if(q)p.set('search',q); if(st)p.set('status',st); if(tg)p.set('tag',tg);
+  const r=await api('/admin/chats?'+p.toString());
+  CHAT_TAGS={};
+  document.getElementById('chat-list').innerHTML= (r.chats||[]).map(c=>{
+    CHAT_TAGS[c.id]=(c.tags||[]).map(x=>x.id);
+    const tgs=(c.tags||[]).map(x=>`<span class="tg" style="${tagStyle(x)}">${esc(x.name)}</span>`).join('');
+    return `<div class="chat-li ${c.id===adminChatId?'active':''} ${(c.unread||0)>0?'has-unread':''} ${c.status==='closed'?'closed':''}" onclick="openAdminChat(${c.id})">
+    ${(c.unread||0)>0?`<span class="dot">${c.unread>99?'99+':c.unread}</span>`:''}
+    <b>${esc(c.email||('ID '+c.user_id))}</b><small>${esc(c.specialist)} · ${dt(c.last_at||c.created_at)}${c.status==='closed'?' · '+t('закрыт'):''}</small>
+    <div class="prev">${esc(((c.last_msg||'')||((c.lastFiles||0)>0?'📎 '+t('Вложение'):''))).slice(0,70)}</div>${tgs?`<div class="tgs">${tgs}</div>`:''}</div>`; }).join('') || '<div class="empty">Нет обращений</div>';
+  applyLang();
+}
+function fmtSize(n){ n=Number(n)||0; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(1)+' MB'; }
+function renderMsgFiles(files){
+  return (files||[]).map(f=>{
+    if(/^image\/(jpeg|png|gif|webp)$/.test(f.m||''))
+      return `<img src="${esc(f.url)}" class="att-thumb" loading="lazy" onclick="openLightbox(this.src)">`;
+    return `<a href="${esc(f.url)}" class="att-file" download>📎 ${esc(f.o||'file')} <small>${fmtSize(f.s)}</small></a>`;
+  }).join('');
+}
+function renderAdminMsg(m,email,specialist){
+  const who=m.sender==='user'?esc(email||''):esc(specialist);
+  const tm=dt(m.createdAt||m.created_at);
+  const orig=(m.orig!=null)?`<div class="orig">${esc(m.orig)}</div>`:''; /* исходник виден и у удалённых — история не теряется */
+  const tag=(m.deleted?`<span class="edited-tag">${t('удалено')}</span>`:'')+(m.edited?`<span class="edited-tag">${t('ред.')}</span>`:'');
+
+  const at=renderMsgFiles(m.files);
+  const tx=m.text?(m.deleted?`<div class="txt">${esc(m.text)}</div>`:`<div>${esc(m.text)}</div>`):'';
+  const hasFiles=(m.files||[]).length>0;
+  const own=m.sender==='support'; /* CHAT3: править/удалять можно только свои сообщения */
+  const c2=can('chats',2), acts=(!own||m.deleted||!c2)?'':hasFiles
+    ?`<div class="msg-actions"><button onclick="delAdminMsg(${m.id})" title="${t('Удалить')}">🗑</button></div>` /* CHAT2: вложения не правим, только удаляем */
+    :`<div class="msg-actions"><button onclick="editAdminMsg(${m.id},this)" title="${t('Редактировать')}">✏️</button><button onclick="delAdminMsg(${m.id})" title="${t('Удалить')}">🗑</button></div>`;
+  if(m.sender==='system') return `<div class="cm sys">${esc(m.text||'')}</div>`;
+  return `<div class="cm ${m.sender==='user'?'ag':'me'}${m.deleted?' deleted':''}"><small>${who} · ${tm}${tag}</small>${orig}${at?'<div class="att-grid">'+at+'</div>':''}${tx}${acts}</div>`;
+}
+async function openAdminChat(id){
+  if(adminChatId!==id) clearPendingQuick();
+  adminChatId=id; loadChats(); mobChats('chat');
+  try{
+    const r=await api('/admin/chats/'+id+'/messages');
+    adminChatStatus=r.chat.status||'open';
+    document.getElementById('chat-title').textContent=(r.chat.email||'')+' · '+r.chat.specialist;
+    const cid=r.chat.client_id||r.chat.user_id;
+    document.getElementById('chat-sub').innerHTML=`ID <b class="mono">${esc(String(cid))}</b> <button class="btn btn-ghost" style="padding:0 7px;font-size:12px" data-addr="${esc(String(cid))}" onclick="copyAddr(this)" title="${t('Копировать')}">⧉</button><span>·</span><span class="mono">${money(r.chat.real_balance||0)}</span><span>·</span><span>${esc(r.chat.country||'—')}</span><span>·</span><span>${esc(r.chat.lang||'—')}</span><span>·</span><span>KYC ${esc(r.chat.verify_status||'—')}</span>`;
+    const cb=document.getElementById('chat-close-btn');
+    if(!can('chats',2)){ cb.style.display='none'; }
+    else{ cb.style.display=''; cb.textContent=adminChatStatus==='closed'?t('Открыть заново'):t('Закрыть обращение'); }
+    const v=document.getElementById('chat-view');
+    v.innerHTML=(r.messages||[]).map(m=>renderAdminMsg(m,r.chat.email,r.chat.specialist)).join('')||'<div class="empty">—</div>';
+    v.scrollTop=v.scrollHeight;
+    loadChats(); /* CHAT1: точка гаснет — сервер сбросил unread при открытии */
+  }catch(e){}
+}
+async function closeChatToggle(){
+  if(adminChatId==null) return;
+  if(adminChatStatus==='closed'){
+    try{ await api('/admin/chats/'+adminChatId+'/reopen',{method:'POST'}); toast(t('Открыто')); openAdminChat(adminChatId); }
+    catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+  }else{
+    if(!confirm(t('Закрыть обращение?'))) return;
+    try{ await api('/admin/chats/'+adminChatId+'/close',{method:'POST'}); openAdminChat(adminChatId); }
+    catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+  }
+}
+let ALL_TAGS=[];
+function toggleTagMenu(){
+  const m=document.getElementById('tag-menu');
+  const show=m.style.display==='none';
+  m.style.display=show?'block':'none';
+  if(show) loadChatTags();
+}
+async function loadChatTags(){
+  try{
+    const r=await api('/admin/chat-tags');
+    ALL_TAGS=r.tags||[];
+    const cur=new Set(CHAT_TAGS[adminChatId]||[]);
+    document.getElementById('tag-menu-list').innerHTML=ALL_TAGS.map(x=>`<span class="tm-tag ${cur.has(x.id)?'on':''}" style="${tagStyle(x)}" onclick="tagToggle(${x.id})">${cur.has(x.id)?'✓ ':''}${esc(x.name)} <small style="color:var(--dim)">${x.count||''}</small><button class="mini" onclick="event.stopPropagation();tagRename(${x.id})" title="${t('Редактировать')}">✏️</button><button class="mini" onclick="event.stopPropagation();tagDel(${x.id})" title="${t('Удалить')}">🗑</button></span>`).join('')||`<span style="font-size:12px;color:var(--dim)">${t('Нет тегов')}</span>`;
+    const sel=document.getElementById('chats-tag'), keep=sel.value;
+    sel.innerHTML='<option value="">все теги</option>'+ALL_TAGS.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+    sel.value=keep;
+  }catch(e){}
+}
+async function tagToggle(id){
+  if(adminChatId==null){ toast(t('Сначала выберите чат')); return; }
+  const has=(CHAT_TAGS[adminChatId]||[]).includes(id);
+  try{
+    if(has) await api(`/admin/chats/${adminChatId}/tags/${id}`,{method:'DELETE'});
+    else await api(`/admin/chats/${adminChatId}/tags`,{method:'POST',body:{tag_id:id}});
+    await loadChats(); loadChatTags();
+  }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+async function tagCreate(){
+  const inp=document.getElementById('tag-new'), nm=inp.value.trim();
+  if(!nm) return;
+  try{ const r=await api('/admin/chat-tags',{method:'POST',body:{name:nm}}); inp.value='';
+    if(adminChatId!=null){ await api(`/admin/chats/${adminChatId}/tags`,{method:'POST',body:{tag_id:r.id}}); await loadChats(); }
+    loadChatTags();
+  }catch(e){ alert(t('Ошибка: {m}',{m:e.code==='exists'?t('такой тег уже есть'):e.message})); }
+}
+async function tagRename(id){
+  const x=ALL_TAGS.find(z=>z.id===id);
+  const nm=prompt(t('Название тега:'),(x&&x.name)||''); if(!nm||!nm.trim()) return;
+  try{ await api('/admin/chat-tags/'+id,{method:'PUT',body:{name:nm.trim()}}); await loadChats(); loadChatTags(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+async function tagDel(id){
+  if(!confirm(t('Удалить тег?'))) return;
+  try{ await api('/admin/chat-tags/'+id,{method:'DELETE'}); await loadChats(); loadChatTags(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+async function reloadOpenChat(){ /* CHAT1: тихая подгрузка открытого чата, скролл не дёргаем */
+  if(adminChatId==null||curTab!=='chats') return;
+  try{
+    const r=await api('/admin/chats/'+adminChatId+'/messages');
+    const v=document.getElementById('chat-view');
+    const nearBottom=v.scrollHeight-v.scrollTop-v.clientHeight<120;
+    v.innerHTML=(r.messages||[]).map(m=>renderAdminMsg(m,r.chat.email,r.chat.specialist)).join('')||'<div class="empty">—</div>';
+    if(nearBottom) v.scrollTop=v.scrollHeight;
+  }catch(e){}
+}
+function startChatPoll(){ stopChatPoll(); chatPollTimer=setInterval(async()=>{ try{ await loadChats(); }catch(e){} reloadOpenChat(); },4000); }
+function stopChatPoll(){ if(chatPollTimer){ clearInterval(chatPollTimer); chatPollTimer=null; } }
+async function sendAdminReply(){
+  const inp=document.getElementById('chat-reply'); const v=inp.value.trim();
+  if(adminChatId==null||(!v&&!pendingQuick)) return;
+  inp.value='';
+  try{
+    if(pendingQuick){ /* CHAT4: подставлен шаблон — шлём с его файлами */
+      const fd=new FormData(); fd.append('text',v); fd.append('quick_item',pendingQuick.id);
+      await api('/admin/chats/'+adminChatId+'/messages',{method:'POST',body:fd});
+      clearPendingQuick();
+    } else await api('/admin/chats/'+adminChatId+'/messages',{method:'POST',body:{text:v}});
+    openAdminChat(adminChatId);
+  }catch(e){
+    if(e.code==='quick_not_found'){ clearPendingQuick(); alert(t('Шаблон не найден (удалён?)')); }
+    else alert(t('Ошибка: {m}',{m:e.message}));
+  }
+}
+function chatFileErr(e){
+  alert(e.code==='bad_file'?t('Только JPG, PNG, GIF, WebP, SVG и PDF до 8 МБ')
+    :e.code==='too_many_files'?t('Максимум 5 файлов за раз')
+    :e.code==='file_too_big'?t('Файл слишком большой (макс. 8 МБ)')
+    :e.code==='quick_not_found'?(clearPendingQuick(),t('Шаблон не найден (удалён?)'))
+    :t('Ошибка: {m}',{m:e.message}));
+}
+/* CHAT4: предотправочное окно вложений — превью + подпись, отправка только по кнопке */
+let attFiles=[];
+function sendAdminFiles(input){
+  if(adminChatId==null||!input.files||!input.files.length) { input.value=''; return; }
+  openAttModal([...input.files]);
+  input.value='';
+}
+function openAttModal(files){
+  attFiles=files||[];
+  if(!attFiles.length) return;
+  document.getElementById('att-caption').value=document.getElementById('chat-reply').value;
+  const pv=document.getElementById('att-preview'); pv.innerHTML='';
+  attFiles.forEach(f=>{
+    if(/^image\/(jpeg|png|gif|webp)$/.test(f.type)){
+      const img=document.createElement('img'); img.src=URL.createObjectURL(f); pv.appendChild(img);
+    } else {
+      const a=document.createElement('span'); a.className='att-file'; a.textContent='📎 '+f.name+' ';
+      const sm=document.createElement('small'); sm.textContent=fmtSize(f.size); a.appendChild(sm); pv.appendChild(a);
+    }
+  });
+  document.getElementById('att-modal').classList.add('open');
+  applyLang();
+}
+function closeAttModal(){ document.getElementById('att-modal').classList.remove('open'); attFiles=[]; }
+async function doAttSend(){
+  if(!attFiles.length) { closeAttModal(); return; }
+  const fd=new FormData();
+  const cap=document.getElementById('att-caption').value.trim();
+  if(cap) fd.append('text',cap);
+  for(const f of attFiles) fd.append('files',f);
+  if(pendingQuick) fd.append('quick_item',pendingQuick.id);
+  closeAttModal();
+  try{ await api('/admin/chats/'+adminChatId+'/messages',{method:'POST',body:fd}); document.getElementById('chat-reply').value=''; clearPendingQuick(); openAdminChat(adminChatId); }
+  catch(e){ chatFileErr(e); }
+}
+async function editAdminMsg(mid,btn){
+  if(adminChatId==null) return;
+  const box=btn.closest('.cm'); const cur=box?box.querySelector('div:not(.orig):not(.msg-actions)'):{};
+  const nv=prompt(t('Редактировать сообщение:'),(cur&&cur.textContent)||'');
+  if(nv==null) return;
+  try{ await api('/admin/chats/'+adminChatId+'/messages/'+mid,{method:'PUT',body:{text:nv.trim()}}); reloadOpenChat(); }
+  catch(e){ alert(e.code==='deleted'?t('Сообщение уже удалено'):e.code==='not_own'?t('Можно менять только свои сообщения'):t('Ошибка: {m}',{m:e.message})); }
+}
+async function delAdminMsg(mid){
+  if(adminChatId==null) return;
+  if(!confirm(t('Удалить это сообщение? Юзер его больше не увидит.'))) return;
+  try{ await api('/admin/chats/'+adminChatId+'/messages/'+mid,{method:'DELETE'}); reloadOpenChat(); }
+  catch(e){ alert(e.code==='not_own'?t('Можно менять только свои сообщения'):t('Ошибка: {m}',{m:e.message})); }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey&&document.activeElement&&document.activeElement.id==='chat-reply'){ e.preventDefault(); sendAdminReply(); } });
+
+/* ── CHAT4: быстрые ответы (папки-группы + шаблоны; клик вставляет, НЕ отправляет) ── */
+let QUICK=[], quickSel=null, pendingQuick=null;
+function toggleQuick(show){
+  const p=document.getElementById('quick-panel');
+  const open=(show===undefined)?p.style.display==='none':!!show;
+  p.style.display=open?'flex':'none';
+  if(open){ loadQuick(); if(window.innerWidth<=1020) mobChats('tpl'); }
+}
+function mobChats(v){ const t=document.getElementById('tab-chats'); if(t) t.dataset.mob=v; }
+function mobQTpl(v){ const q=document.getElementById('quick-body'); if(q) q.dataset.qtpl=v; }
+function clearPendingQuick(){ pendingQuick=null; updatePendingChip(); }
+function updatePendingChip(){
+  const el=document.getElementById('quick-pending');
+  if(!pendingQuick){ el.style.display='none'; return; }
+  el.style.display='flex';
+  const n=(pendingQuick.files||[]).length;
+  document.getElementById('quick-pending-tx').textContent=(pendingQuick.text||'').slice(0,60)+(n?` 📎${n}`:'');
+}
+async function loadQuick(){
+  try{
+    const r=await api('/admin/quick');
+    QUICK=r.groups||[];
+    if(!QUICK.some(g=>g.id===quickSel)) quickSel=QUICK.length?QUICK[0].id:null;
+    renderQuick();
+  }catch(e){}
+}
+function renderQuick(){
+  const cats=document.getElementById('q-cats-list');
+  cats.innerHTML=QUICK.map(g=>`<div class="q-cat ${quickSel===g.id?'sel':''}" onclick="quickSel=${g.id};renderQuick();mobQTpl('tpl')">
+    <span class="nm">${esc(g.name)}</span>
+    ${can('chats',2)?`<button class="icobtn" onclick="event.stopPropagation();renameQuickGroup(${g.id})" title="${t('Редактировать')}">✏️</button>
+    <button class="icobtn" onclick="event.stopPropagation();delQuickGroup(${g.id})" title="${t('Удалить')}">🗑</button>`:''}
+  </div>`).join('')||`<div class="empty">${t('Нет категорий')}</div>`;
+  const g=QUICK.find(x=>x.id===quickSel);
+  document.getElementById('q-tpl-name').textContent=g?g.name:'—';
+  const list=document.getElementById('q-tpl-list');
+  if(!g){ list.innerHTML=`<div class="empty">${t('Выберите категорию')}</div>`; applyLang(); return; }
+  list.innerHTML=(g.items||[]).map(it=>{
+    const thumbs=(it.files||[]).filter(f=>/^image\/(jpeg|png|gif|webp)$/.test(f.m||''))
+      .map(f=>`<img class="qthumb" src="${esc(f.url)}" loading="lazy" onclick="openLightbox(this.src)">`).join('');
+    const nfiles=(it.files||[]).length;
+    return `<div class="q-item">
+      ${it.text?`<div class="tx">${esc(it.text)}</div>`:''}${thumbs}${(!it.text&&nfiles)?`<div class="tx">📎 ${t('Вложение')}${nfiles>1?' ×'+nfiles:''}</div>`:''}
+      ${can('chats',2)?`<div class="row"><button class="q-use" onclick="insertQuick(${it.id})">${t('Использовать этот шаблон')}</button>
+      <span class="dots"><button onclick="event.stopPropagation();this.nextElementSibling.classList.toggle('open')">⋮</button>
+      <span class="menu"><button onclick="openQEdit(${it.id})">${t('Редактировать')}</button>
+      <button class="danger" onclick="delQuickItem(${it.id})">${t('Удалить')}</button></span></span></div>`:''}
+    </div>`; }).join('')||`<div class="empty">${t('Нет шаблонов')}</div>`;
+  applyLang();
+}
+function findQuick(id){ for(const g of QUICK) for(const it of (g.items||[])) if(it.id===id) return it; return null; }
+function insertQuick(id){
+  const it=findQuick(id); if(!it) return;
+  if(adminChatId==null){ alert(t('Сначала выберите чат')); return; }
+  const inp=document.getElementById('chat-reply');
+  inp.value=inp.value? inp.value+'\n'+(it.text||'') : (it.text||''); /* вставка БЕЗ отправки */
+  pendingQuick=((it.files||[]).length||null)&&it;
+  updatePendingChip();
+  inp.focus();
+  if(window.innerWidth<=1020) mobChats('chat'); /* моб: вставил шаблон — назад в переписку */
+}
+/* выбор шаблона окнами (как в мобильном чаттере): категории → шаблоны */
+let qmCat=null;
+async function qmOpen(){
+  if(!QUICK.length){ try{ await loadQuick(); }catch(e){} }
+  qmCat=null;
+  document.getElementById('qm-search').value='';
+  document.getElementById('qmodal').classList.add('open');
+  qmRender();
+}
+function qmClose(){ document.getElementById('qmodal').classList.remove('open'); }
+function qmBack(){ qmCat=null; qmRender(); }
+function qmRender(){
+  const q=document.getElementById('qm-search').value.trim().toLowerCase();
+  const back=document.getElementById('qm-back'), title=document.getElementById('qm-title'), list=document.getElementById('qm-list');
+  if(qmCat==null){
+    back.style.visibility='hidden'; title.textContent=t('Категории');
+    const gs=QUICK.filter(g=>!q||(g.name||'').toLowerCase().includes(q));
+    list.innerHTML=gs.map(g=>`<div class="qm-row" onclick="qmCat=${g.id};qmRender()"><b>${esc(g.name)}</b><span style="color:var(--dim);font-size:12px">${(g.items||[]).length}</span><span style="color:var(--dim);font-size:18px">›</span></div>`).join('')||`<div class="empty">${t('Нет категорий')}</div>`;
+  }else{
+    const g=QUICK.find(x=>x.id===qmCat);
+    if(!g){ qmCat=null; qmRender(); return; }
+    back.style.visibility=''; title.textContent=g.name;
+    const items=(g.items||[]).filter(it=>!q||(it.text||'').toLowerCase().includes(q));
+    list.innerHTML=items.map(it=>{
+      const thumbs=(it.files||[]).filter(f=>/^image\/(jpeg|png|gif|webp)$/.test(f.m||'')).map(f=>`<img class="qthumb" src="${esc(f.url)}" loading="lazy" onclick="openLightbox(this.src)">`).join('');
+      const nfiles=(it.files||[]).length;
+      return `<div class="q-item">${it.text?`<div class="tx">${esc(it.text)}</div>`:''}${thumbs}${(!it.text&&nfiles)?`<div class="tx">📎 ${t('Вложение')}${nfiles>1?' ×'+nfiles:''}</div>`:''}<div class="row"><button class="q-use" onclick="qmUse(${it.id})">${t('Использовать этот шаблон')}</button></div></div>`;
+    }).join('')||`<div class="empty">${t('Нет шаблонов')}</div>`;
+  }
+  applyLang();
+}
+function qmUse(id){ if(adminChatId==null){ alert(t('Сначала выберите чат')); return; } insertQuick(id); qmClose(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') qmClose(); });
+async function addQuickGroup(){
+  const nm=prompt(t('Название группы:')); if(!nm||!nm.trim()) return;
+  try{ const r=await api('/admin/quick/groups',{method:'POST',body:{name:nm.trim()}}); quickSel=r.id; loadQuick(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+async function renameQuickGroup(id){
+  const g=QUICK.find(x=>x.id===id);
+  const nm=prompt(t('Название группы:'),(g&&g.name)||''); if(!nm||!nm.trim()) return;
+  try{ await api('/admin/quick/groups/'+id,{method:'PUT',body:{name:nm.trim()}}); loadQuick(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+async function delQuickGroup(id){
+  if(!confirm(t('Удалить группу со всеми шаблонами?'))) return;
+  try{ await api('/admin/quick/groups/'+id,{method:'DELETE'}); if(quickSel===id) quickSel=null; loadQuick(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+let qeditId=null, qeditFiles=[], qeditClear=false; /* qeditId=null — новый шаблон */
+function openQEdit(id){
+  const it=(id==null)?null:findQuick(id);
+  if(id!=null&&!it) return;
+  if(id==null&&quickSel==null){ alert(t('Сначала создайте категорию')); return; }
+  qeditId=id; qeditFiles=[]; qeditClear=false;
+  document.getElementById('qedit-title').textContent=t(id==null?'Новый шаблон':'Редактировать сообщение');
+  document.getElementById('qedit-text').value=(it&&it.text)||'';
+  document.getElementById('qedit-file').value='';
+  document.getElementById('qedit-clear').style.display=(it&&(it.files||[]).length)?'':'none';
+  document.querySelectorAll('#quick-panel .q-item .menu.open').forEach(m=>m.classList.remove('open'));
+  document.getElementById('qedit-modal').classList.add('open');
+  renderQeditFiles();
+}
+function closeQEdit(){ document.getElementById('qedit-modal').classList.remove('open'); qeditFiles=[]; qeditClear=false; }
+function qeditPick(inp){ qeditFiles=[...(inp.files||[])]; qeditClear=false; renderQeditFiles(); inp.value=''; }
+function qeditToggleClear(){ qeditClear=!qeditClear; if(qeditClear) qeditFiles=[]; renderQeditFiles(); }
+function qeditRmNew(i){ qeditFiles.splice(i,1); renderQeditFiles(); }
+function renderQeditFiles(){
+  const box=document.getElementById('qedit-files');
+  const it=(qeditId==null)?null:findQuick(qeditId);
+  let h='';
+  if(it&&(it.files||[]).length&&!qeditClear&&!qeditFiles.length)
+    h+=(it.files||[]).filter(f=>/^image\/(jpeg|png|gif|webp)$/.test(f.m||'')).map(f=>`<img src="${esc(f.url)}">`).join('');
+  qeditFiles.forEach((f,i)=>{
+    const url=URL.createObjectURL(f);
+    h+=/^image\//.test(f.type)?`<span style="position:relative;display:inline-block"><img src="${url}"><button class="btn btn-ghost" style="position:absolute;top:2px;right:2px;padding:0 6px" onclick="qeditRmNew(${i})">✕</button></span>`
+      :`<span class="chip att-file">📎 ${esc(f.name)} <button onclick="qeditRmNew(${i})" style="background:none;border:none;color:var(--dim);cursor:pointer">✕</button></span>`;
+  });
+  box.innerHTML=h;
+  document.getElementById('qedit-clear').style.display=(it&&(it.files||[]).length&&!qeditFiles.length)?'':'none';
+}
+async function saveQEdit(){
+  const tx=document.getElementById('qedit-text').value.trim();
+  if(qeditId==null){
+    if(!tx&&!qeditFiles.length){ alert(t('Шаблон не может быть пустым')); return; }
+    const fd=new FormData(); fd.append('text',tx);
+    qeditFiles.forEach(f=>fd.append('files',f));
+    try{ await api('/admin/quick/groups/'+quickSel+'/items',{method:'POST',body:fd}); closeQEdit(); loadQuick(); }
+    catch(e){ chatFileErr(e); }
+  }else{
+    const fd=new FormData(); fd.append('text',tx);
+    if(qeditFiles.length) qeditFiles.forEach(f=>fd.append('files',f));
+    else if(qeditClear) fd.append('clear_files','1');
+    else { try{ await api('/admin/quick/items/'+qeditId,{method:'PUT',body:{text:tx}}); closeQEdit(); if(pendingQuick&&pendingQuick.id===qeditId) clearPendingQuick(); loadQuick(); }catch(e){ alert(t('Ошибка: {m}',{m:e.message})); } return; }
+    try{ await api('/admin/quick/items/'+qeditId,{method:'PUT',body:fd}); closeQEdit(); if(pendingQuick&&pendingQuick.id===qeditId) clearPendingQuick(); loadQuick(); }
+    catch(e){ chatFileErr(e); }
+  }
+}
+async function delQuickItem(id){
+  if(!confirm(t('Удалить шаблон?'))) return;
+  try{ await api('/admin/quick/items/'+id,{method:'DELETE'}); if(pendingQuick&&pendingQuick.id===id) clearPendingQuick(); loadQuick(); }
+  catch(e){ alert(t('Ошибка: {m}',{m:e.message})); }
+}
+/* drag&drop файлов в открытый чат + закрытие модалки */
+(function(){
+  const cv=document.getElementById('chat-view');
+  ['dragenter','dragover'].forEach(ev=>cv.addEventListener(ev,e=>{ e.preventDefault(); cv.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev=>cv.addEventListener(ev,e=>{ e.preventDefault(); cv.classList.remove('dragover'); }));
+  cv.addEventListener('drop',e=>{ if(adminChatId!=null&&e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) openAttModal([...e.dataTransfer.files]); });
+  document.getElementById('att-modal').addEventListener('click',e=>{ if(e.target.id==='att-modal') closeAttModal(); });
+  document.getElementById('qedit-modal').addEventListener('click',e=>{ if(e.target.id==='qedit-modal') closeQEdit(); });
+  document.getElementById('lb-modal').addEventListener('click',e=>{ if(e.target.id==='lb-modal'||e.target.id==='lb-img') closeLightbox(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){
+    if(document.getElementById('lb-modal').classList.contains('open')) closeLightbox();
+    else if(document.getElementById('qedit-modal').classList.contains('open')) closeQEdit();
+    else if(document.getElementById('att-modal').classList.contains('open')) closeAttModal();
+  } });
+})();
+function openLightbox(src){ document.getElementById('lb-img').src=src; document.getElementById('lb-modal').classList.add('open'); }
+function closeLightbox(){ document.getElementById('lb-modal').classList.remove('open'); document.getElementById('lb-img').removeAttribute('src'); }
 
 /* ── L1/W: пресеты причин отклонения вывода, мультиязычные ── */
 const PRESET_LANGS=['ru','en','fr','de','pt','es','it','hi'];
@@ -592,7 +1575,7 @@ let rejResolve=null, rejPresets=[];
 function rejRenderList(){ /* W: RU + превью перевода выбранного языка, чтобы было видно, что уйдёт */
   const L=(document.getElementById('rej-lang')||{}).value||'en';
   document.getElementById('rej-list').innerHTML=rejPresets.map((p,i)=>{
-    const tr=p.tr||{}; const tv=tr[L]||tr.en||'';
+    const tr=p.tr||{}; const tv=(L==='ru')?p.text:(tr[L]||tr.en||p.text);
     return `<button class="btn btn-ghost rej-btn" data-i="${i}"><div>${esc(p.text)}</div>`+
       (tv&&tv!==p.text?`<div style="font-size:11px;color:var(--dim);margin-top:3px;text-align:left">→ ${esc(tv)}</div>`:'')+
       `</button>`;
@@ -600,7 +1583,7 @@ function rejRenderList(){ /* W: RU + превью перевода выбран�
     ||'<div class="empty">Пресеты пусты — используйте свою причину</div>';
   document.querySelectorAll('.rej-btn').forEach(b=>b.onclick=()=>{
     const p=rejPresets[+b.dataset.i]||{}; const tr=p.tr||{};
-    rejDone(tr[L]||tr.ru||p.text||tr.en||p.text||b.textContent);
+    rejDone(((L==='ru')?p.text:(tr[L]||tr.en||p.text))||b.textContent);
   });
 }
 async function pickRejectReason(userLang){

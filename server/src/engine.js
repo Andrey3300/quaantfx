@@ -58,11 +58,17 @@ class TFAgg {
 const TFS = { S5: 5, S15: 15, S30: 30, M1: 60, M5: 300, M15: 900, M30: 1800, H1: 3600 };
 /* U2: живой тик идёт с тем же бустом, что и хвост истории — иначе свежий участок «слипается» */
 const LIVE_BOOST = 2.6;
-const TF_MAX = { S5: 1600, S15: 1600, S30: 1600, M1: 2000, M5: 1500, M15: 1200, M30: 900, H1: 1440 };
+/* HIST: глубина колец. DEPTH=home (дефолт, мощная машина: S5≈сутки, H1≈год),
+   DEPTH=lite (Vercel/слабый хостинг: текущие ~40–60 дней). */
+const DEPTH = (process.env.DEPTH || 'home').toLowerCase() === 'lite' ? 'lite' : 'home';
+const TF_MAX = DEPTH === 'home'
+  ? { S5: 17280, S15: 11520, S30: 11520, M1: 20160, M5: 17280, M15: 11520, M30: 11520, H1: 8760 }
+  : { S5: 1600, S15: 1600, S30: 1600, M1: 2000, M5: 1500, M15: 1200, M30: 900, H1: 1440 };
+const BUILD_DAYS = DEPTH === 'home' ? 365 : 61;
 
 class Asset {
   constructor(name, base, fS, sS, dec, cat, payout) {
-    this.name = name; this.dec = dec; this.cat = cat; this.payout = payout;
+    this.name = name; this.dec = dec; this.cat = cat; this.payout = payout; this.basePayout = payout; /* PLAT1: база для сброса оверрайдов */
     this.eng = new Engine(base, fS, sS); this.built = false; this.aggs = {};
     for (const [tf, sec] of Object.entries(TFS)) this.aggs[tf] = new TFAgg(sec, TF_MAX[tf]);
   }
@@ -97,16 +103,27 @@ class Asset {
           const pushCoarse = step > 5 || (i % 12 === 0 && j === 0);
           for (let k2 = 0; k2 < aggs.length; k2++) {
             if (!pushCoarse && aggs[k2].sec >= 300) continue;
+            /* HIST: пуш старше покрытия кольца (max свечей × шаг) всё равно вытеснится
+               shift'ами — пропускаем сразу, иначе грубые фазы деградируют квадратично */
+            if (now - t > aggs[k2].max * aggs[k2].sec) continue;
             aggs[k2].push(p, t);
           }
         }
       }
     };
     /* M1: фазовая генерация — каждая фаза покрывает потребности своего ТФ */
-    runPhase(1800, 12, days, 15); /* M30/H1: пуш каждые 150с */
-    runPhase(300, 6, 15, 6);      /* M15: пуш каждые 50с */
-    runPhase(60, 1, 6, 1.5);      /* M5: 5 пушей */
-    runPhase(5, 3, 1.5, 0);       /* S5–M1: мелко */
+    /* HIST: в home-режиме фазы глубже; (60,4) даёт ровную 15-секундную сетку для S15 */
+    if (days > 100) {
+      runPhase(1800, 12, days, 60); /* H1/M30: пуш каждые 150с */
+      runPhase(300, 6, 60, 14);     /* M15/M5: пуш каждые 50с */
+      runPhase(60, 4, 14, 2);       /* M1/S30/S15: пуш каждые 15с */
+      runPhase(5, 3, 2, 0);         /* S5–M1: мелко */
+    } else {
+      runPhase(1800, 12, days, 15); /* M30/H1: пуш каждые 150с */
+      runPhase(300, 6, 15, 6);      /* M15: пуш каждые 50с */
+      runPhase(60, 1, 6, 1.5);      /* M5: 5 пушей */
+      runPhase(5, 3, 1.5, 0);       /* S5–M1: мелко */
+    }
     /* U2: финальная цена = база. Глобальное умножение не искажает диапазоны свечей. */
     {
       const kk = base / this.eng.price;
@@ -129,7 +146,7 @@ class Asset {
         }
         this.eng.price = snap.price;
       }
-      const gap = Math.min(now - snap.t, 40 * 86400);
+      const gap = Math.min(now - snap.t, BUILD_DAYS * 86400); /* HIST: догон в пределах глубины колец */
       const n = Math.floor(gap / 60);
       let ts = now - gap;
       const k60 = Math.sqrt(60 / 0.5); /* U1: догон с 60-секундной амплитудой */
@@ -138,13 +155,32 @@ class Asset {
       for (let i = 0; i < n; i++, ts += 60) {
         this.eng.next(); this.eng.price = base + (this.eng.price - base) * (1 - anchor60); const p = this.eng.price;
         this.eng.next(); this.eng.price = base + (this.eng.price - base) * (1 - anchor60); const p2 = this.eng.price;
-        for (let k2 = 0; k2 < aggs.length; k2++) { aggs[k2].push(p, ts); aggs[k2].push(p2, ts + 30); }
+        for (let k2 = 0; k2 < aggs.length; k2++) {
+          if (now - ts > aggs[k2].max * aggs[k2].sec) continue; /* HIST: старше покрытия — пропуск */
+          aggs[k2].push(p, ts); aggs[k2].push(p2, ts + 30);
+        }
       }
       this.eng.fastSigma = of * LIVE_BOOST; this.eng.slowSigma = os;
     }
   }
   price() { return this.eng.price; }
   candles(tf) { return this.aggs[tf].all(); }
+  /* HIST: окно истории для пагинации ?before&limit (по времени свечи, по возрастанию).
+     before==null → последнее окно (свежий край). */
+  window(tf, before, limit) {
+    const all = this.aggs[tf].all();
+    const oldest = all.length ? all[0].time : null;
+    const latest = all.length ? all[all.length - 1].time : null;
+    let arr = all;
+    if (before != null && isFinite(before)) {
+      let lo = 0, hi = all.length;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (all[m].time < before) lo = m + 1; else hi = m; }
+      arr = all.slice(0, lo);
+    }
+    const candles = arr.slice(-limit);
+    const hasMore = candles.length > 0 ? candles[0].time > oldest : false;
+    return { candles, hasMore, oldest, latest };
+  }
   fmt(p) { return p.toFixed(this.dec); }
 }
 
@@ -216,9 +252,20 @@ function tickAll(nowSec) {
   }
 }
 
+/* PLAT1: переопределения выплат из настроек (админка) */
+const PAYOUT_OVERRIDES = {};
+function setPayoutOverrides(map){
+  for(const k of Object.keys(PAYOUT_OVERRIDES)) delete PAYOUT_OVERRIDES[k];
+  for(const [id,p] of Object.entries(map||{})){
+    const pct=Number(p);
+    if(ASSETS[id] && Number.isFinite(pct) && pct>=1 && pct<=1000) PAYOUT_OVERRIDES[id]=pct;
+  }
+  for(const [id,a] of Object.entries(ASSETS)) a.payout = PAYOUT_OVERRIDES[id] || a.basePayout;
+}
 function catalog() {
-  return RAW.map(r => ({ id: r[0], cat: r[1], payout: r[2], dec: r[6] }));
+  return RAW.map(r => ({ id: r[0], cat: r[1], payout: PAYOUT_OVERRIDES[r[0]] || r[2], dec: r[6] }));
 }
 
 const BOOT = Date.now() / 1000; /* V2: эпоха сервера — клиент сбрасывает кэш истории при рестарте */
-module.exports = { TICK_MS, TFS, ASSETS, tickAll, catalog, BOOT };
+function basePayouts(){ const o={}; for(const r of RAW) o[r[0]]=r[2]; return o; }
+module.exports = { TICK_MS, TFS, ASSETS, tickAll, catalog, BOOT, DEPTH, BUILD_DAYS, setPayoutOverrides, PAYOUT_OVERRIDES, basePayouts };

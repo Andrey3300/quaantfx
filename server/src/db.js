@@ -140,6 +140,53 @@ CREATE TABLE IF NOT EXISTS chat_messages(
   const cols = db.prepare('PRAGMA table_info(verifications)').all().map(c => c.name);
   if (!cols.includes('doc_type')) db.exec(`ALTER TABLE verifications ADD COLUMN doc_type TEXT NOT NULL DEFAULT ''`);
 }
+/* миграция CHAT4: быстрые ответы (группы-папки + шаблоны с текстом/файлами) */
+db.exec(`
+CREATE TABLE IF NOT EXISTS quick_groups(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  pos INTEGER NOT NULL DEFAULT 0,
+  created_at REAL
+);
+CREATE TABLE IF NOT EXISTS quick_items(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL REFERENCES quick_groups(id) ON DELETE CASCADE,
+  text TEXT NOT NULL DEFAULT '',
+  files TEXT NOT NULL DEFAULT '[]',
+  pos INTEGER NOT NULL DEFAULT 0,
+  created_at REAL
+);
+CREATE INDEX IF NOT EXISTS idx_quick_items_group ON quick_items(group_id);
+`);
+/* миграция CHAT2: вложения в сообщениях чата (JSON-массив файлов) */
+{
+  const msgCols = db.prepare('PRAGMA table_info(chat_messages)').all().map(c => c.name);
+  if (!msgCols.includes('files')) db.exec(`ALTER TABLE chat_messages ADD COLUMN files TEXT NOT NULL DEFAULT '[]'`);
+}
+/* миграция CHAT1: непрочитанные для админа + правки/удаления сообщений */
+{
+  const chatCols = db.prepare('PRAGMA table_info(chats)').all().map(c => c.name);
+  if (!chatCols.includes('admin_unread')) db.exec(`ALTER TABLE chats ADD COLUMN admin_unread INTEGER NOT NULL DEFAULT 0`);
+  if (!chatCols.includes('user_unread')) db.exec(`ALTER TABLE chats ADD COLUMN user_unread INTEGER NOT NULL DEFAULT 0`);
+  const msgCols = db.prepare('PRAGMA table_info(chat_messages)').all().map(c => c.name);
+  if (!msgCols.includes('orig_text')) db.exec(`ALTER TABLE chat_messages ADD COLUMN orig_text TEXT`);
+  if (!msgCols.includes('edited_at')) db.exec(`ALTER TABLE chat_messages ADD COLUMN edited_at REAL`);
+  if (!msgCols.includes('deleted')) db.exec(`ALTER TABLE chat_messages ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0`);
+  /* бэкфил: непрочитанные = хвостовые сообщения юзера без ответа поддержки */
+  try {
+    db.exec(`UPDATE chats SET admin_unread = (
+      SELECT COUNT(*) FROM chat_messages m WHERE m.chat_id = chats.id AND m.sender = 'user'
+        AND m.id > COALESCE((SELECT MAX(id) FROM chat_messages s WHERE s.chat_id = chats.id AND s.sender = 'support'), 0)
+    ) WHERE admin_unread = 0`);
+  } catch (e) {}
+  /* бэкфил: непрочитанные юзера = хвостовые сообщения поддержки без ответа юзера */
+  try {
+    db.exec(`UPDATE chats SET user_unread = (
+      SELECT COUNT(*) FROM chat_messages m WHERE m.chat_id = chats.id AND m.sender = 'support' AND m.deleted = 0
+        AND m.id > COALESCE((SELECT MAX(id) FROM chat_messages u WHERE u.chat_id = chats.id AND u.sender = 'user'), 0)
+    ) WHERE user_unread = 0`);
+  } catch (e) {}
+}
 /* миграция O1: запертый бонус + скрытый вейджер у юзера */
 {
   const cols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
@@ -158,6 +205,30 @@ CREATE TABLE IF NOT EXISTS chat_messages(
   const cols = db.prepare('PRAGMA table_info(promocodes)').all().map(c => c.name);
   if (!cols.includes('wager_mult')) db.exec(`ALTER TABLE promocodes ADD COLUMN wager_mult REAL NOT NULL DEFAULT 20`);
 }
+/* STAFF1: права персонала + журнал действий */
+{
+  const cols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+  if (!cols.includes('perms')) db.exec(`ALTER TABLE users ADD COLUMN perms TEXT NOT NULL DEFAULT '{}'`);
+}
+/* CHAT7: теги чатов */
+db.exec(`CREATE TABLE IF NOT EXISTS chat_tags(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL, created_at REAL NOT NULL)`);
+db.exec(`CREATE TABLE IF NOT EXISTS chat_tag_map(
+  chat_id INTEGER NOT NULL, tag_id INTEGER NOT NULL, PRIMARY KEY(chat_id,tag_id))`);
+/* цвета тегов: 0..5 из палитры; -1 = выдать случайный */
+if(!db.prepare('PRAGMA table_info(chat_tags)').all().some(c=>c.name==='color')){
+  db.exec(`ALTER TABLE chat_tags ADD COLUMN color INTEGER NOT NULL DEFAULT -1`);
+}
+db.exec(`UPDATE chat_tags SET color=ABS(RANDOM())%6 WHERE color IS NULL OR color<0 OR color>5`);
+/* скриншот оплаты в заявке на депозит */
+if(!db.prepare('PRAGMA table_info(deposits)').all().some(c=>c.name==='screenshot')){
+  db.exec(`ALTER TABLE deposits ADD COLUMN screenshot TEXT`);
+}
+db.exec(`CREATE TABLE IF NOT EXISTS admin_log(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_id INTEGER, actor_email TEXT NOT NULL DEFAULT '',
+  action TEXT NOT NULL, target TEXT NOT NULL DEFAULT '', detail TEXT NOT NULL DEFAULT '',
+  created_at REAL NOT NULL)`);
 /* L1: редактируемые пресеты причин отклонения вывода */
 db.exec(`
 CREATE TABLE IF NOT EXISTS reject_presets(
@@ -178,6 +249,34 @@ CREATE TABLE IF NOT EXISTS reject_presets(
   DEF.forEach((t, i) => ins.run(i + 1, t));
 }
 
+/* ── контакты для страницы условий: плейсхолдеры, правятся из админки ── */
+const DEFAULT_CONTACTS = {
+  email: 'support@example.com',
+  telegram: 'https://t.me/example_support',
+  phone: '+0 (000) 000-00-00',
+  company: 'Example Company Ltd',
+  address: '123 Example Street, Example City',
+  hours: '24/7'
+};
+function getContacts() {
+  try {
+    const r = db.prepare("SELECT value FROM meta WHERE key='contacts'").get();
+    if (r && r.value) return { ...DEFAULT_CONTACTS, ...JSON.parse(r.value) };
+  } catch (e) {}
+  return { ...DEFAULT_CONTACTS };
+}
+function setContacts(patch) {
+  const cur = getContacts();
+  const s = (v, max = 160) => String(v == null ? '' : v).slice(0, max).trim();
+  for (const k of Object.keys(DEFAULT_CONTACTS)) {
+    if (patch[k] != null) cur[k] = s(patch[k], k === 'address' ? 300 : 160);
+  }
+  if (cur.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cur.email)) throw new Error('bad_email');
+  db.prepare(`INSERT INTO meta (key, value) VALUES ('contacts', ?)
+    ON CONFLICT(key) DO UPDATE SET value=excluded.value`).run(JSON.stringify(cur));
+  return cur;
+}
+
 /* ── 8-значные клиентские ID: последовательно от случайного большого старта ── */
 function nextClientId() {
   const row = db.prepare(`SELECT value FROM meta WHERE key='client_id_seq'`).get();
@@ -189,10 +288,24 @@ function nextClientId() {
 
 /* ── сиды ── */
 const now = () => Date.now() / 1000;
-if (!db.prepare('SELECT id FROM users WHERE email=?').get('admin@synth.local')) {
+/* STAFF1: переезд со старых тестовых доступов (только если пароль не меняли) */
+{
+  const oldA = db.prepare("SELECT * FROM users WHERE email='admin@synth.local'").get();
+  const newA = db.prepare('SELECT id FROM users WHERE email=?').get('admin@quantfx.com');
+  if (oldA && !newA) {
+    try {
+      if (bcrypt.compareSync('admin123', oldA.pass_hash)) {
+        db.prepare('UPDATE users SET email=?, pass_hash=? WHERE id=?')
+          .run('admin@quantfx.com', bcrypt.hashSync('Kj54er1hD', 10), oldA.id);
+        console.log('[migrate] admin@synth.local → admin@quantfx.com (дефолтный пароль обновлён)');
+      }
+    } catch (e) {}
+  }
+}
+if (!db.prepare('SELECT id FROM users WHERE email=?').get('admin@quantfx.com')) {
   db.prepare('INSERT INTO users (email, pass_hash, role, client_id, created_at, nick) VALUES (?,?,?,?,?,?)')
-    .run('admin@synth.local', bcrypt.hashSync('admin123', 10), 'admin', nextClientId(), now(), 'admin');
-  console.log('[seed] admin создан: admin@synth.local / admin123 — СМЕНИТЕ ПАРОЛЬ');
+    .run('admin@quantfx.com', bcrypt.hashSync('Kj54er1hD', 10), 'admin', nextClientId(), now(), 'admin');
+  console.log('[seed] admin создан: admin@quantfx.com / Kj54er1hD — СМЕНИТЕ ПАРОЛЬ');
 }
 if (!db.prepare('SELECT id FROM promocodes WHERE code=?').get('WELCOME')) {
   db.prepare('INSERT INTO promocodes (code, bonus_pct, active, created_at) VALUES (?,?,1,?)')
@@ -200,7 +313,14 @@ if (!db.prepare('SELECT id FROM promocodes WHERE code=?').get('WELCOME')) {
   console.log('[seed] промокод WELCOME 50%');
 }
 
+if (!db.prepare("SELECT value FROM meta WHERE key='contacts'").get()) {
+  db.prepare("INSERT INTO meta (key, value) VALUES ('contacts', ?)").run(JSON.stringify(DEFAULT_CONTACTS));
+  console.log('[seed] контакты-плейсхолдеры (правятся в админке: Контакты)');
+}
+
 module.exports = db;
+module.exports.getContacts = getContacts;
+module.exports.setContacts = setContacts;
 module.exports.DATA_DIR = DATA_DIR;
 module.exports.UPLOADS = path.join(DATA_DIR, 'uploads');
 module.exports.nextClientId = nextClientId;

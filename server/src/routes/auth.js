@@ -18,6 +18,7 @@ function setAsid(res, token) {
 router.post('/register', rateLimit(20, 60000), (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const pass = String(req.body.pass || '');
+  if (req.body.agree !== true) return res.status(400).json({ error: 'agree_required' });
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'bad_email' });
   if (pass.length < 6) return res.status(400).json({ error: 'weak_password' });
   if (db.prepare('SELECT id FROM users WHERE email=?').get(email))
@@ -40,7 +41,7 @@ router.post('/login', rateLimit(20, 60000), (req, res) => {
     return res.status(403).json({ error: 'blocked' });
   }
   if (req.body.admin) { /* K1: админская сессия в отдельной куке asid */
-    if (u.role !== 'admin') return res.status(403).json({ error: 'not_admin' });
+    if (u.role !== 'admin' && u.role !== 'moder') return res.status(403).json({ error: 'not_admin' }); /* STAFF1 */
     setAsid(res, createSession(u.id));
   } else {
     setSid(res, createSession(u.id));

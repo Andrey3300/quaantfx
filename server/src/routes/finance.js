@@ -1,10 +1,32 @@
 'use strict';
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const db = require('../db');
+const { UPLOADS } = require('../db');
 const { auth } = require('../auth');
+const { getSettings, getDepositInstr } = require('../settings'); /* PLAT1 */
 
 const router = express.Router();
 const now = () => Date.now() / 1000;
+
+/* скриншот оплаты (необязательный, ускоряет проверку) */
+const depStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(UPLOADS, 'deposits', String(req.user.id));
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const safe = file.originalname.replace(/[^\w.\-]+/g, '_').slice(-40);
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e6)}-${safe}`);
+  }
+});
+const depUpload = multer({
+  storage: depStorage, limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype))
+});
 
 /* способы пополнения/вывода */
 const METHODS = [
@@ -26,6 +48,7 @@ function addrOf(id) {
   return w ? w.addr : (METHODS.find(m => m.id === id) || {}).addr;
 }
 router.get('/methods', (req, res) => res.json({ methods: METHODS.map(m => ({ ...m, addr: addrOf(m.id) })) }));
+router.get('/deposit-instructions', (req, res) => res.json({ instructions: getDepositInstr() }));
 
 /* проверка промокода до отправки депозита */
 router.get('/promo/check', auth, (req, res) => {
@@ -37,12 +60,13 @@ router.get('/promo/check', auth, (req, res) => {
 });
 
 /* заявка на пополнение: НЕ зачисляется, ждёт апрува админа */
-router.post('/deposits', auth, (req, res) => {
+router.post('/deposits', auth, depUpload.single('screenshot'), (req, res) => {
   const b = req.body || {};
   const m = METHODS.find(x => x.id === b.method);
   if (!m) return res.status(400).json({ error: 'bad_method' });
   const amount = Number(b.amount);
-  if (!(amount >= 10 && amount <= 1000000)) return res.status(400).json({ error: 'bad_amount' });
+  const lim = getSettings();
+  if (!(amount >= lim.minDeposit && amount <= lim.maxDeposit)) return res.status(400).json({ error: 'bad_amount', min: lim.minDeposit, max: lim.maxDeposit });
 
   let promo = null, bonus = 0;
   const code = String(b.promo || '').trim().toUpperCase();
@@ -51,11 +75,12 @@ router.post('/deposits', auth, (req, res) => {
     if (!promo) return res.status(400).json({ error: 'invalid_promo' });
     bonus = Math.round(amount * promo.bonus_pct) / 100; // amount*pct/100, округление до цента
   }
-  const info = db.prepare(`INSERT INTO deposits (user_id, method, amount, promo_code, bonus, status, created_at)
-    VALUES (?,?,?,?,?, 'pending', ?)`)
-    .run(req.user.id, m.sym + ' · ' + m.net, amount, promo ? promo.code : null, bonus, now());
+  const shot = req.file ? req.file.filename : null;
+  const info = db.prepare(`INSERT INTO deposits (user_id, method, amount, promo_code, bonus, status, created_at, screenshot)
+    VALUES (?,?,?,?,?, 'pending', ?, ?)`)
+    .run(req.user.id, m.sym + ' · ' + m.net, amount, promo ? promo.code : null, bonus, now(), shot);
   const dep = db.prepare('SELECT * FROM deposits WHERE id=?').get(info.lastInsertRowid);
-  res.json({ deposit: { id: dep.id, amount: dep.amount, bonus: dep.bonus, status: dep.status, createdAt: dep.created_at } });
+  res.json({ deposit: { id: dep.id, amount: dep.amount, bonus: dep.bonus, status: dep.status, createdAt: dep.created_at, shot: !!dep.screenshot } });
 });
 
 /* заявка на вывод: средства резервируются сразу, решение за админом */
@@ -64,7 +89,8 @@ router.post('/withdrawals', auth, (req, res) => {
   const m = METHODS.find(x => x.id === b.method);
   if (!m) return res.status(400).json({ error: 'bad_method' });
   const amount = Number(b.amount);
-  if (!(amount >= 10 && amount <= 1000000)) return res.status(400).json({ error: 'bad_amount' });
+  const limw = getSettings();
+  if (!(amount >= limw.minWithdrawal && amount <= limw.maxWithdrawal)) return res.status(400).json({ error: 'bad_amount', min: limw.minWithdrawal, max: limw.maxWithdrawal });
   const addr = String(b.addr || '').trim();
   if (addr.length < 10) return res.status(400).json({ error: 'bad_addr' });
 
